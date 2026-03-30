@@ -1,4 +1,4 @@
-# SERL data Structures
+# SERL data Structure
 
 ## Half‑Hourly Electricity & Gas Data
 **File format:** `self_half_hourly_<year>_<month>_edition08.csv`
