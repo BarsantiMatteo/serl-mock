@@ -1,119 +1,61 @@
+﻿# serl-mock
 
-# SERL Mock Data Generator  
-*A lightweight framework for generating dummy SERL‑style datasets for local development, prototyping, and pipeline testing.*
+A lightweight Python package that generates synthetic datasets matching the structure
+and naming conventions of the **SERL (Smart Energy Research Lab) Observatory** data releases.
 
+Use it to build and test analysis pipelines locally, without needing access to the real
+Trusted Research Environment (TRE).
 
-## Overview
-This project produces **dummy**, SERL‑inspired datasets:
+---
 
-### 1. **Half‑hourly Smart‑Meter Data**
-Generated according to Edition 07/08‑style logic:
-- UTC month cut‑off  
-- BST/GMT local timestamps  
-- Effective date rules  
-- HH interval index (1–48)  
-- Edition07‑aligned error flags  
-- Gas energy conversion (CV = 39.5 MJ/m³)  
-- Configurable number of households, period, seed  
-- **Schema is fully hard‑coded** inside `generator_smartmeter.py`  
+## What is generated
 
-### 2. **SERL Contextual Data**
-Generated to emulate:
-- EPC dataset  
-- SERL survey dataset  
-- Participant summary  
-- Follow‑up survey  
-- List of exporters  
+Running the pipeline writes the following files to `data/mock/`:
 
-### 3. **PUPRN Master File**
-All datasets use the **same household ID list** (`PUPRN`) ensuring cross‑dataset mergeability.
+| Output | Description |
+|---|---|
+| `puprn_master.csv` | Shared list of synthetic household IDs |
+| `serl_smart_meter_hh_edition08/` | Monthly half-hourly electricity and gas CSVs |
+| `epc_data_edition08.csv` | EPC records |
+| `serl_survey_data_edition08.csv` | Survey responses |
+| `serl_participant_summary_data_edition08.csv` | Region and deprivation index |
+| `serl_follow_up_survey_<year>_data_edition08.csv` | Follow-up survey |
+| `Elec_<year>_list_of_exporter_puprns_edition08.csv` | Electricity export list |
 
-## 📁 Project Structure
-```
-project_root/
-│
-├─ config/
-│   └─ serl_mock.yaml          # Single general configuration file
-│
-├─ data/
-│   └─ mock/  
-│        ├─ serl_smart_meter_hh_edition08/               # Smart‑meter CSV outputs
-│        ├─ serl_follow_up_survey_2023_data_edition08    # Survey data
-│        ├─ ...                                          # Other contextual outputs
-│        └─ puprn_master.csv                             # Shared household IDs
-│
-├─ src/
-│   └─ serl_mock/
-│        ├─ generator_smartmeter.py           # Half-hourly generator
-│        ├─ generator_contextual_data.py      # Contextual data generator
-│        ├─ ids.py                            # PUPRN utilities
-│        ├─ utils.py                          # Config + IO helpers
-│        └─ paths.py                          # Project paths
-│
-└─ scripts/
-     └─ generate_mock_data.py                 # Full pipeline runner
+All datasets share the same PUPRN list and can be joined directly.
+
+---
+
+## Quick start
+
+```bash
+uv sync
+python scripts/generate_mock_data.py
 ```
 
-## Configuration
-All global settings live in:
+All settings (number of households, time period, random seed, consumption parameters)
+are controlled by a single file:
+
 ```
 config/serl_mock.yaml
 ```
-Example:
-```yaml
-n_households: 100
-seed: 42
-edition: "08"
 
-start_year: 2019
-end_year: 2019
-```
+---
 
-## Running the Full Generation Pipeline
-From the project root:
-```bash
-python scripts/generate_mock_data.py
-```
-This performs **three steps** automatically:
+## Documentation
 
-### **Step 1 — Generate PUPRN master list**
-- Creates a deterministic list of household IDs.
-- Writes it to `data/mock/puprn_master.csv`.
+| Topic | File |
+|---|---|
+| What the project does, key concepts | [docs/00_overview.md](docs/00_overview.md) |
+| Project layout and module descriptions | [docs/01_structure.md](docs/01_structure.md) |
+| How smart-meter values are generated | [docs/03_generation_model.md](docs/03_generation_model.md) |
+| All configuration options | [docs/02_configuration.md](docs/02_configuration.md) |
+| SERL dataset column reference | [docs/04_metadata.md](docs/04_metadata.md) |
 
-### **Step 2 — Generate Smart‑Meter Data**
-- Reads `serl_mock.yaml`.
-- Uses the **hard‑coded smart‑meter schema**.
-- Applies Edition07 logic to timestamps & flags.
-- Outputs monthly CSVs into:
-  ```
-  data/mock/serl_smart_meter_hh_edition08/
-  ```
+---
 
-### **Step 3 — Generate Contextual Data**
-- Uses the same PUPRN list.
-- Writes EPC, survey, summary, follow‑up, exporters datasets into:
-  ```
-  data/mock/
-  ```
+## Generated data is not real
 
-## Example: Smart‑Meter Output Columns
-Generated per half‑hour for every PUPRN:
-- `Read_date_time_UTC`
-- `Read_date_time_local` (BST/GMT)
-- `Read_date_effective_local`
-- `HH` (1–48 or NA)
-- `Valid_read_time`  
-- Electricity active/reactive import/export  
-- Gas volume & converted Wh  
-- Edition07‑style flags (`-1`, `-2`, `-5`, `1`, `0`)  
-
-## Extending the Generators
-### Add or modify contextual fields  
-Edit `generator_contextual_data.py`.
-
-### Adjust smart‑meter value ranges  
-Edit `COLUMNS_SCHEMA` inside `generator_smartmeter.py`.
-
-### Change time period or number of households  
-Edit `serl_mock.yaml`.
-
+The output files are for **pipeline testing and local development only**. They do not
+represent real households or real consumption, and should never be used for analysis
+or reporting.

@@ -1,0 +1,392 @@
+Variable,Value,ValueDescription,QuestionOrMeaning,FreeText,Type
+PUPRN,"","",Pseudonymised participant identifier,FALSE,Assigned
+Survey_version,Wave1,Wave 1 (pilot),Version of the survey received,FALSE,Assigned
+Survey_version,Wave2,Wave 2,Version of the survey received,FALSE,Assigned
+Survey_version,Wave3,Wave 3,Version of the survey received,FALSE,Assigned
+Recorded_date,"","",Date survey was recorded by participants (if online) or entered online from postal response,FALSE,Assigned
+Collection_method,Online,Online,Data collection method,FALSE,Primary
+Collection_method,Postal,Offline,Data collection method,FALSE,Primary
+Language,English,English,Please select your language preference,FALSE,Primary
+Language,Welsh,Welsh,Please select your language preference,FALSE,Primary
+Language,Unknown,Unknown,Please select your language preference,FALSE,Primary
+A1,-2,No answer,"Before we contacted you about this study, did you know you had a smart meter?",FALSE,Primary
+A1,1,Yes,"Before we contacted you about this study, did you know you had a smart meter?",FALSE,Primary
+A1,2,No,"Before we contacted you about this study, did you know you had a smart meter?",FALSE,Primary
+A2,-9,Not applicable,Having a smart meter has affected the way you use gas or electricity?,FALSE,Primary
+A2,-2,No answer,Having a smart meter has affected the way you use gas or electricity?,FALSE,Primary
+A2,-1,Don't know,Having a smart meter has affected the way you use gas or electricity?,FALSE,Primary
+A2,1,A lot,Having a smart meter has affected the way you use gas or electricity?,FALSE,Primary
+A2,2,Some,Having a smart meter has affected the way you use gas or electricity?,FALSE,Primary
+A2,3,A little,Having a smart meter has affected the way you use gas or electricity?,FALSE,Primary
+A2,4,Not at all,Having a smart meter has affected the way you use gas or electricity?,FALSE,Primary
+A301,0,No,Type of central heating - None,FALSE,Primary
+A301,1,Yes,Type of central heating - None,FALSE,Primary
+A302,0,No,"Type of central heating - gas, gas boiler",FALSE,Primary
+A302,1,Yes,"Type of central heating - gas, gas boiler",FALSE,Primary
+A303,0,No,Type of central heating - electric storage heaters,FALSE,Primary
+A303,1,Yes,Type of central heating - electric storage heaters,FALSE,Primary
+A304,0,No,Type of central heating - electric radiators,FALSE,Primary
+A304,1,Yes,Type of central heating - electric radiators,FALSE,Primary
+A305,0,No,Type of central heating - other electric,FALSE,Primary
+A305,1,Yes,Type of central heating - other electric,FALSE,Primary
+A306,0,No,Type of central heating - oil,FALSE,Primary
+A306,1,Yes,Type of central heating - oil,FALSE,Primary
+A307,0,No,Type of central heating - solid fuel,FALSE,Primary
+A307,1,Yes,Type of central heating - solid fuel,FALSE,Primary
+A308,0,No,Type of central heating - biomass,FALSE,Primary
+A308,1,Yes,Type of central heating - biomass,FALSE,Primary
+A309,0,No,Type of central heating - district or community,FALSE,Primary
+A309,1,Yes,Type of central heating - district or community,FALSE,Primary
+A310,0,No,Type of central heating - other,FALSE,Primary
+A310,1,Yes,Type of central heating - other,FALSE,Primary
+A3_Other,,,Type of central heating - other,TRUE,Primary
+A3_sum,"","",Number of response options selected for A3 (A301 + A302 + .. + A310),FALSE,Derived
+A3_err,TRUE,'No central heating' and another option selected,Clear error in A3 response,FALSE,Derived
+A3_err,FALSE,Otherwise,Clear error in A3 response,FALSE,Derived
+A301_edit,TRUE,A301 was edited from 1 to 0 since A3_err,Has A301 been edited,FALSE,Derived
+A301_edit,FALSE,No edits to A301,Has A301 been edited,FALSE,Derived
+A401,-9,Not applicable,Central Heating controls - timer,FALSE,Primary
+A401,0,No,Central Heating controls - timer,FALSE,Primary
+A401,1,Yes,Central Heating controls - timer,FALSE,Primary
+A402,-9,Not applicable,Central Heating controls - temperature setting,FALSE,Primary
+A402,0,No,Central Heating controls - temperature setting,FALSE,Primary
+A402,1,Yes,Central Heating controls - temperature setting,FALSE,Primary
+A403,-9,Not applicable,Central Heating controls - smart device,FALSE,Primary
+A403,0,No,Central Heating controls - smart device,FALSE,Primary
+A403,1,Yes,Central Heating controls - smart device,FALSE,Primary
+A404,-9,Not applicable,Central Heating controls - manually,FALSE,Primary
+A404,0,No,Central Heating controls - manually,FALSE,Primary
+A404,1,Yes,Central Heating controls - manually,FALSE,Primary
+A405,-9,Not applicable,Central Heating controls - none of the above,FALSE,Primary
+A405,0,No,Central Heating controls - none of the above,FALSE,Primary
+A405,1,Yes,Central Heating controls - none of the above,FALSE,Primary
+A406,-9,Not applicable,Central Heating controls - don't know,FALSE,Primary
+A406,0,No,Central Heating controls - don't know,FALSE,Primary
+A406,1,Yes,Central Heating controls - don't know,FALSE,Primary
+A4_sum,"","",Number of response options selected for A4 (A401 + A402 + .. + A406),FALSE,Derived
+A4_err,TRUE,'None of these' and another option selected,Clear error in A4 response,FALSE,Derived
+A4_err,FALSE,Otherwise,Clear error in A4 response,FALSE,Derived
+A405_edit,TRUE,A405 was edited from 1 to 0 since A4_err,Has A405 been edited,FALSE,Derived
+A405_edit,FALSE,No edits to A405,Has A405 been edited,FALSE,Derived
+A5,-9,Not applicable,Temperature controller set at for late afternoons or evenings,TRUE,Primary
+A5,-2,No answer,Temperature controller set at for late afternoons or evenings,TRUE,Primary
+A5,-1,Don't know/doesn't apply,Temperature controller set at for late afternoons or evenings,TRUE,Primary
+A5,1,Answer in deg C,Temperature controller set at for late afternoons or evenings,TRUE,Primary
+A5,2,Answer in deg F,Temperature controller set at for late afternoons or evenings,TRUE,Primary
+A5,3,Answer in deg C and deg F,Temperature controller set at for late afternoons or evenings,TRUE,Primary
+A5_C_text,"",Degrees C,Temperature controller set at for late afternoons or evenings,TRUE,Primary
+A5_F_text,"",Degrees F,Temperature controller set at for late afternoons or evenings,TRUE,Primary
+A5_degC,"","","Temperature in deg C, converted from deg F if > 35, or if given in deg F (later surveys)",TRUE,Derived
+A5_edit,TRUE,A5 was edited due to non-integer response or wrong units,Has A5 been edited,FALSE,Derived
+A5_edit,FALSE,No edits to A5,Has A5 been edited,FALSE,Derived
+A5_err,TRUE,"<10 deg C or >35 deg C (after conversion from deg F if applicable), or if deg F and deg C answers differ by more than 1 deg C",Clear error in A4 response,FALSE,Derived
+A5_err,FALSE,Otherwise,Clear error in A4 response,FALSE,Derived
+A6,-2,No answer,Does your household use any standalone heaters,FALSE,Primary
+A6,1,No,Does your household use any standalone heaters,FALSE,Primary
+A6,2,Yes,Does your household use any standalone heaters,FALSE,Primary
+A7,-9,Not applicable,Do any of your standalone heaters have their own source of power,FALSE,Primary
+A7,-2,No answer,Do any of your standalone heaters have their own source of power,FALSE,Primary
+A7,1,"Yes, some or all have their own source of fuel (e.g. logs, coal, bottled gas, etc.)",Do any of your standalone heaters have their own source of power,FALSE,Primary
+A7,2,"No, all are powered by mains gas or electric",Do any of your standalone heaters have their own source of power,FALSE,Primary
+A8,-9,Not applicable,"In very cold winter weather, how often are these standalone heaters typically used",FALSE,Primary
+A8,-2,No answer,"In very cold winter weather, how often are these standalone heaters typically used",FALSE,Primary
+A8,-1,Don't know,"In very cold winter weather, how often are these standalone heaters typically used",FALSE,Primary
+A8,1,Daily,"In very cold winter weather, how often are these standalone heaters typically used",FALSE,Primary
+A8,2,Most days,"In very cold winter weather, how often are these standalone heaters typically used",FALSE,Primary
+A8,3,Rarely - only if I/we really have to,"In very cold winter weather, how often are these standalone heaters typically used",FALSE,Primary
+A8,4,Never,"In very cold winter weather, how often are these standalone heaters typically used",FALSE,Primary
+A8,5,Varies - depends on temperature or other reasons,"In very cold winter weather, how often are these standalone heaters typically used",FALSE,Primary
+A901,0,No,Do you adjust your heating - When especially cold,FALSE,Primary
+A901,1,Yes,Do you adjust your heating - When especially cold,FALSE,Primary
+A902,0,No,"Do you adjust your heating - Because of children, infants, babies",FALSE,Primary
+A902,1,Yes,"Do you adjust your heating - Because of children, infants, babies",FALSE,Primary
+A903,0,No,Do you adjust your heating - Visitors,FALSE,Primary
+A903,1,Yes,Do you adjust your heating - Visitors,FALSE,Primary
+A904,0,No,Do you adjust your heating - Pets,FALSE,Primary
+A904,1,Yes,Do you adjust your heating - Pets,FALSE,Primary
+A905,0,No,Do you adjust your heating - Stress,FALSE,Primary
+A905,1,Yes,Do you adjust your heating - Stress,FALSE,Primary
+A906,0,No,Do you adjust your heating - Working at home,FALSE,Primary
+A906,1,Yes,Do you adjust your heating - Working at home,FALSE,Primary
+A907,0,No,Do you adjust your heating - None of these,FALSE,Primary
+A907,1,Yes,Do you adjust your heating - None of these,FALSE,Primary
+A9_sum,"","",Number of response options selected for A9 (A901 + A902 + .. + A907),FALSE,Derived
+A10,-2,No answer,How do you adjust heating controls when house is unoccupied,FALSE,Primary
+A10,1,Always,How do you adjust heating controls when house is unoccupied,FALSE,Primary
+A10,2,Very often,How do you adjust heating controls when house is unoccupied,FALSE,Primary
+A10,3,Quite often,How do you adjust heating controls when house is unoccupied,FALSE,Primary
+A10,4,Not very often,How do you adjust heating controls when house is unoccupied,FALSE,Primary
+A10,5,Never,How do you adjust heating controls when house is unoccupied,FALSE,Primary
+A10,6,"Not applicable, cannot do this",How do you adjust heating controls when house is unoccupied,FALSE,Primary
+A11,-2,No answer,"During the winter, are there living spaces not normally heated",FALSE,Primary
+A11,1,Yes,"During the winter, are there living spaces not normally heated",FALSE,Primary
+A11,2,No,"During the winter, are there living spaces not normally heated",FALSE,Primary
+A12_Taps_GB,0,No,Tap water heated (Gas Boiler),FALSE,Primary
+A12_Taps_GB,1,Yes,Tap water heated (Gas Boiler),FALSE,Primary
+A12_Taps_EH,0,No,Tap water heated (Electrical Heater),FALSE,Primary
+A12_Taps_EH,1,Yes,Tap water heated (Electrical Heater),FALSE,Primary
+A12_Taps_SWH,0,No,Tap water heated (Solar Water Heater),FALSE,Primary
+A12_Taps_SWH,1,Yes,Tap water heated (Solar Water Heater),FALSE,Primary
+A12_Taps_Other,0,No,Tap water heated (Other),FALSE,Primary
+A12_Taps_Other,1,Yes,Tap water heated (Other),FALSE,Primary
+A12_Taps_NA,0,No,Tap water heated (Not applicable),FALSE,Primary
+A12_Taps_NA,1,Yes,Tap water heated (Not applicable),FALSE,Primary
+A12_Taps_DK,0,No,Tap water heated (Dont Know),FALSE,Primary
+A12_Taps_DK,1,Yes,Tap water heated (Dont Know),FALSE,Primary
+A12_Taps_sum,"","",Number of response options selected for A12 (taps),FALSE,Derived
+A12_Shower_GB,0,No,Shower water heated (Gas Boiler),FALSE,Primary
+A12_Shower_GB,1,Yes,Shower water heated (Gas Boiler),FALSE,Primary
+A12_Shower_EH,0,No,Shower water heated (Electrical Heater),FALSE,Primary
+A12_Shower_EH,1,Yes,Shower water heated (Electrical Heater),FALSE,Primary
+A12_Shower_SWH,0,No,Shower water heated (Solar Water Heater),FALSE,Primary
+A12_Shower_SWH,1,Yes,Shower water heated (Solar Water Heater),FALSE,Primary
+A12_Shower_Other,0,No,Shower water heated (Other),FALSE,Primary
+A12_Shower_Other,1,Yes,Shower water heated (Other),FALSE,Primary
+A12_Shower_NA,0,No,Shower water heated (Not applicable),FALSE,Primary
+A12_Shower_NA,1,Yes,Shower water heated (Not applicable),FALSE,Primary
+A12_Shower_DK,0,No,Shower water heated (Dont Know),FALSE,Primary
+A12_Shower_DK,1,Yes,Shower water heated (Dont Know),FALSE,Primary
+A12_Shower_sum,"","",Number of response options selected for A12 (shower),FALSE,Derived
+A13_01,-2,No answer,How often do you .. Switch off lights,FALSE,Primary
+A13_01,1,Always,How often do you .. Switch off lights,FALSE,Primary
+A13_01,2,Very often,How often do you .. Switch off lights,FALSE,Primary
+A13_01,3,Quite often,How often do you .. Switch off lights,FALSE,Primary
+A13_01,4,Not very often,How often do you .. Switch off lights,FALSE,Primary
+A13_01,5,Never,How often do you .. Switch off lights,FALSE,Primary
+A13_01,6,"Not applicable, cannot do this",How often do you .. Switch off lights,FALSE,Primary
+A13_02,-2,No answer,How often do you .. Put on more clothes when cold,FALSE,Primary
+A13_02,1,Always,How often do you .. Put on more clothes when cold,FALSE,Primary
+A13_02,2,Very often,How often do you .. Put on more clothes when cold,FALSE,Primary
+A13_02,3,Quite often,How often do you .. Put on more clothes when cold,FALSE,Primary
+A13_02,4,Not very often,How often do you .. Put on more clothes when cold,FALSE,Primary
+A13_02,5,Never,How often do you .. Put on more clothes when cold,FALSE,Primary
+A13_02,6,"Not applicable, cannot do this",How often do you .. Put on more clothes when cold,FALSE,Primary
+A14,-2,No answer,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+A14,-1,Don't know,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+A14,1,A great deal of effort,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+A14,2,Some effort,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+A14,3,A little effort,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+A14,4,No effort at all,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+A1501,-2,No answer,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+A1501,-1,Don't know,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+A1501,1,Always,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+A1501,2,Very often,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+A1501,3,Quite often,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+A1501,4,Not very often,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+A1501,5,Never,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+A1502,-2,No answer,How often will your household open the windows .. on a typical warm day,FALSE,Primary
+A1502,-1,Don't know,How often will your household open the windows .. on a typical warm day,FALSE,Primary
+A1502,1,Always,How often will your household open the windows .. on a typical warm day,FALSE,Primary
+A1502,2,Very often,How often will your household open the windows .. on a typical warm day,FALSE,Primary
+A1502,3,Quite often,How often will your household open the windows .. on a typical warm day,FALSE,Primary
+A1502,4,Not very often,How often will your household open the windows .. on a typical warm day,FALSE,Primary
+A1502,5,Never,How often will your household open the windows .. on a typical warm day,FALSE,Primary
+A1601,0,No,Considering replacing or adding heating or energy- Not considering,FALSE,Primary
+A1601,1,Yes,Considering replacing or adding heating or energy- Not considering,FALSE,Primary
+A1602,0,No,Considering replacing or adding heating or energy- Not applicable,FALSE,Primary
+A1602,1,Yes,Considering replacing or adding heating or energy- Not applicable,FALSE,Primary
+A1603,0,No,Considering replacing or adding heating or energy- Gas Boiler,FALSE,Primary
+A1603,1,Yes,Considering replacing or adding heating or energy- Gas Boiler,FALSE,Primary
+A1604,0,No,Considering replacing or adding heating or energy- Solar panels for electricity,FALSE,Primary
+A1604,1,Yes,Considering replacing or adding heating or energy- Solar panels for electricity,FALSE,Primary
+A1605,0,No,Considering replacing or adding heating or energy- Solar water heating,FALSE,Primary
+A1605,1,Yes,Considering replacing or adding heating or energy- Solar water heating,FALSE,Primary
+A1606,0,No,Considering replacing or adding heating or energy- Wood or fuel burner,FALSE,Primary
+A1606,1,Yes,Considering replacing or adding heating or energy- Wood or fuel burner,FALSE,Primary
+A1607,0,No,Considering replacing or adding heating or energy- Heat pump,FALSE,Primary
+A1607,1,Yes,Considering replacing or adding heating or energy- Heat pump,FALSE,Primary
+A1608,0,No,Considering replacing or adding heating or energy- Micro combined HPU,FALSE,Primary
+A1608,1,Yes,Considering replacing or adding heating or energy- Micro combined HPU,FALSE,Primary
+A1609,0,No,Considering replacing or adding heating or energy- Wind turbine,FALSE,Primary
+A1609,1,Yes,Considering replacing or adding heating or energy- Wind turbine,FALSE,Primary
+A1610,0,No,Considering replacing or adding heating or energy- other specify,FALSE,Primary
+A1610,1,Yes,Considering replacing or adding heating or energy- other specify,FALSE,Primary
+A16_Other,,,Considering replacing or adding heating or energy- other,TRUE,Primary
+A16_sum,"","",Number of response options selected for A16 (A1601 + A1602 + .. + A1610),FALSE,Derived
+A16_edit,TRUE,A1603 to A1609 were edited from 1 to 0 if 'not applicable' or 'not considering any changes' were also selected (excludes 'other'),Has A16 been edited,FALSE,Derived
+A16_edit,FALSE,No edits to A16,Has A16 been edited,FALSE,Derived
+B1,-2,No answer,What type of accommodation do you live in,FALSE,Primary
+B1,1,detached,What type of accommodation do you live in,FALSE,Primary
+B1,2,semi detached,What type of accommodation do you live in,FALSE,Primary
+B1,3,terraced (including end terrace),What type of accommodation do you live in,FALSE,Primary
+B1,4,in a purpose-built block of flats or tenement,What type of accommodation do you live in,FALSE,Primary
+B1,5,part of a converted or shared house (including bedsits),What type of accommodation do you live in,FALSE,Primary
+B1,6,"in a commercial building (e.g. in an office building, hotel or over a shop)",What type of accommodation do you live in,FALSE,Primary
+B2,-2,No answer,Is your accommodation self contained,FALSE,Primary
+B2,1,"Yes, all the rooms are behind a door that only my household can use",Is your accommodation self contained,FALSE,Primary
+B2,2,No,Is your accommodation self contained,FALSE,Primary
+B3,-9,Not applicable,How many other households do you share with,TRUE,Primary
+B3,-2,No answer,How many other households do you share with,TRUE,Primary
+B4,-2,No answer,Do you own or rent this accommodation,FALSE,Primary
+B4,1,Own it outright / buying it with a mortgage/loan,Do you own or rent this accommodation,FALSE,Primary
+B4,2,Part own and part rent (shared ownership),Do you own or rent this accommodation,FALSE,Primary
+B4,3,Privately,Do you own or rent this accommodation,FALSE,Primary
+B4,4,From council (local authority) or housing association,Do you own or rent this accommodation,FALSE,Primary
+B4,5,Live here rent free,Do you own or rent this accommodation,FALSE,Primary
+B5,-2,No answer,How many rooms are available for use by this household,TRUE,Primary
+B5,-4,Unusable,How many rooms are available for use by this household,TRUE,Primary
+B5_err,TRUE,B5 < B6 (fewer rooms than bedrooms) or B5 == 0 (no rooms),Clear error in B5 response,FALSE,Derived
+B5_err,FALSE,B5 >= B6 and B5 != 0,Clear error in B5 response,FALSE,Derived
+B6,-2,No answer,How many of these rooms count as bedrooms,TRUE,Primary
+B6,-4,Unusable,How many of these rooms count as bedrooms,TRUE,Primary
+B6_err,TRUE,B5 < B6 (fewer rooms than bedrooms),Clear error in B6 response,FALSE,Derived
+B6_err,FALSE,B5 >= B6,Clear error in B6 response,FALSE,Derived
+B7,-2,No answer,During the cold winter weather can you keep comfortably warm,FALSE,Primary
+B7,-1,Don't know,During the cold winter weather can you keep comfortably warm,FALSE,Primary
+B7,1,Yes,During the cold winter weather can you keep comfortably warm,FALSE,Primary
+B7,2,No,During the cold winter weather can you keep comfortably warm,FALSE,Primary
+B8,-2,No answer,"Do you have problems with condensation, damp or mould",FALSE,Primary
+B8,-1,Don't know,"Do you have problems with condensation, damp or mould",FALSE,Primary
+B8,1,Yes,"Do you have problems with condensation, damp or mould",FALSE,Primary
+B8,2,No,"Do you have problems with condensation, damp or mould",FALSE,Primary
+B9,-2,No answer,When was your accommodation built,FALSE,Primary
+B9,-1,Don't know,When was your accommodation built,FALSE,Primary
+B9,1,Before 1900,When was your accommodation built,FALSE,Primary
+B9,2,1900 to 1929,When was your accommodation built,FALSE,Primary
+B9,3,1930 to 1949,When was your accommodation built,FALSE,Primary
+B9,4,1950 to 1975,When was your accommodation built,FALSE,Primary
+B9,5,1976 to 1990,When was your accommodation built,FALSE,Primary
+B9,6,1991 to 2002,When was your accommodation built,FALSE,Primary
+B9,7,2003 onwards,When was your accommodation built,FALSE,Primary
+B1001,0,No,Appliances in accommodation - Kitchen - Electric Oven,FALSE,Primary
+B1001,1,Yes,Appliances in accommodation - Kitchen - Electric Oven,FALSE,Primary
+B1002,0,No,Appliances in accommodation - Kitchen - Gas Oven,FALSE,Primary
+B1002,1,Yes,Appliances in accommodation - Kitchen - Gas Oven,FALSE,Primary
+B1003,0,No,Appliances in accommodation - Kitchen - Electric Hob,FALSE,Primary
+B1003,1,Yes,Appliances in accommodation - Kitchen - Electric Hob,FALSE,Primary
+B1004,0,No,Appliances in accommodation - Kitchen - Gas Hob,FALSE,Primary
+B1004,1,Yes,Appliances in accommodation - Kitchen - Gas Hob,FALSE,Primary
+B1005,0,No,Appliances in accommodation - Kitchen - Dishwasher,FALSE,Primary
+B1005,1,Yes,Appliances in accommodation - Kitchen - Dishwasher,FALSE,Primary
+B1006,0,No,Appliances in accommodation - Kitchen - Fridge or fridge-freezer,FALSE,Primary
+B1006,1,Yes,Appliances in accommodation - Kitchen - Fridge or fridge-freezer,FALSE,Primary
+B1007,0,No,Appliances in accommodation - Kitchen - Separate stand alone freezer,FALSE,Primary
+B1007,1,Yes,Appliances in accommodation - Kitchen - Separate stand alone freezer,FALSE,Primary
+B1008,0,No,Appliances in accommodation - Laundry - Combined clothes washer dryer,FALSE,Primary
+B1008,1,Yes,Appliances in accommodation - Laundry - Combined clothes washer dryer,FALSE,Primary
+B1009,0,No,Appliances in accommodation - Laundry - Washing machine,FALSE,Primary
+B1009,1,Yes,Appliances in accommodation - Laundry - Washing machine,FALSE,Primary
+B1010,0,No,Appliances in accommodation - Laundry - Tumble dryer,FALSE,Primary
+B1010,1,Yes,Appliances in accommodation - Laundry - Tumble dryer,FALSE,Primary
+B1011,0,No,"Appliances in accommodation - Consumer electronics - Laptop, computer",FALSE,Primary
+B1011,1,Yes,"Appliances in accommodation - Consumer electronics - Laptop, computer",FALSE,Primary
+B1012,0,No,Appliances in accommodation - Consumer electronics - TV,FALSE,Primary
+B1012,1,Yes,Appliances in accommodation - Consumer electronics - TV,FALSE,Primary
+B1013,0,No,Appliances in accommodation - Cooling - air conditioning unit,FALSE,Primary
+B1013,1,Yes,Appliances in accommodation - Cooling - air conditioning unit,FALSE,Primary
+B1014,0,No,Appliances in accommodation - Cooling - cooling fan,FALSE,Primary
+B1014,1,Yes,Appliances in accommodation - Cooling - cooling fan,FALSE,Primary
+B10_sum,"","",Number of response options selected for B10 (B1001 + B1002 + .. + B1014),FALSE,Derived
+C1,-2,No answer,How many people live in household,TRUE,Primary
+C1_new,"","",Number of occupants after error correction,TRUE,Derived
+C2_Male_0_15,-2,No answer,Males in houshold (0-15),TRUE,Primary
+C2_Male_16_24,-2,No answer,Males in houshold (16-24),TRUE,Primary
+C2_Male_25_44,-2,No answer,Males in houshold (25-44),TRUE,Primary
+C2_Male_45_64,-2,No answer,Males in houshold (45-64),TRUE,Primary
+C2_Male_65_74,-2,No answer,Males in houshold (65-74),TRUE,Primary
+C2_Male_75_84,-2,No answer,Males in houshold (75-84),TRUE,Primary
+C2_Male_85_plus,-2,No answer,Males in houshold (85+),TRUE,Primary
+C2_Female_0_15,-2,No answer,Females in houshold (0-15),TRUE,Primary
+C2_Female_16_24,-2,No answer,Females in houshold (16-24),TRUE,Primary
+C2_Female_25_44,-2,No answer,Females in houshold (25-44),TRUE,Primary
+C2_Female_45_64,-2,No answer,Females in houshold (45-64),TRUE,Primary
+C2_Female_65_74,-2,No answer,Females in houshold (65-74),TRUE,Primary
+C2_Female_75_84,-2,No answer,Females in houshold (75-84),TRUE,Primary
+C2_Female_85_plus,-2,No answer,Females in houshold (85+),TRUE,Primary
+C2_sum,"","",Number of occupants from C2 responses,FALSE,Derived
+C2_sum_diff,"","",C2_sum - C1_new,FALSE,Derived
+C2_error,TRUE,C2_sum_dif != 0 after obvious error correction,Clear error in C2 response,FALSE,Derived
+C2_error,FALSE,C2_sum_diff == 0,Clear error in C2 response,FALSE,Derived
+C2_tot_child,"","",Number of occupants aged under 16,TRUE,Derived
+C2_tot_adult,"","",Number of occupants aged 16+,TRUE,Derived
+C2_tot_65_plus,"","",Number of occupants aged 65+,TRUE,Derived
+C2_all_65_plus,1,All aged 65+,All occupants aged 65+,TRUE,Derived
+C2_all_65_plus,0,Not all aged 65+,All occupants aged 65+,TRUE,Derived
+C301,-2,No answer,Working Status - Working 30 + hours per week,TRUE,Primary
+C302,-2,No answer,Working Status - Working less than 30 hours per week,TRUE,Primary
+C303,-2,No answer,Working Status - Not Working - long term sickness or disability,TRUE,Primary
+C304,-2,No answer,Working Status - Unemployed but seeking work,TRUE,Primary
+C305,-2,No answer,Working Status - Student,TRUE,Primary
+C306,-2,No answer,Working Status - Retired / at home / not seeking work,TRUE,Primary
+C307,-2,No answer,Working Status - Other,TRUE,Primary
+C3_sum,"","",Number of response options selected for C3 (C307 + C302 + .. + C307),FALSE,Derived
+C3_sum_diff,"","",C3_sum - C2_tot_adult,FALSE,Derived
+C3_error,TRUE,"C3_sum_dif != 0 and C2_tot_adult calculatable, or C3_sum>15",Clear error in C3 response given adults reported,FALSE,Derived
+C3_error,FALSE,Otherwise,Clear error in C3 response given adults reported,FALSE,Derived
+C3_edit,TRUE,C3_sum_diff == 0 and C3 and C2 both answered,Has C3 been edited,FALSE,Derived
+C3_edit,FALSE,Otherwise,Has C3 been edited,FALSE,Derived
+None_working,1,No adults working,No adults work,FALSE,Derived
+None_working,0,Some adults working,No adults work,FALSE,Derived
+None_working,NA,Not possible to determine,No adults work,FALSE,Derived
+C4,-2,No answer,How many people in household hold a degree or higher qualification,TRUE,Primary
+C4,-1,Don't know/prefer not to say,How many people in household hold a degree or higher qualification,TRUE,Primary
+C4,,Non-numeric answer given,How many people in household hold a degree or higher qualification,TRUE,Primary
+C4_error,TRUE,"C4 > C1_new and C1 answered (more qualified than occupants), or non-numeric answer given",Clear error in C4 response given occupants reported,FALSE,Derived
+C4_error,FALSE,Otherwise,Clear error in C4 response given occupants reported,FALSE,Derived
+C5,-2,No answer,Does household have plug in electric vehicle,FALSE,Primary
+C5,-1,Don't know,Does household have plug in electric vehicle,FALSE,Primary
+C5,1,Yes,Does household have plug in electric vehicle,FALSE,Primary
+C5,2,No,Does household have plug in electric vehicle,FALSE,Primary
+C6,-9,Not applicable,When does household charge electric vehicle at home,FALSE,Primary
+C6,-2,No answer,When does household charge electric vehicle at home,FALSE,Primary
+C6,-1,Don't know,When does household charge electric vehicle at home,FALSE,Primary
+C6,1,Mostly overnight (8pm to 7am),When does household charge electric vehicle at home,FALSE,Primary
+C6,2,Mostly during the day (7am to 4pm),When does household charge electric vehicle at home,FALSE,Primary
+C6,3,Mostly in the evening (4pm to 8pm),When does household charge electric vehicle at home,FALSE,Primary
+C6,4,Varies - whenever it's needed,When does household charge electric vehicle at home,FALSE,Primary
+C6,5,"Not applicable, charging is not done at home (e.g. at work)",When does household charge electric vehicle at home,FALSE,Primary
+D1,-9,Not applicable,Age Group,FALSE,Primary
+D1,-2,No answer,Age Group,FALSE,Primary
+D1,1,Under 18,Age Group,FALSE,Primary
+D1,2,18-24,Age Group,FALSE,Primary
+D1,3,25-44,Age Group,FALSE,Primary
+D1,4,45-64,Age Group,FALSE,Primary
+D1,5,65-74,Age Group,FALSE,Primary
+D1,6,75-84,Age Group,FALSE,Primary
+D1,7,85+,Age Group,FALSE,Primary
+D1_new,-2,No answer,"Individual's age group, filled from C1 if single occupier",FALSE,Derived
+D1_new,1,Under 18,"Individual's age group, filled from C1 if single occupier",FALSE,Derived
+D1_new,2,18-24,"Individual's age group, filled from C1 if single occupier",FALSE,Derived
+D1_new,3,25-44,"Individual's age group, filled from C1 if single occupier",FALSE,Derived
+D1_new,4,45-64,"Individual's age group, filled from C1 if single occupier",FALSE,Derived
+D1_new,5,65-74,"Individual's age group, filled from C1 if single occupier",FALSE,Derived
+D1_new,6,75-84,"Individual's age group, filled from C1 if single occupier",FALSE,Derived
+D1_new,7,85+,"Individual's age group, filled from C1 if single occupier",FALSE,Derived
+D2,-9,Not applicable,Gender,FALSE,Primary
+D2,-3,Prefer not to say,Gender,FALSE,Primary
+D2,-2,No answer,Gender,FALSE,Primary
+D2,1,Male,Gender,FALSE,Primary
+D2,2,Female,Gender,FALSE,Primary
+D2,3,In some other way,Gender,FALSE,Primary
+D2_new,-3,Prefer not to say,"Individual's gender, filled from C2 if single occupier",FALSE,Derived
+D2_new,-2,No answer,"Individual's gender, filled from C2 if single occupier",FALSE,Derived
+D2_new,1,Male,"Individual's gender, filled from C2 if single occupier",FALSE,Derived
+D2_new,2,Female,"Individual's gender, filled from C2 if single occupier",FALSE,Derived
+D2_new,3,In some other way,"Individual's gender, filled from C2 if single occupier",FALSE,Derived
+D3,-9,Not applicable,Current Employment Status,FALSE,Primary
+D3,-3,Prefer not to say,Current Employment Status,FALSE,Primary
+D3,-2,No answer,Current Employment Status,FALSE,Primary
+D3,1,Working (paid or unpaid): 30 hours a week or more,Current Employment Status,FALSE,Primary
+D3,2,Working (paid or unpaid): less than 30 hours a week,Current Employment Status,FALSE,Primary
+D3,3,Not working because of long-term sickness or disability,Current Employment Status,FALSE,Primary
+D3,4,Unemployed but seeking work,Current Employment Status,FALSE,Primary
+D3,5,A student,Current Employment Status,FALSE,Primary
+D3,6,Retired/at home/not seeking work (including looking after the home or family),Current Employment Status,FALSE,Primary
+D3,7,Other,Current Employment Status,FALSE,Primary
+D3_new,-3,Prefer not to say,"Individual's working status, filled from C3 if single occupier",FALSE,Derived
+D3_new,-2,No answer,"Individual's working status, filled from C3 if single occupier",FALSE,Derived
+D3_new,1,Working (paid or unpaid): 30 hours a week or more,"Individual's working status, filled from C3 if single occupier",FALSE,Derived
+D3_new,2,Working (paid or unpaid): less than 30 hours a week,"Individual's working status, filled from C3 if single occupier",FALSE,Derived
+D3_new,3,Not working because of long-term sickness or disability,"Individual's working status, filled from C3 if single occupier",FALSE,Derived
+D3_new,4,Unemployed but seeking work,"Individual's working status, filled from C3 if single occupier",FALSE,Derived
+D3_new,5,A student,"Individual's working status, filled from C3 if single occupier",FALSE,Derived
+D3_new,6,Retired/at home/not seeking work (including looking after the home or family),"Individual's working status, filled from C3 if single occupier",FALSE,Derived
+D3_new,7,Other,"Individual's working status, filled from C3 if single occupier",FALSE,Derived
+D4,-3,Prefer not to say,How well do you manage financially,FALSE,Primary
+D4,-2,No answer,How well do you manage financially,FALSE,Primary
+D4,-1,Don't know,How well do you manage financially,FALSE,Primary
+D4,1,Living comfortably,How well do you manage financially,FALSE,Primary
+D4,2,Doing alright,How well do you manage financially,FALSE,Primary
+D4,3,Just about getting by,How well do you manage financially,FALSE,Primary
+D4,4,Finding it quite difficult,How well do you manage financially,FALSE,Primary
+D4,5,Finding it very difficult,How well do you manage financially,FALSE,Primary

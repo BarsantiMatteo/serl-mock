@@ -2,8 +2,11 @@
 from __future__ import annotations
 import json
 import os
+import random
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+
+PathLike = Union[str, os.PathLike]
 
 import numpy as np
 import pandas as pd
@@ -16,7 +19,7 @@ except Exception:
     _HAS_YAML = False
 
 # ---------- Config ----------
-def read_config(path: Optional[str]) -> Dict[str, Any]:
+def read_config(path: Optional[PathLike]) -> Dict[str, Any]:
     """
     Load JSON or YAML configuration. 
     """
@@ -38,14 +41,13 @@ def seed_random(seed: int) -> None:
     """
     Seed Python's and NumPy's RNGs for reproducibility.
     """
-    import random
     random.seed(seed)
     np.random.seed(seed)
 
 # ---------- I/O ----------
-def ensure_output_dir(path: str) -> str:
+def ensure_output_dir(path: PathLike) -> str:
     os.makedirs(path, exist_ok=True)
-    return path
+    return str(path)
 
 def with_edition_suffix(basename: str, edition: Optional[str]) -> str:
     """
@@ -53,9 +55,8 @@ def with_edition_suffix(basename: str, edition: Optional[str]) -> str:
     """
     return f"{basename}_edition{edition}.csv" if edition else f"{basename}.csv"
 
-def write_csv(df: pd.DataFrame, path: str, encoding: Optional[str] = None) -> None:
-    kwargs = {} if encoding is None else {"encoding": encoding}
-    df.to_csv(path, index=False, **kwargs)
+def write_csv(df: pd.DataFrame, path: PathLike, encoding: str = "utf-8") -> None:
+    df.to_csv(path, index=False, encoding=encoding)
 
 # ---------- Survey dictionary ----------
 def read_survey_dictionary(path: str) -> List[str]:

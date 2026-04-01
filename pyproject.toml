@@ -1,7 +1,19 @@
 [project]
 name = "serl-mock"
 version = "0.1.0"
-description = "Add your description here"
+description = "Generates dummy SERL-style datasets for local development and pipeline testing."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "numpy",
+    "pandas",
+    "pyyaml",
+]
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "nbconvert>=7.17.0",
+    "matplotlib>=3.10.8",
+    "ipykernel>=7.2.0",
+]

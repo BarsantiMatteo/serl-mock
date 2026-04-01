@@ -1,6 +1,5 @@
-def main():
-    print("Hello from serl-mock!")
+from scripts.generate_mock_data import run_all
 
 
 if __name__ == "__main__":
-    main()
+    run_all()

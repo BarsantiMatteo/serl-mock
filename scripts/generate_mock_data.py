@@ -1,14 +1,18 @@
 """
-Generate mock SERL half‑hourly smart‑meter data.
+Generate mock SERL smart-meter and contextual data.
 
-This script loads the configuration from config/smartmeter_schema.json
-and produces monthly CSV files (2019–2025) with the same structure and
-column names as the SERL Edition 08 half‑hourly dataset. The output is
-saved under data/mock/serl_smart_meter_hh_edition08/.
+Loads settings from config/serl_mock.yaml and produces:
 
-The mock data is not intended to be realistic — it is only for
-testing pipelines, code development, and running workflows outside the
-DSH environment.
+  1. puprn_master.csv               — shared household ID list
+  2. Monthly half-hourly CSVs       — realistic electricity and gas time series
+                                       with seasonal and intraday patterns
+                                       (see src/serl_mock/patterns.py)
+  3. Contextual datasets            — EPC, survey, participant summary,
+                                       follow-up survey, list of exporters
+
+Output is saved under data/mock/.  The generated data is not real SERL data
+and is intended only for pipeline testing and local development outside the
+Trusted Research Environment.
 """
 
 # --- src-layout shim ---
@@ -42,20 +46,24 @@ def run_all():
         length=cfg.get("puprn", {}).get("length", 8)
     )
     write_puprn_list_csv(puprns, puprn_csv)
-    
-    print("\nStep 2: Generating smart meter data")
+    print(f"  {len(puprns)} PUPRNs written to {puprn_csv}")
+
+    print(f"\nStep 2: Generating smart meter data "
+          f"({cfg.get('start_year')}–{cfg.get('end_year')}, "
+          f"edition {cfg.get('edition', '08')})")
     gen_sm = HHSmartMeterGenerator(
-        config_path=str(cfg_path), 
-        puprn_list_path=puprn_csv
+        config_path=str(cfg_path),
+        puprn_list_path=str(puprn_csv),
     )
     gen_sm.generate_all(outfolder=MOCK_HH_DIR)
-    
-    print("\nStep 3: Generating contextual variables") 
+
+    print("\nStep 3: Generating contextual variables")
     gen_ctx = SERLContextualVariablesGenerator(
         config_path=str(cfg_path),
-        puprn_list_path=puprn_csv
+        puprn_list_path=str(puprn_csv),
     )
     gen_ctx.write_all(outfolder=MOCK_DIR)
+    print("\nDone.")
 
 if __name__ == "__main__":
     run_all()

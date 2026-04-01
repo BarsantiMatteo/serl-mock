@@ -1,8 +1,10 @@
 # src/serl_mock/generator_contextual_data.py
 from __future__ import annotations
+import os
+import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -47,7 +49,6 @@ class SERLContextualVariablesGenerator:
         # Core parameters
         self.n_households = n_households or cfg.get("n_households", 100)
         self.year = year or cfg.get("year", 2023)
-        self.outfolder = outfolder
 
         # RNG
         self.seed = seed if seed is not None else cfg.get("seed", 42)
@@ -67,7 +68,7 @@ class SERLContextualVariablesGenerator:
         # Survey dictionary path
         self.survey_dictionary_path = cfg.get(
             "survey_dictionary_path",
-            "docs/serl_data_documentation/serl_survey_data_dictionary_edition07.csv",
+            "docs/documentation/serl_survey_data_dictionary_edition07.csv",
         )
 
         # PUPRN: load from master list or generate deterministically
@@ -123,7 +124,6 @@ class SERLContextualVariablesGenerator:
         ]
 
     def generate_epc(self) -> pd.DataFrame:
-        import random
         fields = self._epc_fields()
         energy_ratings = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
         property_types = ['House', 'Flat', 'Maisonette', 'Bungalow']
@@ -194,7 +194,6 @@ class SERLContextualVariablesGenerator:
 
     # ---------- SERL survey ----------
     def generate_serl_survey(self) -> pd.DataFrame:
-        import random
         survey_fields = read_survey_dictionary(self.survey_dictionary_path)
         survey_versions = ['Wave1', 'Wave2', 'Wave3']
         collection_methods = ['Online', 'Postal']
@@ -263,7 +262,6 @@ class SERLContextualVariablesGenerator:
 
     # ---------- Participant summary ----------
     def generate_participant_summary(self) -> pd.DataFrame:
-        import random
         fields = ['PUPRN', 'Region', 'IMD_quintile']
         regions = [
             'NORTH EAST','NORTH WEST','YORKSHIRE AND THE HUMBER','EAST MIDLANDS',
@@ -282,7 +280,6 @@ class SERLContextualVariablesGenerator:
 
     # ---------- Follow-up survey ----------
     def generate_follow_up_survey(self) -> pd.DataFrame:
-        import random
         fields = ['PUPRN','A1_corr_C','A1_err','B3_1_yes','B3_4_yes','C1','D4','D5']
         incomes = [
             'Below £10,000','£10,001 to £20,000','£20,001 to £30,000','£30,001 to £40,000',
@@ -310,12 +307,12 @@ class SERLContextualVariablesGenerator:
 
     # ---------- Exporters list ----------
     def generate_list_of_exporters(self) -> pd.DataFrame:
-        import random
-        exporters = [p for p in self.puprns if random.Random(self.seed + 500).random() < 0.07]
+        rnd = random.Random(self.seed + 500)
+        exporters = [p for p in self.puprns if rnd.random() < 0.07]
         return pd.DataFrame(exporters, columns=['PUPRN'])
 
     # ---------- Write all ----------
-    def write_all(self, outfolder: str):
+    def write_all(self, outfolder: "Union[str, os.PathLike]"):
 
         # EPC
         epc_df = self.generate_epc()
