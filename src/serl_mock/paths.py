@@ -11,3 +11,6 @@ MOCK_DIR = DATA_DIR / "mock"
 
 # Target folder for monthly half-hourly mock files
 MOCK_HH_DIR = MOCK_DIR / "serl_smart_meter_hh_edition08"
+
+# Target folder for ERA5 climate data files
+MOCK_CLIMATE_DIR = MOCK_DIR / "serl_climate_data_edition08"

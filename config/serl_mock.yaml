@@ -41,3 +41,54 @@ patterns:
   elec_spike_max_wh:        2000.0   # Maximum additional Wh added by a spike
   summer_hot_water_probability: 0.15  # Chance of non-zero gas outside heating season
   gas_heating_threshold:       0.1   # gas_seasonal multiplier below which is "summer"
+
+# -------------------------
+# Weather data (CDS / ERA5)
+# Download real hourly ERA5 reanalysis data via the Copernicus Climate Data
+# Store API (https://cds.climate.copernicus.eu/how-to-api).
+# Credentials must be configured in ~/.cdsapirc or via environment variables
+# CDSAPI_URL and CDSAPI_KEY before running the downloader.
+# -------------------------
+weather:
+  # CDS dataset identifier
+  dataset: "reanalysis-era5-single-levels"
+
+  # ERA5 product type
+  product_type: "reanalysis"
+
+  # Variables to retrieve — aligned with the SERL climate data schema
+  variables:
+    - "2m_temperature"
+    - "surface_solar_radiation_downwards"
+    - "total_precipitation"
+    - "10m_u_component_of_wind"
+    - "10m_v_component_of_wind"
+
+  # Bounding box [north, west, south, east] in decimal degrees
+  # Default covers Great Britain and Northern Ireland
+  area:
+    - 60.0   # north
+    - -8.0   # west
+    - 49.0   # south
+    -  2.0   # east
+
+  # Spatial resolution in degrees [lat_step, lon_step]
+  grid:
+    - 0.25
+    - 0.25
+
+  # Temporal resolution: download one record per hour
+  time_step_hours: 1
+
+  # Output file format: "netcdf" (.nc) or "grib" (.grib)
+  output_format: "netcdf"
+
+  # Date range for downloads — defaults to top-level start_year / end_year
+  # if omitted.  Override here to download a different period than the
+  # smart-meter simulation window.
+  # start_year: 2019
+  # end_year:   2019
+
+  # Output directory (relative to project root).
+  # Defaults to data/mock/serl_climate_data_edition08/
+  # output_dir: "data/mock/serl_climate_data_edition08"

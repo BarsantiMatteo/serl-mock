@@ -5,9 +5,12 @@ description = "Generates dummy SERL-style datasets for local development and pip
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "cdsapi>=0.7.7",
+    "netcdf4",
     "numpy",
     "pandas",
     "pyyaml",
+    "xarray",
 ]
 
 [dependency-groups]

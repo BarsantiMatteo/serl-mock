@@ -7,15 +7,28 @@ Loads settings from config/serl_mock.yaml and produces:
   2. Monthly half-hourly CSVs       — realistic electricity and gas time series
                                        with seasonal and intraday patterns
                                        (see src/serl_mock/patterns.py)
-  3. Contextual datasets            — EPC, survey, participant summary,
+  3. ERA5 weather data              — hourly NetCDF files downloaded from the
+                                       Copernicus Climate Data Store (CDS API)
+                                       and converted to CSV files in the SERL
+                                       climate data schema
+  4. Contextual datasets            — EPC, survey, participant summary,
                                        follow-up survey, list of exporters
+                                       (participant summary includes LSOA and
+                                       ERA5 grid_cell per household, derived
+                                       from the same grid spec used to download
+                                       the weather data)
 
 Output is saved under data/mock/.  The generated data is not real SERL data
 and is intended only for pipeline testing and local development outside the
 Trusted Research Environment.
+
+Weather download requires CDS API credentials in ~/.cdsapirc (or via the
+CDSAPI_URL / CDSAPI_KEY environment variables).  Pass --skip-weather to skip
+the download step if credentials are not available.
 """
 
 # --- src-layout shim ---
+import argparse
 import sys
 from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]  # repo root
@@ -26,11 +39,12 @@ from src.serl_mock.paths import CONFIG_DIR, MOCK_DIR, MOCK_HH_DIR
 from src.serl_mock.ids import make_alphanumeric_ids_ordered, write_puprn_list_csv
 from src.serl_mock.generator_smartmeter import HHSmartMeterGenerator
 from src.serl_mock.generator_contextual_data import SERLContextualVariablesGenerator
+from src.serl_mock.weather_downloader import WeatherDownloader
 from src.serl_mock.utils import read_config
 
 
 
-def run_all():
+def run_all(skip_weather: bool = False):
     cfg_path = CONFIG_DIR / "serl_mock.yaml"
     cfg = read_config(cfg_path)
 
@@ -57,14 +71,42 @@ def run_all():
     )
     gen_sm.generate_all(outfolder=MOCK_HH_DIR)
 
-    print("\nStep 3: Generating contextual variables")
+    print("\nStep 3: Downloading ERA5 weather data and converting to CSV")
+    if skip_weather:
+        print("  Skipped (--skip-weather flag set).")
+    else:
+        dl = WeatherDownloader(config_path=str(cfg_path))
+        nc_count = 0
+        csv_count = 0
+        for year in range(dl.start_year, dl.end_year + 1):
+            for month in range(1, 13):
+                try:
+                    nc_path, csv_path = dl.ensure_month(year, month)
+                    if nc_path.exists():
+                        nc_count += 1
+                    if csv_path.exists():
+                        csv_count += 1
+                except Exception as exc:
+                    print(f"  WARNING: {year}-{month:02d} failed — {exc}")
+        print(f"  {nc_count} NetCDF file(s) and {csv_count} CSV file(s) in {dl.output_dir}")
+
+    print("\nStep 4: Generating contextual variables")
     gen_ctx = SERLContextualVariablesGenerator(
         config_path=str(cfg_path),
         puprn_list_path=str(puprn_csv),
     )
     gen_ctx.write_all(outfolder=MOCK_DIR)
+
     print("\nDone.")
 
+
 if __name__ == "__main__":
-    run_all()
+    parser = argparse.ArgumentParser(description="Generate mock SERL datasets.")
+    parser.add_argument(
+        "--skip-weather",
+        action="store_true",
+        help="Skip the ERA5 weather data download step (step 3).",
+    )
+    args = parser.parse_args()
+    run_all(skip_weather=args.skip_weather)
 

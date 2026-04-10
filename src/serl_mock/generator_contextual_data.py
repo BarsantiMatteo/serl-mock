@@ -1,10 +1,11 @@
 # src/serl_mock/generator_contextual_data.py
 from __future__ import annotations
+import math
 import os
 import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -81,6 +82,54 @@ class SERLContextualVariablesGenerator:
             self.puprns = puprns[: self.n_households]
         else:
             self.puprns = make_alphanumeric_ids_ordered(self.n_households, length=8, seed=self.seed)
+
+        # ERA5 grid-cell assignment — used in participant summary.
+        # Each PUPRN gets a random location within the weather bounding box,
+        # snapped to the nearest grid point.  This uses the same area/grid
+        # settings as WeatherDownloader, so every assigned cell is guaranteed
+        # to exist in the downloaded ERA5 files.
+        wcfg = cfg.get("weather", {})
+        area = wcfg.get("area", [60.0, -8.0, 49.0, 2.0])
+        grid = wcfg.get("grid", [0.25, 0.25])
+        self._grid_cells: Dict[str, str] = self._assign_grid_cells(
+            puprns=list(self.puprns),
+            area=area,
+            grid=grid,
+            seed=self.seed,
+        )
+
+    # ---------- Grid-cell assignment ----------
+    @staticmethod
+    def _assign_grid_cells(
+        puprns: List[str],
+        area: List[float],
+        grid: List[float],
+        seed: int,
+    ) -> Dict[str, str]:
+        """Randomly assign each PUPRN to the nearest ERA5 grid cell.
+
+        Locations are drawn uniformly within *area* and snapped to the grid
+        defined by *grid*.  The resulting ``grid_cell`` identifier uses the
+        format ``<col>_<row>`` (0-based, origin at the NW corner of *area*),
+        consistent with the SERL climate data schema.
+        """
+        north, west, south, east = (
+            float(area[0]), float(area[1]), float(area[2]), float(area[3])
+        )
+        lat_step, lon_step = float(grid[0]), float(grid[1])
+        max_row = math.floor((north - south) / lat_step)
+        max_col = math.floor((east - west) / lon_step)
+
+        rng = np.random.default_rng(seed)
+        raw_lats = rng.uniform(south, north, size=len(puprns))
+        raw_lons = rng.uniform(west, east, size=len(puprns))
+
+        result: Dict[str, str] = {}
+        for puprn, raw_lat, raw_lon in zip(puprns, raw_lats, raw_lons):
+            row = max(0, min(round((north - float(raw_lat)) / lat_step), max_row))
+            col = max(0, min(round((float(raw_lon) - west) / lon_step), max_col))
+            result[puprn] = f"{col}_{row}"
+        return result
 
     # ---------- File naming ----------
     def _fname(self, basename: str) -> str:
@@ -262,18 +311,25 @@ class SERLContextualVariablesGenerator:
 
     # ---------- Participant summary ----------
     def generate_participant_summary(self) -> pd.DataFrame:
-        fields = ['PUPRN', 'Region', 'IMD_quintile']
+        fields = ['PUPRN', 'Region', 'LSOA', 'grid_cell', 'IMD_quintile']
         regions = [
             'NORTH EAST','NORTH WEST','YORKSHIRE AND THE HUMBER','EAST MIDLANDS',
             'WEST MIDLANDS','EAST OF ENGLAND','LONDON','SOUTH EAST','SOUTH WEST',
             'SCOTLAND','WALES'
         ]
+        # LSOA prefix by nation; all other regions are in England (E01)
+        _lsoa_prefix = {'WALES': 'W01', 'SCOTLAND': 'S01'}
         data = []
         rnd = random.Random(self.seed + 300)
         for puprn in self.puprns:
+            region = rnd.choice(regions)
+            prefix = _lsoa_prefix.get(region, 'E01')
+            lsoa = f"{prefix}{rnd.randint(0, 999999):06d}"
             data.append({
                 'PUPRN': puprn,
-                'Region': rnd.choice(regions),
+                'Region': region,
+                'LSOA': lsoa,
+                'grid_cell': self._grid_cells.get(puprn, ''),
                 'IMD_quintile': rnd.randint(1, 5),
             })
         return pd.DataFrame(data, columns=fields)
