@@ -20,6 +20,7 @@ Running the pipeline produces the following files under `data/mock/`:
 |---|---|
 | `puprn_master.csv` | Master list of synthetic household IDs (PUPRNs) |
 | `serl_smart_meter_hh_edition08/` | One CSV per calendar month with half-hourly electricity and gas readings |
+| `serl_climate_data_edition08/` | One CSV per calendar month with hourly ERA5 weather data |
 | `epc_data_edition08.csv` | EPC (Energy Performance Certificate) records |
 | `serl_survey_data_edition08.csv` | Household survey responses |
 | `serl_participant_summary_data_edition08.csv` | Region and deprivation index per household |
@@ -51,9 +52,28 @@ uv sync
 
 # Generate all mock data (reads config/serl_mock.yaml)
 python scripts/generate_mock_data.py
+
+# Skip ERA5 weather download (no CDS credentials needed)
+python scripts/generate_mock_data.py --skip-weather
 ```
 
 Output appears in `data/mock/`.
+
+### Weather data (ERA5)
+
+Step 3 downloads real hourly ERA5 reanalysis data from the
+[Copernicus Climate Data Store](https://cds.climate.copernicus.eu/how-to-api)
+and converts each monthly file to a SERL-style CSV under `serl_climate_data_edition08/`.
+
+CDS credentials are required. After registering, create `~/.cdsapirc`:
+
+```
+url: https://cds.climate.copernicus.eu/api
+key: <your-api-key>
+```
+
+Each month is processed independently: if the NetCDF already exists it is not
+re-downloaded; if the CSV already exists it is not re-converted.
 
 ---
 

@@ -16,8 +16,10 @@ serl-mock/
 │       ├── Elec_2023_list_of_exporter_puprns_edition08.csv
 │       └── serl_smart_meter_hh_edition08/
 │           ├── serl_half_hourly_2019_01_edition08.csv
-│           └── ...
-│
+│           └── ...│       └── serl_climate_data_edition08/
+│           ├── serl_climate_data_2019_01_edition08.nc   # raw ERA5 download
+│           ├── serl_climate_data_2019_01_edition08.csv  # SERL-format CSV
+│           └── ...│
 ├── docs/
 │   ├── overview.md                 # What the project does and quick-start
 │   ├── structure.md                # This file
@@ -38,7 +40,8 @@ serl-mock/
 │       ├── profiles.py
 │       ├── patterns.py
 │       ├── generator_smartmeter.py
-│       └── generator_contextual_data.py
+│       ├── generator_contextual_data.py
+│       └── weather_downloader.py
 │
 ├── main.py                         # Thin wrapper — calls scripts/generate_mock_data.py
 ├── pyproject.toml
@@ -50,11 +53,12 @@ serl-mock/
 ## Module descriptions
 
 ### `scripts/generate_mock_data.py`
-The **entry point** for the full generation pipeline.  Runs three sequential steps:
+The **entry point** for the full generation pipeline.  Runs four sequential steps:
 
 1. Generate and write `puprn_master.csv`
 2. Instantiate `HHSmartMeterGenerator` and write monthly HH CSVs
-3. Instantiate `SERLContextualVariablesGenerator` and write contextual CSVs
+3. Instantiate `WeatherDownloader` and, for each month, download ERA5 data from CDS (if not already present) and convert to CSV (if not already present). Use `--skip-weather` to bypass this step.
+4. Instantiate `SERLContextualVariablesGenerator` and write contextual CSVs
 
 ### `src/serl_mock/paths.py`
 Defines `Path` constants for `CONFIG_DIR`, `DATA_DIR`, `MOCK_DIR`, and `MOCK_HH_DIR` relative to the project root.  Import these instead of hard-coding paths anywhere else.
@@ -94,3 +98,12 @@ Replacing any function here changes the shape of the generated time series witho
 - EPC records generated field-by-field using category lists and numeric ranges
 - Survey data driven by the SERL survey data dictionary (falls back to a minimal set if the dictionary file is absent)
 - `write_all(outfolder)` writes all five contextual files in one call
+
+### `src/serl_mock/weather_downloader.py`
+`WeatherDownloader` retrieves and converts ERA5 reanalysis data:
+- `download_month(year, month)` — downloads a single month from the CDS API; skips if the NetCDF file already exists
+- `convert_month_to_csv(year, month)` — converts the NetCDF (or ZIP bundle produced by CDS API v2) to a SERL-format hourly CSV; skips if the CSV already exists
+- `ensure_month(year, month)` — combines both steps in one call
+- `ensure_all()` — runs `ensure_month` for every month in the configured date range
+
+The CSV output contains one row per ERA5 grid cell per UTC hour with columns: `grid_cell`, `analysis_date`, `date_time_utc`, `2m_temperature_K`, `surface_solar_radiation_downwards`, `total_precipitation`, `10m_u_component_of_wind`, `10m_v_component_of_wind`.

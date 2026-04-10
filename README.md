@@ -3,8 +3,8 @@
 A lightweight Python package that generates synthetic datasets matching the structure
 and naming conventions of the **SERL (Smart Energy Research Lab) Observatory** data releases.
 
-Use it to build and test analysis pipelines locally, without needing access to the real
-Trusted Research Environment (TRE).
+Use it to build and test analysis pipelines locally, without needing access to the real data in
+the Data Safe Haven (DSH) or Trusted Research Environment (TRE).
 
 ---
 
@@ -16,6 +16,7 @@ Running the pipeline writes the following files to `data/mock/`:
 |---|---|
 | `puprn_master.csv` | Shared list of synthetic household IDs |
 | `serl_smart_meter_hh_edition08/` | Monthly half-hourly electricity and gas CSVs |
+| `serl_climate_data_edition08/` | Monthly hourly ERA5 weather CSVs (one per calendar month) |
 | `epc_data_edition08.csv` | EPC records |
 | `serl_survey_data_edition08.csv` | Survey responses |
 | `serl_participant_summary_data_edition08.csv` | Region and deprivation index |
@@ -39,6 +40,26 @@ are controlled by a single file:
 ```
 config/serl_mock.yaml
 ```
+
+### Weather data (ERA5 via CDS API)
+
+Step 3 of the pipeline downloads real hourly ERA5 reanalysis data from the
+[Copernicus Climate Data Store](https://cds.climate.copernicus.eu/how-to-api)
+and converts each monthly file to a SERL-style CSV.
+
+This requires a free CDS account. Once registered, create `~/.cdsapirc`:
+
+```
+url: https://cds.climate.copernicus.eu/api
+key: <your-api-key>
+```
+
+If credentials are not available, skip the download step:
+
+```bash
+python scripts/generate_mock_data.py --skip-weather
+```
+
 
 ---
 

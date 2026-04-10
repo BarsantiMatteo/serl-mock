@@ -83,3 +83,53 @@ filenames:
 1. Add the key and a default value to `serl_mock.yaml`.
 2. Read it in the relevant `__init__` method with `cfg.get("your_key", default)`.
 3. Document it here.
+
+---
+
+## Weather settings
+
+Controls the ERA5 download and CSV conversion performed in Step 3.
+
+```yaml
+weather:
+  dataset:      "reanalysis-era5-single-levels"  # CDS dataset identifier
+  product_type: "reanalysis"
+  output_format: "netcdf"   # "netcdf" (.nc) or "grib"
+
+  # ERA5 variables — aligned with the SERL climate data schema
+  variables:
+    - "2m_temperature"
+    - "surface_solar_radiation_downwards"
+    - "total_precipitation"
+    - "10m_u_component_of_wind"
+    - "10m_v_component_of_wind"
+
+  # UK bounding box [north, west, south, east] in decimal degrees
+  area: [60.0, -8.0, 49.0, 2.0]
+
+  # Spatial resolution [lat_step, lon_step] in degrees
+  grid: [0.25, 0.25]
+
+  # Hourly download (ERA5 native resolution)
+  time_step_hours: 1
+
+  # Override date range (defaults to top-level start_year / end_year)
+  # start_year: 2019
+  # end_year:   2019
+
+  # Override output directory (defaults to data/mock/serl_climate_data_edition08/)
+  # output_dir: "data/mock/serl_climate_data_edition08"
+```
+
+> **CDS credentials required.** Register at https://cds.climate.copernicus.eu and add `~/.cdsapirc`:
+> ```
+> url: https://cds.climate.copernicus.eu/api
+> key: <your-api-key>
+> ```
+> Use `--skip-weather` to bypass the download step if credentials are unavailable.
+
+### Idempotent execution
+
+- If a `.nc` file already exists for a month, it is **not re-downloaded**.
+- If a `.csv` file already exists for a month, it is **not re-converted**.
+- Re-running the pipeline is safe; only missing files are produced.
