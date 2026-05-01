@@ -38,7 +38,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]  # repo root
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.serl_mock.paths import CONFIG_DIR, MOCK_DIR, MOCK_HH_DIR, MOCK_DAILY_DIR, MOCK_INTERNAL_DIR, MOCK_AGGREGATED_DIR, REFERENCE_DIR
+from src.serl_mock.paths import CONFIG_DIR, MOCK_DIR, MOCK_HH_DIR, MOCK_DAILY_DIR, MOCK_INTERNAL_DIR, MOCK_AGGREGATED_DIR, REFERENCE_DIR, MOCK_CLIMATE_DIR
 from src.serl_mock.ids import make_alphanumeric_ids_ordered, write_puprn_list_csv
 from src.serl_mock.generator_smartmeter import HHSmartMeterGenerator, DailySmartMeterGenerator
 from src.serl_mock.generator_contextual_data import SERLContextualVariablesGenerator
@@ -124,20 +124,27 @@ def run_all(skip_weather: bool = False):
     if skip_weather:
         print("  Skipped (--skip-weather flag set).")
     else:
-        dl = WeatherDownloader(config_path=str(cfg_path))
-        nc_count = 0
-        csv_count = 0
-        for year in range(dl.start_year, dl.end_year + 1):
-            for month in range(1, 13):
-                try:
-                    nc_path, csv_path = dl.ensure_month(year, month)
-                    if nc_path.exists():
-                        nc_count += 1
-                    if csv_path.exists():
-                        csv_count += 1
-                except Exception as exc:
-                    print(f"  WARNING: {year}-{month:02d} failed — {exc}")
-        print(f"  {nc_count} NetCDF file(s) and {csv_count} CSV file(s) in {dl.output_dir}")
+        try:
+            dl = WeatherDownloader(config_path=str(cfg_path))
+            dl._get_client()  # fail fast: surface credential / connectivity errors now
+        except Exception as exc:
+            print(f"  WARNING: CDS API unavailable — {exc}")
+            print(f"  Skipping weather download; placeholder folder created at {MOCK_CLIMATE_DIR}")
+            MOCK_CLIMATE_DIR.mkdir(parents=True, exist_ok=True)
+        else:
+            nc_count = 0
+            csv_count = 0
+            for year in range(dl.start_year, dl.end_year + 1):
+                for month in range(1, 13):
+                    try:
+                        nc_path, csv_path = dl.ensure_month(year, month)
+                        if nc_path.exists():
+                            nc_count += 1
+                        if csv_path.exists():
+                            csv_count += 1
+                    except Exception as exc:
+                        print(f"  WARNING: {year}-{month:02d} failed — {exc}")
+            print(f"  {nc_count} NetCDF file(s) and {csv_count} CSV file(s) in {dl.output_dir}")
 
     print("\nStep 5: Generating contextual variables")
     gen_ctx = SERLContextualVariablesGenerator(
