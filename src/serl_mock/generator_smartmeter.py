@@ -410,7 +410,7 @@ class DailySmartMeterGenerator:
         ].reset_index(drop=True)
 
     def write_year(self, df: pd.DataFrame, year: int, outfolder: str):
-        fname = with_edition_suffix(f"serl_daily_{year}", self.edition)
+        fname = with_edition_suffix(f"serl_smart_meter_daily_{year}", self.edition)
         write_csv(df, str(Path(outfolder) / fname))
 
     def generate_all(self, outfolder: "Union[str, os.PathLike]"):
