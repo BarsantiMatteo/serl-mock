@@ -92,3 +92,17 @@ weather:
   # Output directory (relative to project root).
   # Defaults to data/mock/serl_climate_data_edition08/
   # output_dir: "data/mock/serl_climate_data_edition08"
+
+
+
+# --------------------------
+# Naming of output files
+# --------------------------
+filenames:
+  epc: "serl_epc_data"
+  covid19_survey: "serl_covid19_survey_data"
+  survey: "serl_survey_data"
+  followup_survey: "serl_2023_follow_up_survey_data"
+  summary: "serl_participant_summary"
+  followup_prefix: "serl_follow_up_survey"
+  tariff_data: "serl_tariff_data"

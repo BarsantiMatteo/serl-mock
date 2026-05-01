@@ -31,13 +31,14 @@ the download step if credentials are not available.
 
 # --- src-layout shim ---
 import argparse
+import shutil
 import sys
 from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]  # repo root
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.serl_mock.paths import CONFIG_DIR, MOCK_DIR, MOCK_HH_DIR, MOCK_DAILY_DIR
+from src.serl_mock.paths import CONFIG_DIR, MOCK_DIR, MOCK_HH_DIR, MOCK_DAILY_DIR, MOCK_INTERNAL_DIR, MOCK_AGGREGATED_DIR, REFERENCE_DIR
 from src.serl_mock.ids import make_alphanumeric_ids_ordered, write_puprn_list_csv
 from src.serl_mock.generator_smartmeter import HHSmartMeterGenerator, DailySmartMeterGenerator
 from src.serl_mock.generator_contextual_data import SERLContextualVariablesGenerator
@@ -50,13 +51,49 @@ def run_all(skip_weather: bool = False):
     cfg_path = CONFIG_DIR / "serl_mock.yaml"
     cfg = read_config(cfg_path)
 
+    edition = str(cfg.get("edition", "08")).zfill(2)
+
     # Ensure target folders exist
     MOCK_DIR.mkdir(parents=True, exist_ok=True)
     MOCK_HH_DIR.mkdir(parents=True, exist_ok=True)
     MOCK_DAILY_DIR.mkdir(parents=True, exist_ok=True)
+    MOCK_INTERNAL_DIR.mkdir(parents=True, exist_ok=True)
+    MOCK_AGGREGATED_DIR.mkdir(parents=True, exist_ok=True)
+
+    print("\nStep 0: Copying reference files to mock folder")
+    # Files copied as-is (name unchanged)
+    for fname in ["bst_dates_to_2030.csv"]:
+        src = REFERENCE_DIR / fname
+        if src.exists():
+            shutil.copy2(src, MOCK_DIR / fname)
+            print(f"  Copied {fname}")
+    # Data dictionaries: copy from reference with edition suffix updated
+    dict_renames = {
+        "serl_survey_data_dictionary_edition07.csv":
+            f"serl_survey_data_dictionary_edition{edition}.csv",
+        "serl_covid19_survey_data_dictionary_edition07.csv":
+            f"serl_covid19_survey_data_dictionary_edition{edition}.csv",
+    }
+    for src_name, dst_name in dict_renames.items():
+        src = REFERENCE_DIR / src_name
+        if src.exists():
+            shutil.copy2(src, MOCK_DIR / dst_name)
+            print(f"  Copied {src_name} -> {dst_name}")
+
+    print("\nStep 0b: Creating placeholder files")
+    placeholders = [
+        f"serl_tariff_data_edition{edition}.csv",
+        f"serl_smart_meter_rt_summary_edition{edition}.csv",
+        "serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv",
+    ]
+    for fname in placeholders:
+        p = MOCK_DIR / fname
+        if not p.exists():
+            p.write_text("# placeholder\n", encoding="utf-8")
+            print(f"  Created {fname}")
 
     print("\nStep 1: Generating PUPRNs")
-    puprn_csv = MOCK_DIR / "puprn_master.csv"
+    puprn_csv = MOCK_INTERNAL_DIR / "puprn_master.csv"
     puprns = make_alphanumeric_ids_ordered(
         n=cfg.get("n_households", 100),
         seed=cfg.get("seed", 42),
@@ -107,7 +144,7 @@ def run_all(skip_weather: bool = False):
         config_path=str(cfg_path),
         puprn_list_path=str(puprn_csv),
     )
-    gen_ctx.write_all(outfolder=MOCK_DIR)
+    gen_ctx.write_all(outfolder=MOCK_DIR, mock_only_outfolder=MOCK_INTERNAL_DIR)
 
     print("\nDone.")
 

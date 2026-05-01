@@ -18,10 +18,11 @@ from .utils import (
 
 @dataclass
 class OutputNames:
-    epc: str = "epc_data"
+    epc: str = "serl_epc_data"
     survey: str = "serl_survey_data"
-    summary: str = "serl_participant_summary_data"
-    followup_prefix: str = "serl_follow_up_survey"
+    covid19_survey: str = "serl_covid19_survey_data"
+    summary: str = "serl_participant_summary"
+    followup_survey: str = "serl_2023_follow_up_survey_data"
     exporters_prefix: str = "Elec"
 
 class SERLContextualVariablesGenerator:
@@ -58,10 +59,11 @@ class SERLContextualVariablesGenerator:
         # Edition & filenames
         fcfg = cfg.get("filenames", {})
         self.names = OutputNames(
-            epc=fcfg.get("epc", "epc_data"),
+            epc=fcfg.get("epc", "serl_epc_data"),
             survey=fcfg.get("survey", "serl_survey_data"),
-            summary=fcfg.get("summary", "serl_participant_summary_data"),
-            followup_prefix=fcfg.get("followup_prefix", "serl_follow_up_survey"),
+            covid19_survey=fcfg.get("covid19_survey", "serl_covid19_survey_data"),
+            summary=fcfg.get("summary", "serl_participant_summary"),
+            followup_survey=fcfg.get("followup_survey", "serl_2023_follow_up_survey_data"),
             exporters_prefix=fcfg.get("exporters_prefix", "Elec"),
         )
         self.edition = str(cfg.get("edition", "")).strip() or None
@@ -69,7 +71,7 @@ class SERLContextualVariablesGenerator:
         # Survey dictionary path
         self.survey_dictionary_path = cfg.get(
             "survey_dictionary_path",
-            "docs/documentation/serl_survey_data_dictionary_edition07.csv",
+            "data/reference/serl_survey_data_dictionary_edition07.csv",
         )
 
         # PUPRN: load from master list or generate deterministically
@@ -309,6 +311,119 @@ class SERLContextualVariablesGenerator:
 
         return pd.DataFrame(data)
 
+    # ---------- COVID-19 survey ----------
+    def generate_covid19_survey(self) -> pd.DataFrame:
+        rnd = random.Random(self.seed + 600)
+        missing_codes = [-1, -2, -9]
+
+        def maybe_missing(choices, p=0.05):
+            return rnd.choice(missing_codes) if rnd.random() < p else rnd.choice(choices)
+
+        data = []
+        for puprn in self.puprns:
+            row: dict = {'PUPRN': puprn}
+
+            # Q1: Smart meter IHD usage frequency during lockdown (1=most days … 7=don't know)
+            row['Q1'] = maybe_missing([1, 2, 3, 4, 5, 6, 7])
+
+            # Q2: IHD usage vs. pre-lockdown (skip if Q1=6 "I don't have this")
+            row['Q2'] = 4 if row['Q1'] == 6 else maybe_missing([1, 2, 3, 4, 5])
+
+            # Q3: Switched energy tariff/supplier during lockdown
+            q3 = rnd.choice([1, 2])
+            row['Q3'] = q3
+
+            # Q3a: Motivations for switching (multi-select binary; only if Q3=1)
+            for i in range(1, 8):
+                row[f'Q3a_{i}'] = rnd.choice([0, 1]) if q3 == 1 else np.nan
+
+            # Q4: Outdoor/green-space access (multi-select binary)
+            for i in range(1, 7):
+                row[f'Q4_{i}'] = rnd.choice([0, 1])
+
+            # Q5: Energy conservation effort (1=great deal … 5=don't know)
+            row['Q5'] = maybe_missing([1, 2, 3, 4, 5])
+
+            # Q6: Window-opening frequency on cold/warm days
+            # Response codes: 7=always, 14=very often, 15=quite often, 16=not very often, 17=never, 18=don't know
+            for i in range(1, 3):
+                row[f'Q6_{i}'] = maybe_missing([7, 14, 15, 16, 17, 18])
+
+            # Q7: Damp/condensation/mould (1=yes, 2=no, 3=don't know)
+            row['Q7'] = rnd.choice([1, 2, 3])
+
+            # Q8b: Heating hours vs. pre-lockdown (1=more … 4=N/A)
+            row['Q8b'] = maybe_missing([1, 2, 3, 4])
+
+            # Q9: Thermostat unit (1=Celsius, 2=Fahrenheit, 4=can't remember/N/A)
+            row['Q9'] = maybe_missing([1, 2, 4])
+
+            # Q10: Number of heated rooms vs. pre-lockdown
+            row['Q10'] = maybe_missing([1, 2, 3, 4])
+
+            # Q11a: "Don't have this appliance" flags
+            # Appliances: 1=baths, 2=showers, 3=washing machine, 4=tumble dryer, 5=dishwasher, 6=cooker/oven/grill
+            for idx in range(1, 7):
+                row[f'Q11a_2_{idx}_1'] = rnd.choice([0, 1])
+
+            # Q11b: Appliance usage frequency vs. pre-lockdown (1=more … 4=don't know)
+            for i in range(1, 7):
+                row[f'Q11b_{i}'] = maybe_missing([1, 2, 3, 4])
+
+            # Q12a: "Don't have this device" flags
+            # Devices: 1=TV, 2=laptop/computer/tablet, 3=electric gym equipment
+            for idx in range(1, 4):
+                row[f'Q12a_2_{idx}_1'] = rnd.choice([0, 1])
+
+            # Q12b: Device usage duration vs. pre-lockdown (1=more … 4=don't know)
+            for i in range(1, 4):
+                row[f'Q12b_{i}'] = maybe_missing([1, 2, 3, 4])
+
+            # Q22a: Time-of-day during lockdown for 9 activities × 6 slots (multi-select binary)
+            # Activities: 1=baths, 2=showers, 3=washing machine, 4=tumble dryer,
+            #             5=dishwasher, 6=oven/cooker/grill, 7=TV, 8=laptop/tablet, 9=gym equipment
+            # Slots: 1=4am-7:59am, 2=8am-11:59am, 3=12pm-3:59pm,
+            #        4=4pm-7:59pm, 5=8pm-11:59pm, 6=12am-3:59am
+            for act in range(1, 10):
+                for slot in range(1, 7):
+                    row[f'Q22a_1_{act}_{slot}'] = rnd.choice([0, 1])
+                row[f'Q22a_2_{act}_1'] = rnd.choice([0, 1])  # "don't know" flag
+
+            # Q22b: Time-of-day before lockdown for the same 9 activities × 6 slots
+            for act in range(1, 10):
+                for slot in range(1, 7):
+                    row[f'Q22b_1_{act}_{slot}'] = rnd.choice([0, 1])
+                row[f'Q22b_2_{act}_1'] = rnd.choice([0, 1])  # "don't know" flag
+
+            # Q17: Increased time at home before formal lockdown start
+            row['Q17'] = maybe_missing([1, 2, 3, 4])
+
+            # Q18: Expect to continue spending more time at home (codes: 1,4,5,6)
+            row['Q18'] = maybe_missing([1, 4, 5, 6])
+
+            # Q19: Financial wellbeing (1=living comfortably … 7=prefer not to say)
+            row['Q19'] = maybe_missing([1, 2, 3, 4, 5, 6, 7])
+
+            # Q21: Easing of restrictions caused substantial household changes
+            row['Q21'] = maybe_missing([1, 2, 3, 4])
+
+            # Q24: Usual travel-to-work mode BEFORE lockdown (1=car driver … 12=N/A)
+            row['Q24'] = maybe_missing(list(range(1, 13)))
+
+            # Q25: Usual travel-to-work mode DURING lockdown (1=car driver … 12=N/A)
+            row['Q25'] = maybe_missing(list(range(1, 13)))
+
+            # RC1/RC2: Research consent
+            row['RC1'] = rnd.choice([1, 2])
+            row['RC2'] = rnd.choice([1, 2])
+
+            # Finished indicator (0=FALSE, 1=TRUE)
+            row['Finished'] = rnd.choice([0, 1])
+
+            data.append(row)
+
+        return pd.DataFrame(data)
+
     # ---------- Participant summary ----------
     def generate_participant_summary(self) -> pd.DataFrame:
         fields = ['PUPRN', 'Region', 'LSOA', 'grid_cell', 'IMD_quintile']
@@ -368,7 +483,9 @@ class SERLContextualVariablesGenerator:
         return pd.DataFrame(exporters, columns=['PUPRN'])
 
     # ---------- Write all ----------
-    def write_all(self, outfolder: "Union[str, os.PathLike]"):
+    def write_all(self, outfolder: "Union[str, os.PathLike]", mock_only_outfolder: "Optional[Union[str, os.PathLike]]" = None):
+
+        mock_only_dir = Path(mock_only_outfolder) if mock_only_outfolder is not None else Path(outfolder)
 
         # EPC
         epc_df = self.generate_epc()
@@ -378,16 +495,19 @@ class SERLContextualVariablesGenerator:
         serl_df = self.generate_serl_survey()
         write_csv(serl_df, str(Path(outfolder) / self._fname(self.names.survey)))
 
+        # COVID-19 survey
+        covid19_df = self.generate_covid19_survey()
+        write_csv(covid19_df, str(Path(outfolder) / self._fname(self.names.covid19_survey)))
+
         # Participant summary
         summary_df = self.generate_participant_summary()
         write_csv(summary_df, str(Path(outfolder) / self._fname(self.names.summary)))
 
-        # Follow-up survey 
-        followup_base = f"{self.names.followup_prefix}_{self.year}_data"
+        # Follow-up survey
         followup_df = self.generate_follow_up_survey()
-        write_csv(followup_df, str(Path(outfolder) / self._fname(followup_base)), encoding="latin-1")
+        write_csv(followup_df, str(Path(outfolder) / self._fname(self.names.followup_survey)), encoding="latin-1")
 
-        # Exporters list
+        # Exporters list — mock-only file, not part of the SERL Edition release
         exporters_base = f"{self.names.exporters_prefix}_{self.year}_list_of_exporter_puprns"
         exporters_df = self.generate_list_of_exporters()
-        write_csv(exporters_df, str(Path(outfolder) / self._fname(exporters_base)))
+        write_csv(exporters_df, str(mock_only_dir / self._fname(exporters_base)))
