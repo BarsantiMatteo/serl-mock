@@ -7,11 +7,13 @@ Loads settings from config/serl_mock.yaml and produces:
   2. Monthly half-hourly CSVs       — realistic electricity and gas time series
                                        with seasonal and intraday patterns
                                        (see src/serl_mock/patterns.py)
-  3. ERA5 weather data              — hourly NetCDF files downloaded from the
+  3. Yearly daily CSVs              — daily sums of electricity and gas,
+                                       one file per calendar year
+  4. ERA5 weather data              — hourly NetCDF files downloaded from the
                                        Copernicus Climate Data Store (CDS API)
                                        and converted to CSV files in the SERL
                                        climate data schema
-  4. Contextual datasets            — EPC, survey, participant summary,
+  5. Contextual datasets            — EPC, survey, participant summary,
                                        follow-up survey, list of exporters
                                        (participant summary includes LSOA and
                                        ERA5 grid_cell per household, derived
@@ -35,9 +37,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]  # repo root
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.serl_mock.paths import CONFIG_DIR, MOCK_DIR, MOCK_HH_DIR
+from src.serl_mock.paths import CONFIG_DIR, MOCK_DIR, MOCK_HH_DIR, MOCK_DAILY_DIR
 from src.serl_mock.ids import make_alphanumeric_ids_ordered, write_puprn_list_csv
-from src.serl_mock.generator_smartmeter import HHSmartMeterGenerator
+from src.serl_mock.generator_smartmeter import HHSmartMeterGenerator, DailySmartMeterGenerator
 from src.serl_mock.generator_contextual_data import SERLContextualVariablesGenerator
 from src.serl_mock.weather_downloader import WeatherDownloader
 from src.serl_mock.utils import read_config
@@ -51,6 +53,7 @@ def run_all(skip_weather: bool = False):
     # Ensure target folders exist
     MOCK_DIR.mkdir(parents=True, exist_ok=True)
     MOCK_HH_DIR.mkdir(parents=True, exist_ok=True)
+    MOCK_DAILY_DIR.mkdir(parents=True, exist_ok=True)
 
     print("\nStep 1: Generating PUPRNs")
     puprn_csv = MOCK_DIR / "puprn_master.csv"
@@ -62,7 +65,7 @@ def run_all(skip_weather: bool = False):
     write_puprn_list_csv(puprns, puprn_csv)
     print(f"  {len(puprns)} PUPRNs written to {puprn_csv}")
 
-    print(f"\nStep 2: Generating smart meter data "
+    print(f"\nStep 2: Generating half-hourly smart meter data "
           f"({cfg.get('start_year')}–{cfg.get('end_year')}, "
           f"edition {cfg.get('edition', '08')})")
     gen_sm = HHSmartMeterGenerator(
@@ -71,7 +74,16 @@ def run_all(skip_weather: bool = False):
     )
     gen_sm.generate_all(outfolder=MOCK_HH_DIR)
 
-    print("\nStep 3: Downloading ERA5 weather data and converting to CSV")
+    print(f"\nStep 3: Generating daily smart meter data "
+          f"({cfg.get('start_year')}–{cfg.get('end_year')}, "
+          f"edition {cfg.get('edition', '08')})")
+    gen_daily = DailySmartMeterGenerator(
+        config_path=str(cfg_path),
+        puprn_list_path=str(puprn_csv),
+    )
+    gen_daily.generate_all(outfolder=MOCK_DAILY_DIR)
+
+    print("\nStep 4: Downloading ERA5 weather data and converting to CSV")
     if skip_weather:
         print("  Skipped (--skip-weather flag set).")
     else:
@@ -90,7 +102,7 @@ def run_all(skip_weather: bool = False):
                     print(f"  WARNING: {year}-{month:02d} failed — {exc}")
         print(f"  {nc_count} NetCDF file(s) and {csv_count} CSV file(s) in {dl.output_dir}")
 
-    print("\nStep 4: Generating contextual variables")
+    print("\nStep 5: Generating contextual variables")
     gen_ctx = SERLContextualVariablesGenerator(
         config_path=str(cfg_path),
         puprn_list_path=str(puprn_csv),

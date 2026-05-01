@@ -297,5 +297,125 @@ class HHSmartMeterGenerator:
 
 
 class DailySmartMeterGenerator:
-    # To be implemented
-    pass
+    """
+    Daily smart meter data generator.
+
+    Wraps HHSmartMeterGenerator: generates half-hourly data month by month,
+    aggregates to daily level by summing valid HH reads, and writes one CSV
+    per calendar year.
+    """
+
+    DAILY_ELEC_VERY_HIGH_WH = 100_000  # ~4× HH threshold × 48 HH
+    DAILY_GAS_VERY_HIGH_M3  = 200.0
+
+    def __init__(self, config_path: str, puprn_list_path: Optional[str] = None):
+        self._hh      = HHSmartMeterGenerator(config_path, puprn_list_path)
+        self.start_year = self._hh.start_year
+        self.end_year   = self._hh.end_year
+        self.edition    = self._hh.edition
+
+    @staticmethod
+    def _expected_hh(local_date) -> int:
+        """Return expected HH count for a local date: 46 (spring-forward), 50 (fall-back), 48 otherwise."""
+        ts = pd.Timestamp(str(local_date), tz="Europe/London")
+        ts_next = ts + pd.DateOffset(days=1)
+        return int((ts_next.tz_convert("UTC") - ts.tz_convert("UTC")).total_seconds() / 1800)
+
+    def _aggregate_to_daily(self, hh_df: pd.DataFrame) -> pd.DataFrame:
+        df = hh_df.copy()
+
+        # Parse local effective date (HH format is dd/mm/yyyy)
+        df["_date"]  = pd.to_datetime(df["Read_date_effective_local"], format="%d/%m/%Y").dt.date
+        df["_valid"] = df["Valid_read_time"].astype(bool)
+
+        # Energy from valid reads only (invalid skewed timestamps contribute 0)
+        df["_e_wh"] = np.where(df["_valid"], df["Elec_act_imp_hh_Wh"].astype(float), 0.0)
+        df["_g_m3"] = np.where(df["_valid"], df["Gas_hh_m3"].astype(float), 0.0)
+
+        grp = df.groupby(["PUPRN", "_date"])
+        agg = grp.agg(
+            _valid_n=("_valid", "sum"),
+            _e_sum=("_e_wh",  "sum"),
+            _g_sum=("_g_m3",  "sum"),
+        ).reset_index()
+
+        # DST-aware expected HH count (46 / 48 / 50)
+        exp_map = {d: self._expected_hh(d) for d in agg["_date"].unique()}
+        agg["_exp"]  = agg["_date"].map(exp_map)
+        agg["_full"] = agg["_valid_n"] >= agg["_exp"]
+
+        # HH sums — NA / NaN when day is incomplete
+        agg["Elec_act_imp_hh_sum_Wh"] = (
+            agg["_e_sum"].round().astype("Int64").where(agg["_full"])
+        )
+        agg["Gas_hh_sum_m3"] = agg["_g_sum"].round(4).where(agg["_full"])
+
+        # Primary daily reads equal HH sums in mock data
+        agg["Elec_act_imp_d_Wh"]              = agg["Elec_act_imp_hh_sum_Wh"]
+        agg["Unit_correct_elec_act_imp_d_Wh"] = agg["Elec_act_imp_d_Wh"]
+        agg["Gas_d_m3"]                        = agg["Gas_hh_sum_m3"]
+
+        # Validity and match codes
+        agg["Valid_hh_sum_or_daily_elec"] = agg["_full"]
+        agg["Valid_hh_sum_or_daily_gas"]  = agg["_full"]
+        agg["Elec_sum_match"] = np.where(agg["_full"], 1, 0)
+        agg["Gas_sum_match"]  = np.where(agg["_full"], 1, 0)
+
+        # Date columns — daily read is assumed at UTC midnight → UTC date = eff_date + 1
+        eff = pd.to_datetime(agg["_date"])
+        agg["Read_date_effective_local"] = eff.dt.strftime("%Y-%m-%d")
+        agg["Read_date_time_UTC"]        = (eff + pd.Timedelta(days=1)).dt.strftime("%Y-%m-%d")
+        agg["Valid_read_time"]           = True
+
+        # Energy flags on daily values
+        e_d = agg["Elec_act_imp_d_Wh"].fillna(0).astype(float).to_numpy()
+        g_d = agg["Gas_d_m3"].fillna(0.0).to_numpy(dtype=float)
+        v   = HHSmartMeterGenerator.FLAG_THRESHOLDS
+
+        e_flag = np.ones(len(agg), dtype=int)
+        e_flag = np.where(e_d >  self.DAILY_ELEC_VERY_HIGH_WH,  -2, e_flag)
+        e_flag = np.where(e_d >= v["elec_meter_max_Wh"],         -1, e_flag)
+        agg["Elec_act_imp_flag"] = e_flag
+
+        g_flag = np.ones(len(agg), dtype=int)
+        g_flag = np.where(g_d >  self.DAILY_GAS_VERY_HIGH_M3,   -2, g_flag)
+        g_flag = np.where(g_d >= v["gas_meter_max_m3"],          -1, g_flag)
+        agg["Gas_flag"] = g_flag
+
+        return agg[[
+            "PUPRN",
+            "Read_date_effective_local",
+            "Read_date_time_UTC",
+            "Valid_read_time",
+            "Elec_act_imp_flag",
+            "Valid_hh_sum_or_daily_elec",
+            "Elec_sum_match",
+            "Gas_flag",
+            "Valid_hh_sum_or_daily_gas",
+            "Gas_sum_match",
+            "Elec_act_imp_d_Wh",
+            "Unit_correct_elec_act_imp_d_Wh",
+            "Elec_act_imp_hh_sum_Wh",
+            "Gas_d_m3",
+            "Gas_hh_sum_m3",
+        ]]
+
+    def generate_year(self, year: int) -> pd.DataFrame:
+        """Generate and aggregate all 12 months of HH data for one calendar year."""
+        chunks = [self._hh.generate_month(year, m) for m in range(1, 13)]
+        daily  = self._aggregate_to_daily(pd.concat(chunks, ignore_index=True))
+        # Drop boundary dates that belong to an adjacent year
+        return daily[
+            daily["Read_date_effective_local"].str.startswith(str(year))
+        ].reset_index(drop=True)
+
+    def write_year(self, df: pd.DataFrame, year: int, outfolder: str):
+        fname = with_edition_suffix(f"serl_daily_{year}", self.edition)
+        write_csv(df, str(Path(outfolder) / fname))
+
+    def generate_all(self, outfolder: "Union[str, os.PathLike]"):
+        outfolder = ensure_output_dir(outfolder)
+        for year in range(self.start_year, self.end_year + 1):
+            print(f"  {year} (daily) ...")
+            df = self.generate_year(year)
+            self.write_year(df, year, outfolder)
