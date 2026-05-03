@@ -71,8 +71,8 @@ Contextual output filenames default to SERL Edition 08 naming.  They can be over
 filenames:
   epc:              epc_data
   survey:           serl_survey_data
-  summary:          serl_participant_summary_data
-  followup_prefix:  serl_follow_up_survey
+  summary:          serl_participant_summary
+  followup_survey:  serl_2023_follow_up_survey_data
   exporters_prefix: Elec
 ```
 
@@ -88,7 +88,7 @@ filenames:
 
 ## Weather settings
 
-Controls the ERA5 download and CSV conversion performed in Step 3.
+Controls the ERA5 download and CSV conversion performed in the weather step.
 
 ```yaml
 weather:

@@ -1,7 +1,7 @@
 ﻿# serl-mock
 
-A lightweight Python package that generates synthetic datasets matching the structure
-and naming conventions of the **SERL (Smart Energy Research Lab) Observatory** data releases.
+A lightweight Python package that generates mock datasets matching the structure
+and naming conventions of the **SERL (Smart Energy Research Lab) Observatory** data Edition08 release.
 
 Use it to build and test analysis pipelines locally, without needing access to the real data in
 the Data Safe Haven (DSH) or Trusted Research Environment (TRE).
@@ -10,29 +10,72 @@ the Data Safe Haven (DSH) or Trusted Research Environment (TRE).
 
 ## What is generated
 
-Running the pipeline writes the following files to `data/mock/`:
+Running the pipeline writes outputs under `data/mock/` with this structure:
 
-| Output | Description |
-|---|---|
-| `puprn_master.csv` | Shared list of synthetic household IDs |
-| `serl_smart_meter_hh_edition08/` | Monthly half-hourly electricity and gas CSVs |
-| `serl_climate_data_edition08/` | Monthly hourly ERA5 weather CSVs (one per calendar month) |
-| `epc_data_edition08.csv` | EPC records |
-| `serl_survey_data_edition08.csv` | Survey responses |
-| `serl_participant_summary_data_edition08.csv` | Region and deprivation index |
-| `serl_follow_up_survey_<year>_data_edition08.csv` | Follow-up survey |
-| `Elec_<year>_list_of_exporter_puprns_edition08.csv` | Electricity export list |
+```text
+data/mock/
+	bst_dates_to_2030.csv
+	serl_survey_data_dictionary_edition08.csv
+	serl_covid19_survey_data_dictionary_edition08.csv
+	serl_tariff_data_edition08.csv
+	serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv
 
-All datasets share the same PUPRN list and can be joined directly.
+	serl_epc_data_edition08.csv
+	serl_survey_data_edition08.csv
+	serl_covid19_survey_data_edition08.csv
+	serl_participant_summary_edition08.csv
+	serl_2023_follow_up_survey_data_edition08.csv
+	serl_smart_meter_rt_summary_edition08.csv
+
+	serl_smart_meter_hh_edition08/
+		serl_half_hourly_<YYYY>_<MM>_edition08.csv
+
+	serl_smart_meter_daily_edition08/
+		serl_smart_meter_daily_<YYYY>_edition08.csv
+
+	serl_climate_data_edition08/
+		serl_climate_data_<YYYY>_<MM>_edition08.nc
+		serl_climate_data_<YYYY>_<MM>_edition08.csv
+
+	serl_aggregated_data/
+
+	mock_internal/
+		puprn_master.csv
+		Elec_2023_list_of_exporter_puprns_edition08.csv
+```
+
+Notes:
+
+- `serl_smart_meter_rt_summary_edition08.csv` is the read-type data quality summary (one row per PUPRN and read type).
+- `mock_internal/` contains helper/mock-only files, including the master PUPRN list used to align all datasets.
+- `serl_climate_data_edition08/` is populated only when weather download is enabled and CDS access is configured.
+- Filename suffixes (`edition08`, year values) come from `config/serl_mock.yaml` and generator defaults.
 
 ---
 
 ## Quick start
 
+Use this path if you want to generate mock smart-meter and contextual datasets without downloading weather data.
+
+1. Install uv (if not already installed):
+
+```bash
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+2. Sync the project environment:
+
 ```bash
 uv sync
-python scripts/generate_mock_data.py
 ```
+
+3. Run the generator:
+
+```bash
+uv run python scripts/generate_mock_data.py --skip-weather
+```
+
+This command generates all mock datasets except ERA5 weather files.
 
 All settings (number of households, time period, random seed, consumption parameters)
 are controlled by a single file:
@@ -43,21 +86,30 @@ config/serl_mock.yaml
 
 ### Weather data (ERA5 via CDS API)
 
-Step 3 of the pipeline downloads real hourly ERA5 reanalysis data from the
-[Copernicus Climate Data Store](https://cds.climate.copernicus.eu/how-to-api)
-and converts each monthly file to a SERL-style CSV.
+If you also want weather data, the same generator can download ERA5 hourly reanalysis data from the
+[Copernicus Climate Data Store](https://cds.climate.copernicus.eu/how-to-api) and convert it to SERL-style monthly CSV files.
 
-This requires a free CDS account. Once registered, create `~/.cdsapirc`:
+Before running with weather enabled, complete these one-time steps:
+
+1. Register for a free CDS account.
+2. Accept the ERA5 dataset licence terms in the CDS portal.
+3. Create `~/.cdsapirc` with your credentials:
 
 ```
 url: https://cds.climate.copernicus.eu/api
 key: <your-api-key>
 ```
 
-If credentials are not available, skip the download step:
+Then run the full pipeline:
 
 ```bash
-python scripts/generate_mock_data.py --skip-weather
+uv run python scripts/generate_mock_data.py
+```
+
+If CDS setup is not available yet, continue using:
+
+```bash
+uv run python scripts/generate_mock_data.py --skip-weather
 ```
 
 

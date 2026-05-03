@@ -40,7 +40,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.serl_mock.paths import CONFIG_DIR, MOCK_DIR, MOCK_HH_DIR, MOCK_DAILY_DIR, MOCK_INTERNAL_DIR, MOCK_AGGREGATED_DIR, REFERENCE_DIR, MOCK_CLIMATE_DIR
 from src.serl_mock.ids import make_alphanumeric_ids_ordered, write_puprn_list_csv
-from src.serl_mock.generator_smartmeter import HHSmartMeterGenerator, DailySmartMeterGenerator
+from src.serl_mock.generator_smartmeter import HHSmartMeterGenerator, DailySmartMeterGenerator, ReadTypeDataQualitySummaryGenerator
 from src.serl_mock.generator_contextual_data import SERLContextualVariablesGenerator
 from src.serl_mock.weather_downloader import WeatherDownloader
 from src.serl_mock.utils import read_config
@@ -83,7 +83,6 @@ def run_all(skip_weather: bool = False):
     print("\nStep 0b: Creating placeholder files")
     placeholders = [
         f"serl_tariff_data_edition{edition}.csv",
-        f"serl_smart_meter_rt_summary_edition{edition}.csv",
         "serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv",
     ]
     for fname in placeholders:
@@ -119,6 +118,18 @@ def run_all(skip_weather: bool = False):
         puprn_list_path=str(puprn_csv),
     )
     gen_daily.generate_all(outfolder=MOCK_DAILY_DIR)
+
+    print(f"\nStep 3b: Generating read-type data quality summary "
+          f"(edition {cfg.get('edition', '08')})")
+    gen_rt = ReadTypeDataQualitySummaryGenerator(
+        config_path=str(cfg_path),
+        puprn_list_path=str(puprn_csv),
+    )
+    gen_rt.generate_and_write(
+        hh_folder=MOCK_HH_DIR,
+        daily_folder=MOCK_DAILY_DIR,
+        outfolder=MOCK_DIR,
+    )
 
     print("\nStep 4: Downloading ERA5 weather data and converting to CSV")
     if skip_weather:

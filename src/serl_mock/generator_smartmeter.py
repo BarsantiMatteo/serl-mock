@@ -234,9 +234,10 @@ class HHSmartMeterGenerator:
         eff_fmt   = [self._effective_date_local(ts) for ts in ts_local_s]
         hh_vals   = [self._hh_index_or_na(ts)       for ts in ts_utc_s]
 
-        df["Read_date_time_UTC"]        = np.repeat(utc_fmt,   H)
-        df["Read_date_time_local"]      = np.repeat(local_fmt, H)
-        df["Read_date_effective_local"] = np.repeat(eff_fmt,   H)
+        # Keep timestamp text columns as object arrays to avoid costly StringArray coercion.
+        df["Read_date_time_UTC"] = np.repeat(np.asarray(utc_fmt, dtype=object), H)
+        df["Read_date_time_local"] = np.repeat(np.asarray(local_fmt, dtype=object), H)
+        df["Read_date_effective_local"] = np.repeat(np.asarray(eff_fmt, dtype=object), H)
         df["HH"]                        = pd.array(hh_vals, dtype="Int64").repeat(H)
         df["Valid_read_time"]           = df["HH"].notna()
         invalid                         = ~df["Valid_read_time"].to_numpy(dtype=bool)
@@ -419,3 +420,304 @@ class DailySmartMeterGenerator:
             print(f"  {year} (daily) ...")
             df = self.generate_year(year)
             self.write_year(df, year, outfolder)
+
+
+class ReadTypeDataQualitySummaryGenerator:
+    """
+    Build `serl_smart_meter_rt_summary_editionXX.csv` from generated HH and daily files.
+
+    Output schema follows Table 7 in the SERL smart meter documentation.
+    One row is produced per (PUPRN, deviceType, readType).
+    """
+
+    def __init__(self, config_path: str, puprn_list_path: Optional[str] = None):
+        cfg = read_config(config_path)
+
+        self.n_households = int(cfg["n_households"])
+        self.start_year = int(cfg["start_year"])
+        self.end_year = int(cfg["end_year"])
+        self.edition = str(cfg.get("edition", "08"))
+        self.seed = int(cfg.get("seed", 42))
+
+        if puprn_list_path and Path(puprn_list_path).exists():
+            puprns = load_puprn_list_csv(puprn_list_path)
+            if len(puprns) < self.n_households:
+                raise ValueError("PUPRN list smaller than n_households.")
+            self.households = puprns[: self.n_households]
+        else:
+            self.households = make_alphanumeric_ids_ordered(
+                self.n_households, length=8, seed=self.seed
+            )
+
+    def _load_hh(self, folder: "Union[str, os.PathLike]") -> pd.DataFrame:
+        parts = []
+        folder = Path(folder)
+        for year in range(self.start_year, self.end_year + 1):
+            for month in range(1, 13):
+                fname = with_edition_suffix(f"serl_half_hourly_{year}_{month:02d}", self.edition)
+                p = folder / fname
+                if p.exists():
+                    parts.append(pd.read_csv(p))
+        if not parts:
+            raise FileNotFoundError("No half-hourly files found; cannot build rt summary.")
+
+        hh = pd.concat(parts, ignore_index=True)
+        hh["_date"] = pd.to_datetime(
+            hh["Read_date_time_UTC"].astype(str).str.slice(0, 10),
+            format="%Y-%m-%d",
+            errors="coerce",
+        )
+        hh["_valid_time"] = hh["Valid_read_time"].astype(bool)
+        return hh
+
+    def _load_daily(self, folder: "Union[str, os.PathLike]") -> pd.DataFrame:
+        parts = []
+        folder = Path(folder)
+        for year in range(self.start_year, self.end_year + 1):
+            fname = with_edition_suffix(f"serl_smart_meter_daily_{year}", self.edition)
+            p = folder / fname
+            if p.exists():
+                parts.append(pd.read_csv(p))
+        if not parts:
+            raise FileNotFoundError("No daily files found; cannot build rt summary.")
+
+        daily = pd.concat(parts, ignore_index=True)
+        daily["_date"] = pd.to_datetime(daily["Read_date_effective_local"], errors="coerce")
+        daily["_valid_time"] = daily["Valid_read_time"].astype(bool)
+        return daily
+
+    @staticmethod
+    def _theoretical_dates(start_year: int, end_year: int) -> tuple[str, str, int]:
+        start = pd.Timestamp(year=start_year, month=1, day=1)
+        end = pd.Timestamp(year=end_year, month=12, day=31)
+        days_range = int((end - start).days + 1)
+        return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"), days_range
+
+    def _summarise_read_type(
+        self,
+        df: pd.DataFrame,
+        *,
+        device_type: str,
+        read_type: str,
+        value_col: str,
+        flag_col: str,
+        max_poss_reads: int,
+        valid_or_hh_col: Optional[str] = None,
+        suspicious_zero: bool = False,
+    ) -> pd.DataFrame:
+        rows = []
+        puprn_grp = {k: g for k, g in df.groupby("PUPRN", sort=False)}
+
+        for puprn in self.households:
+            g = puprn_grp.get(puprn)
+
+            if g is None or g.empty:
+                rows.append({
+                    "PUPRN": puprn,
+                    "deviceType": device_type,
+                    "readType": read_type,
+                    "firstValidReadDate": pd.NA,
+                    "lastValidReadDate": pd.NA,
+                    "percValid": 0.0,
+                    "percValidOrUnitError": 0.0,
+                    "percMissing": 0.0,
+                    "percError": 0.0,
+                    "valid": 0,
+                    "validOrHHsumValid": 0,
+                    "validWrongTime": 0,
+                    "wrongUnits": 0,
+                    "suspiciousZero": 0,
+                    "missing": 0,
+                    "maxRead": 0,
+                    "highRead": 0,
+                    "negative": 0,
+                    "minValidRead": pd.NA,
+                    "maxValidRead": pd.NA,
+                    "meanValidRead": pd.NA,
+                })
+                continue
+
+            flags = pd.to_numeric(g[flag_col], errors="coerce").fillna(0).astype(int)
+            valid_time = g["_valid_time"].astype(bool)
+            vals = pd.to_numeric(g[value_col], errors="coerce")
+
+            valid_mask = (flags == 1) & valid_time
+            valid_wrong_time = int(((flags == 1) & (~valid_time)).sum())
+            wrong_units = int(((flags == -4) & valid_time).sum())
+            missing = int((flags == 0).sum())
+            max_read = int((flags == -1).sum())
+            high_read = int((flags == -2).sum())
+            negative = int((flags == -3).sum())
+
+            invalid_time = int((~valid_time).sum())
+            error_n = max_read + high_read + negative + wrong_units + invalid_time
+            valid_n = int(valid_mask.sum())
+
+            if valid_or_hh_col and valid_or_hh_col in g.columns:
+                valid_or_hh = int(g[valid_or_hh_col].astype(bool).sum())
+            else:
+                valid_or_hh = valid_n
+
+            valid_dates = g.loc[valid_mask, "_date"].dropna()
+            first_valid = valid_dates.min().strftime("%Y-%m-%d") if not valid_dates.empty else pd.NA
+            last_valid = valid_dates.max().strftime("%Y-%m-%d") if not valid_dates.empty else pd.NA
+
+            valid_vals = vals[valid_mask]
+            if valid_vals.empty:
+                min_valid = pd.NA
+                max_valid = pd.NA
+                mean_valid = pd.NA
+            else:
+                min_valid = float(valid_vals.min())
+                max_valid = float(valid_vals.max())
+                mean_valid = round(float(valid_vals.mean()), 2)
+
+            suspicious_zero_n = int(((vals.fillna(np.nan) == 0) & valid_time).sum()) if suspicious_zero else 0
+
+            rows.append({
+                "PUPRN": puprn,
+                "deviceType": device_type,
+                "readType": read_type,
+                "firstValidReadDate": first_valid,
+                "lastValidReadDate": last_valid,
+                "percValid": round((100.0 * valid_n) / max_poss_reads, 2),
+                "percValidOrUnitError": round((100.0 * (valid_n + wrong_units)) / max_poss_reads, 2),
+                "percMissing": round((100.0 * missing) / max_poss_reads, 2),
+                "percError": round((100.0 * error_n) / max_poss_reads, 2),
+                "valid": valid_n,
+                "validOrHHsumValid": valid_or_hh,
+                "validWrongTime": valid_wrong_time,
+                "wrongUnits": wrong_units,
+                "suspiciousZero": suspicious_zero_n,
+                "missing": missing,
+                "maxRead": max_read,
+                "highRead": high_read,
+                "negative": negative,
+                "minValidRead": min_valid,
+                "maxValidRead": max_valid,
+                "meanValidRead": mean_valid,
+            })
+
+        return pd.DataFrame(rows)
+
+    def generate(self, hh_folder: "Union[str, os.PathLike]", daily_folder: "Union[str, os.PathLike]") -> pd.DataFrame:
+        hh = self._load_hh(hh_folder)
+        daily = self._load_daily(daily_folder)
+
+        theoretical_start, theoretical_end, days_range = self._theoretical_dates(
+            self.start_year, self.end_year
+        )
+
+        max_hh = days_range * 48
+        max_daily = days_range
+
+        chunks = [
+            self._summarise_read_type(
+                hh,
+                device_type="ESME",
+                read_type="AI",
+                value_col="Elec_act_imp_hh_Wh",
+                flag_col="Elec_act_imp_flag",
+                max_poss_reads=max_hh,
+            ),
+            self._summarise_read_type(
+                hh,
+                device_type="ESME",
+                read_type="RI",
+                value_col="Elec_react_imp_hh_varh",
+                flag_col="Elect_react_imp_flag",
+                max_poss_reads=max_hh,
+            ),
+            self._summarise_read_type(
+                hh,
+                device_type="ESME",
+                read_type="AE",
+                value_col="Elec_act_exp_hh_Wh",
+                flag_col="Elec_act_exp_flag",
+                max_poss_reads=max_hh,
+            ),
+            self._summarise_read_type(
+                hh,
+                device_type="ESME",
+                read_type="RE",
+                value_col="Elec_react_exp_hh_varh",
+                flag_col="Elect_react_exp_flag",
+                max_poss_reads=max_hh,
+            ),
+            self._summarise_read_type(
+                hh,
+                device_type="GPF",
+                read_type="AI",
+                value_col="Gas_hh_m3",
+                flag_col="Gas_flag",
+                max_poss_reads=max_hh,
+            ),
+            self._summarise_read_type(
+                daily,
+                device_type="ESME",
+                read_type="DL",
+                value_col="Unit_correct_elec_act_imp_d_Wh",
+                flag_col="Elec_act_imp_flag",
+                max_poss_reads=max_daily,
+                valid_or_hh_col="Valid_hh_sum_or_daily_elec",
+                suspicious_zero=True,
+            ),
+            self._summarise_read_type(
+                daily,
+                device_type="GPF",
+                read_type="DL",
+                value_col="Gas_d_m3",
+                flag_col="Gas_flag",
+                max_poss_reads=max_daily,
+                valid_or_hh_col="Valid_hh_sum_or_daily_gas",
+            ),
+        ]
+
+        out = pd.concat(chunks, ignore_index=True)
+        out["theoreticalStart"] = theoretical_start
+        out["theoreticalEnd"] = theoretical_end
+        out["daysRange"] = days_range
+        out["maxPossReads"] = np.where(out["readType"] == "DL", max_daily, max_hh).astype(int)
+
+        cols = [
+            "PUPRN",
+            "deviceType",
+            "readType",
+            "theoreticalStart",
+            "theoreticalEnd",
+            "firstValidReadDate",
+            "lastValidReadDate",
+            "daysRange",
+            "maxPossReads",
+            "percValid",
+            "percValidOrUnitError",
+            "percMissing",
+            "percError",
+            "valid",
+            "validOrHHsumValid",
+            "validWrongTime",
+            "wrongUnits",
+            "suspiciousZero",
+            "missing",
+            "maxRead",
+            "highRead",
+            "negative",
+            "minValidRead",
+            "maxValidRead",
+            "meanValidRead",
+        ]
+        return out[cols].sort_values(["PUPRN", "deviceType", "readType"]).reset_index(drop=True)
+
+    def write(self, df: pd.DataFrame, outfolder: "Union[str, os.PathLike]"):
+        outfolder = ensure_output_dir(outfolder)
+        fname = with_edition_suffix("serl_smart_meter_rt_summary", self.edition)
+        write_csv(df, str(Path(outfolder) / fname))
+
+    def generate_and_write(
+        self,
+        hh_folder: "Union[str, os.PathLike]",
+        daily_folder: "Union[str, os.PathLike]",
+        outfolder: "Union[str, os.PathLike]",
+    ):
+        df = self.generate(hh_folder=hh_folder, daily_folder=daily_folder)
+        self.write(df, outfolder=outfolder)

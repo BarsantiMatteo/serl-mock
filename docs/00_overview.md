@@ -18,14 +18,16 @@ Running the pipeline produces the following files under `data/mock/`:
 
 | File / folder | Content |
 |---|---|
-| `puprn_master.csv` | Master list of synthetic household IDs (PUPRNs) |
+| `mock_internal/puprn_master.csv` | Master list of synthetic household IDs (PUPRNs) |
 | `serl_smart_meter_hh_edition08/` | One CSV per calendar month with half-hourly electricity and gas readings |
+| `serl_smart_meter_daily_edition08/` | One CSV per calendar year with daily electricity and gas readings |
+| `serl_smart_meter_rt_summary_edition08.csv` | Read-type data quality summary (one row per PUPRN/read type) |
 | `serl_climate_data_edition08/` | One CSV per calendar month with hourly ERA5 weather data |
 | `epc_data_edition08.csv` | EPC (Energy Performance Certificate) records |
 | `serl_survey_data_edition08.csv` | Household survey responses |
-| `serl_participant_summary_data_edition08.csv` | Region and deprivation index per household |
-| `serl_follow_up_survey_<year>_data_edition08.csv` | Follow-up survey responses |
-| `Elec_<year>_list_of_exporter_puprns_edition08.csv` | Households with electricity export |
+| `serl_participant_summary_edition08.csv` | Region, LSOA, ERA5 grid cell and deprivation index per household |
+| `serl_2023_follow_up_survey_data_edition08.csv` | Follow-up survey responses |
+| `mock_internal/Elec_2023_list_of_exporter_puprns_edition08.csv` | Households with electricity export |
 
 All datasets share the same PUPRN list so they can be joined reliably.
 
@@ -51,17 +53,17 @@ Every random draw uses a seeded RNG.  Setting the same `seed` in `serl_mock.yaml
 uv sync
 
 # Generate all mock data (reads config/serl_mock.yaml)
-python scripts/generate_mock_data.py
+uv run python scripts/generate_mock_data.py
 
 # Skip ERA5 weather download (no CDS credentials needed)
-python scripts/generate_mock_data.py --skip-weather
+uv run python scripts/generate_mock_data.py --skip-weather
 ```
 
 Output appears in `data/mock/`.
 
 ### Weather data (ERA5)
 
-Step 3 downloads real hourly ERA5 reanalysis data from the
+Step 4 downloads real hourly ERA5 reanalysis data from the
 [Copernicus Climate Data Store](https://cds.climate.copernicus.eu/how-to-api)
 and converts each monthly file to a SERL-style CSV under `serl_climate_data_edition08/`.
 

@@ -8,24 +8,32 @@ serl-mock/
 │
 ├── data/
 │   └── mock/                       # All generated output lands here
-│       ├── puprn_master.csv
 │       ├── epc_data_edition08.csv
 │       ├── serl_survey_data_edition08.csv
-│       ├── serl_participant_summary_data_edition08.csv
+│       ├── serl_covid19_survey_data_edition08.csv
+│       ├── serl_participant_summary_edition08.csv
 │       ├── serl_follow_up_survey_2023_data_edition08.csv
-│       ├── Elec_2023_list_of_exporter_puprns_edition08.csv
+│       ├── serl_smart_meter_rt_summary_edition08.csv
 │       └── serl_smart_meter_hh_edition08/
 │           ├── serl_half_hourly_2019_01_edition08.csv
-│           └── ...│       └── serl_climate_data_edition08/
+│           └── ...
+│       └── serl_smart_meter_daily_edition08/
+│           ├── serl_smart_meter_daily_2019_edition08.csv
+│           └── ...
+│       └── serl_climate_data_edition08/
 │           ├── serl_climate_data_2019_01_edition08.nc   # raw ERA5 download
 │           ├── serl_climate_data_2019_01_edition08.csv  # SERL-format CSV
-│           └── ...│
+│           └── ...
+│       └── mock_internal/
+│           ├── puprn_master.csv
+│           └── Elec_2023_list_of_exporter_puprns_edition08.csv
+│
 ├── docs/
-│   ├── overview.md                 # What the project does and quick-start
-│   ├── structure.md                # This file
-│   ├── generation_model.md         # How smart-meter values are generated
-│   ├── configuration.md            # serl_mock.yaml reference
-│   ├── metadata.md                 # SERL dataset column reference
+│   ├── 00_overview.md              # What the project does and quick-start
+│   ├── 01_structure.md             # This file
+│   ├── 02_configuration.md         # serl_mock.yaml reference
+│   ├── 03_generation_model.md      # How smart-meter values are generated
+│   ├── 04_metadata.md              # SERL dataset column reference
 │   └── documentation/              # Official SERL PDF documentation (read-only)
 │
 ├── scripts/
@@ -53,12 +61,14 @@ serl-mock/
 ## Module descriptions
 
 ### `scripts/generate_mock_data.py`
-The **entry point** for the full generation pipeline.  Runs four sequential steps:
+The **entry point** for the full generation pipeline.
 
-1. Generate and write `puprn_master.csv`
+1. Generate and write `mock_internal/puprn_master.csv`
 2. Instantiate `HHSmartMeterGenerator` and write monthly HH CSVs
-3. Instantiate `WeatherDownloader` and, for each month, download ERA5 data from CDS (if not already present) and convert to CSV (if not already present). Use `--skip-weather` to bypass this step.
-4. Instantiate `SERLContextualVariablesGenerator` and write contextual CSVs
+3. Instantiate `DailySmartMeterGenerator` and write yearly daily CSVs
+4. Instantiate `ReadTypeDataQualitySummaryGenerator` and write `serl_smart_meter_rt_summary_edition08.csv`
+5. Instantiate `WeatherDownloader` and, for each month, download ERA5 data from CDS (if not already present) and convert to CSV (if not already present). Use `--skip-weather` to bypass this step.
+6. Instantiate `SERLContextualVariablesGenerator` and write contextual CSVs
 
 ### `src/serl_mock/paths.py`
 Defines `Path` constants for `CONFIG_DIR`, `DATA_DIR`, `MOCK_DIR`, and `MOCK_HH_DIR` relative to the project root.  Import these instead of hard-coding paths anywhere else.
@@ -87,7 +97,13 @@ Pure NumPy functions that return **time-based multiplier arrays**:
 Replacing any function here changes the shape of the generated time series without touching the generator.  See [03_generation_model.md](03_generation_model.md).
 
 ### `src/serl_mock/generator_smartmeter.py`
-`HHSmartMeterGenerator` produces Edition 07/08-aligned half-hourly CSVs:
+Contains three generators:
+
+- `HHSmartMeterGenerator` produces Edition 07/08-aligned half-hourly CSVs
+- `DailySmartMeterGenerator` aggregates HH output to daily output
+- `ReadTypeDataQualitySummaryGenerator` builds read-type quality summary rows
+
+`HHSmartMeterGenerator`:
 - Reads configuration and instantiates household profiles at `__init__` time
 - `generate_month(year, month)` builds the full T × H DataFrame vectorised
 - Applies Edition 07 timestamp rules (UTC cut-off, BST/GMT labels, HH index, `Valid_read_time`)
