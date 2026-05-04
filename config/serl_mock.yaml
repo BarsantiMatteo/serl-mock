@@ -16,13 +16,15 @@ start_year: 2019
 end_year: 2019
 
 # -------------------------
-# Devices / household characteristics
-# Specify appliance ownership or household traits that affect generated data.
+# Household traits
+# Specify appliance ownership and meter traits that affect generated data.
 # -------------------------
-devices:
-  pv_fraction: 0.15  # share of households with PV/export
+household_traits:
+  pv_fraction: 0.15  # share of households with PV
   hp_fraction: 0.07  # share of households with heat-pump in survey data
   ev_fraction: 0.10  # share of households with EV in survey data
+  gas_meter_fraction: 0.85  # share of households with a gas meter
+  export_meter_fraction: 0.15  # share of households with electricity export meter
 
 # -------------------------
 # Household profiles

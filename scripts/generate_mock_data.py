@@ -4,6 +4,7 @@ Generate mock SERL smart-meter and contextual data.
 Loads settings from config/serl_mock.yaml and produces:
 
   1. puprn_master.csv               — shared household ID list
+    household_traits.csv           — household traits (PV/HP/EV + meter types)
   2. Monthly half-hourly CSVs       — realistic electricity and gas time series
                                        with seasonal and intraday patterns
                                        (see src/serl_mock/patterns.py)
@@ -92,7 +93,7 @@ def run_all(skip_weather: bool = False):
             p.write_text("# placeholder\n", encoding="utf-8")
             print(f"  Created {fname}")
 
-    print("\nStep 1: Generating PUPRNs")
+    print("\nStep 1: Generating PUPRNs and household device traits")
     puprn_csv = MOCK_INTERNAL_DIR / "puprn_master.csv"
     puprns = make_alphanumeric_ids_ordered(
         n=cfg.get("n_households", 100),
@@ -102,18 +103,21 @@ def run_all(skip_weather: bool = False):
     write_puprn_list_csv(puprns, puprn_csv)
     print(f"  {len(puprns)} PUPRNs written to {puprn_csv}")
 
-    print("\nStep 1b: Generating household device traits")
     traits_csv = MOCK_INTERNAL_DIR / "household_traits.csv"
-    devices_cfg = cfg.get("devices", {})
-    pv_fraction = float(devices_cfg.get("pv_fraction", 0.07))
-    hp_fraction = float(devices_cfg.get("hp_fraction", 0.0))
-    ev_fraction = float(devices_cfg.get("ev_fraction", 0.0))
+    traits_cfg = cfg.get("household_traits", {})
+    pv_fraction = float(traits_cfg.get("pv_fraction", 0.07))
+    hp_fraction = float(traits_cfg.get("hp_fraction", 0.0))
+    ev_fraction = float(traits_cfg.get("ev_fraction", 0.0))
+    gas_meter_fraction = float(traits_cfg.get("gas_meter_fraction", 0.85))
+    export_meter_fraction = float(traits_cfg.get("export_meter_fraction", 0.15))
     
     traits_df = generate_household_traits(
         puprns=puprns,
         pv_fraction=pv_fraction,
         hp_fraction=hp_fraction,
         ev_fraction=ev_fraction,
+        gas_meter_fraction=gas_meter_fraction,
+        export_meter_fraction=export_meter_fraction,
         seed=cfg.get("seed", 42),
         edition=edition,
     )
@@ -122,6 +126,8 @@ def run_all(skip_weather: bool = False):
     print(f"    PV households: {(traits_df['has_pv'] == 1).sum()}")
     print(f"    HP households: {(traits_df['has_hp'] == 1).sum()}")
     print(f"    EV households: {(traits_df['has_ev'] == 1).sum()}")
+    print(f"    Gas meter households: {(traits_df['has_gas_meter'] == 1).sum()}")
+    print(f"    Export meter households: {(traits_df['has_export_meter'] == 1).sum()}")
 
     print(f"\nStep 2: Generating half-hourly smart meter data "
           f"({cfg.get('start_year')}–{cfg.get('end_year')}, "

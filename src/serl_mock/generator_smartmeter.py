@@ -126,12 +126,16 @@ class HHSmartMeterGenerator:
         self._base_elec = np.array([self._profiles[p].base_elec_wh for p in self.households])
         self._base_gas  = np.array([self._profiles[p].base_gas_wh  for p in self.households])
         self._elec_var  = np.array([self._profiles[p].elec_variance for p in self.households])
-        self._has_gas   = np.array([self._profiles[p].has_gas       for p in self.households],
-                                   dtype=float)  # 0.0 or 1.0 for vectorised masking
         # Load household traits from CSV
         traits_df = load_household_traits(self.traits_path)
-        self._pv_households = set(traits_df[traits_df['has_pv'] == 1].index.tolist())
-        self._has_pv = np.array([p in self._pv_households for p in self.households], dtype=float)
+        self._has_gas = np.array(
+            [int(traits_df.loc[p, "has_gas_meter"]) for p in self.households],
+            dtype=float,
+        )
+        self._has_export_meter = np.array(
+            [int(traits_df.loc[p, "has_export_meter"]) for p in self.households],
+            dtype=float,
+        )
 
     # ---------- Timestamp formatting helpers ----------
 
@@ -200,7 +204,7 @@ class HHSmartMeterGenerator:
         base_gas_n  = np.tile(self._base_gas,  T)
         elec_var_n  = np.tile(self._elec_var,  T)
         has_gas_n   = np.tile(self._has_gas,   T)
-        has_pv_n    = np.tile(self._has_pv,    T)
+        has_export_meter_n = np.tile(self._has_export_meter, T)
 
         # --- Electricity (active import) ---
         elec_mean = base_elec_n * e_seas_n * e_day_n
@@ -217,12 +221,12 @@ class HHSmartMeterGenerator:
             0.0,
             self.rng.normal(elec_wh * 0.15, np.maximum(elec_wh * 0.05, 1.0)),
         )
-        # Export and reactive export only for PV households.
-        # Non-PV households are kept at 0 and their import/gas generation is unchanged.
+        # Export and reactive export only for households with an export meter.
+        # Non-export-meter households are kept at 0 and their import/gas generation is unchanged.
         solar_day = np.maximum(0.0, np.sin(np.pi * (hour_float - 6.0) / 12.0))
         solar_season = np.clip(1.0 - self._elec_seasonal_amp * np.cos(2.0 * np.pi * (doy - 15.0) / 365.0), 0.3, 1.7)
         solar_gen = np.repeat((150.0 * solar_day * solar_season), H)
-        elec_exp_wh = np.maximum(0.0, self.rng.normal(solar_gen, np.maximum(solar_gen * 0.25, 1.0))) * has_pv_n
+        elec_exp_wh = np.maximum(0.0, self.rng.normal(solar_gen, np.maximum(solar_gen * 0.25, 1.0))) * has_export_meter_n
         elec_react_exp = np.maximum(0.0, self.rng.normal(elec_exp_wh * 0.1, np.maximum(elec_exp_wh * 0.05, 1.0)))
 
         # --- Gas ---
@@ -457,6 +461,12 @@ class ReadTypeDataQualitySummaryGenerator:
         self.edition = str(cfg.get("edition", "08"))
         self.seed = int(cfg.get("seed", 42))
 
+        traits_path = cfg.get("household_traits_path")
+        if not traits_path:
+            from .paths import MOCK_INTERNAL_DIR
+            traits_path = MOCK_INTERNAL_DIR / "household_traits.csv"
+        self.traits_path = str(traits_path)
+
         if puprn_list_path and Path(puprn_list_path).exists():
             puprns = load_puprn_list_csv(puprn_list_path)
             if len(puprns) < self.n_households:
@@ -466,6 +476,14 @@ class ReadTypeDataQualitySummaryGenerator:
             self.households = make_alphanumeric_ids_ordered(
                 self.n_households, length=8, seed=self.seed
             )
+
+        traits_df = load_household_traits(self.traits_path)
+        self._has_gas_meter = {
+            p: bool(int(traits_df.loc[p, "has_gas_meter"])) for p in self.households
+        }
+        self._has_export_meter = {
+            p: bool(int(traits_df.loc[p, "has_export_meter"])) for p in self.households
+        }
 
     def _load_hh(self, folder: "Union[str, os.PathLike]") -> pd.DataFrame:
         parts = []
@@ -520,6 +538,7 @@ class ReadTypeDataQualitySummaryGenerator:
         value_col: str,
         flag_col: str,
         max_poss_reads: int,
+        household_max_reads: Optional[dict[str, int]] = None,
         valid_or_hh_col: Optional[str] = None,
         suspicious_zero: bool = False,
     ) -> pd.DataFrame:
@@ -530,16 +549,17 @@ class ReadTypeDataQualitySummaryGenerator:
             g = puprn_grp.get(puprn)
 
             if g is None or g.empty:
+                row_max_reads = household_max_reads.get(puprn, max_poss_reads) if household_max_reads else max_poss_reads
                 rows.append({
                     "PUPRN": puprn,
                     "deviceType": device_type,
                     "readType": read_type,
                     "firstValidReadDate": pd.NA,
                     "lastValidReadDate": pd.NA,
-                    "percValid": 0.0,
-                    "percValidOrUnitError": 0.0,
-                    "percMissing": 0.0,
-                    "percError": 0.0,
+                    "percValid": 0.0 if row_max_reads > 0 else pd.NA,
+                    "percValidOrUnitError": 0.0 if row_max_reads > 0 else pd.NA,
+                    "percMissing": 0.0 if row_max_reads > 0 else pd.NA,
+                    "percError": 0.0 if row_max_reads > 0 else pd.NA,
                     "valid": 0,
                     "validOrHHsumValid": 0,
                     "validWrongTime": 0,
@@ -552,6 +572,7 @@ class ReadTypeDataQualitySummaryGenerator:
                     "minValidRead": pd.NA,
                     "maxValidRead": pd.NA,
                     "meanValidRead": pd.NA,
+                    "maxPossReads": int(row_max_reads),
                 })
                 continue
 
@@ -591,6 +612,17 @@ class ReadTypeDataQualitySummaryGenerator:
                 mean_valid = round(float(valid_vals.mean()), 2)
 
             suspicious_zero_n = int(((vals.fillna(np.nan) == 0) & valid_time).sum()) if suspicious_zero else 0
+            row_max_reads = household_max_reads.get(puprn, max_poss_reads) if household_max_reads else max_poss_reads
+            if row_max_reads > 0:
+                perc_valid = round((100.0 * valid_n) / row_max_reads, 2)
+                perc_valid_or_unit_error = round((100.0 * (valid_n + wrong_units)) / row_max_reads, 2)
+                perc_missing = round((100.0 * missing) / row_max_reads, 2)
+                perc_error = round((100.0 * error_n) / row_max_reads, 2)
+            else:
+                perc_valid = pd.NA
+                perc_valid_or_unit_error = pd.NA
+                perc_missing = pd.NA
+                perc_error = pd.NA
 
             rows.append({
                 "PUPRN": puprn,
@@ -598,10 +630,10 @@ class ReadTypeDataQualitySummaryGenerator:
                 "readType": read_type,
                 "firstValidReadDate": first_valid,
                 "lastValidReadDate": last_valid,
-                "percValid": round((100.0 * valid_n) / max_poss_reads, 2),
-                "percValidOrUnitError": round((100.0 * (valid_n + wrong_units)) / max_poss_reads, 2),
-                "percMissing": round((100.0 * missing) / max_poss_reads, 2),
-                "percError": round((100.0 * error_n) / max_poss_reads, 2),
+                "percValid": perc_valid,
+                "percValidOrUnitError": perc_valid_or_unit_error,
+                "percMissing": perc_missing,
+                "percError": perc_error,
                 "valid": valid_n,
                 "validOrHHsumValid": valid_or_hh,
                 "validWrongTime": valid_wrong_time,
@@ -614,6 +646,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 "minValidRead": min_valid,
                 "maxValidRead": max_valid,
                 "meanValidRead": mean_valid,
+                "maxPossReads": int(row_max_reads),
             })
 
         return pd.DataFrame(rows)
@@ -628,6 +661,9 @@ class ReadTypeDataQualitySummaryGenerator:
 
         max_hh = days_range * 48
         max_daily = days_range
+        hh_max_export = {p: (max_hh if self._has_export_meter.get(p, False) else 0) for p in self.households}
+        hh_max_gas = {p: (max_hh if self._has_gas_meter.get(p, False) else 0) for p in self.households}
+        daily_max_gas = {p: (max_daily if self._has_gas_meter.get(p, False) else 0) for p in self.households}
 
         chunks = [
             self._summarise_read_type(
@@ -653,6 +689,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 value_col="Elec_act_exp_hh_Wh",
                 flag_col="Elec_act_exp_flag",
                 max_poss_reads=max_hh,
+                household_max_reads=hh_max_export,
             ),
             self._summarise_read_type(
                 hh,
@@ -661,6 +698,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 value_col="Elec_react_exp_hh_varh",
                 flag_col="Elect_react_exp_flag",
                 max_poss_reads=max_hh,
+                household_max_reads=hh_max_export,
             ),
             self._summarise_read_type(
                 hh,
@@ -669,6 +707,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 value_col="Gas_hh_m3",
                 flag_col="Gas_flag",
                 max_poss_reads=max_hh,
+                household_max_reads=hh_max_gas,
             ),
             self._summarise_read_type(
                 daily,
@@ -687,6 +726,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 value_col="Gas_d_m3",
                 flag_col="Gas_flag",
                 max_poss_reads=max_daily,
+                household_max_reads=daily_max_gas,
                 valid_or_hh_col="Valid_hh_sum_or_daily_gas",
             ),
         ]
@@ -695,7 +735,6 @@ class ReadTypeDataQualitySummaryGenerator:
         out["theoreticalStart"] = theoretical_start
         out["theoreticalEnd"] = theoretical_end
         out["daysRange"] = days_range
-        out["maxPossReads"] = np.where(out["readType"] == "DL", max_daily, max_hh).astype(int)
 
         cols = [
             "PUPRN",

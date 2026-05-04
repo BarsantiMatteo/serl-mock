@@ -80,9 +80,8 @@ class SERLContextualVariablesGenerator:
             traits_path = MOCK_INTERNAL_DIR / "household_traits.csv"
         self.traits_path = str(traits_path)
 
-        devices_cfg = cfg.get("devices", {})
-        # Device fractions (pv_fraction, hp_fraction, ev_fraction) are used
-        # during household traits generation, not here.
+        # Household-trait fractions are used during household traits generation,
+        # not directly in this contextual generator.
 
         # Survey dictionary path
         self.survey_dictionary_path = cfg.get(

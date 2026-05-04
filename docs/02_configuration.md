@@ -25,19 +25,21 @@ One monthly HH CSV is written for every month in `[start_year, end_year]` inclus
 
 ---
 
-## Devices / household characteristics
+## Household traits
 
-Controls appliance ownership and household traits that affect generated fields.
+Controls appliance ownership and meter traits that affect generated fields.
 
 ```yaml
-devices:
-  pv_fraction: 0.07  # Share of households with PV/export
+household_traits:
+  pv_fraction: 0.07  # Share of households with PV
   hp_fraction: 0.00  # Reserved for heat pump modelling
   ev_fraction: 0.00  # Reserved for EV modelling
+  gas_meter_fraction: 0.85     # Share of households with a gas meter
+  export_meter_fraction: 0.07  # Share of households with an electricity export meter
 ```
 
-- Only selected PV households get non-zero `Elec_act_exp_hh_Wh` and `Elec_react_exp_hh_varh`.
-- Non-PV households keep export at zero.
+- Only selected export-meter households get non-zero `Elec_act_exp_hh_Wh` and `Elec_react_exp_hh_varh`.
+- Non-export-meter households keep export at zero.
 - Import and gas generation are unchanged by PV assignment.
 - The exporter list file (`Elec_<year>_list_of_exporter_puprns_editionXX.csv`) uses the same PV selection.
 - `hp_fraction` drives heat-pump survey trait fields (`A1607` when present).

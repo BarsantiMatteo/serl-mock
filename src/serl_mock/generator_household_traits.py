@@ -1,7 +1,7 @@
 """
-Household traits generator — pre-compute device/trait assignments for all households.
+Household traits generator — pre-compute device/meter assignments for all households.
 
-Creates a single CSV file listing which households have PV, heat pump, EV traits.
+Creates a single CSV file listing household traits and meter availability.
 Both smart-meter and contextual generators read from this file for perfect alignment.
 """
 from __future__ import annotations
@@ -21,12 +21,15 @@ def generate_household_traits(
     pv_fraction: float,
     hp_fraction: float,
     ev_fraction: float,
+    gas_meter_fraction: float,
+    export_meter_fraction: float,
     seed: int,
     edition: str = "08",
 ) -> pd.DataFrame:
-    """Generate household traits (PV, HP, EV) for all households.
+    """Generate household traits (PV, HP, EV, meter types) for all households.
     
-    Returns a DataFrame with columns: PUPRN, has_pv, has_hp, has_ev (all 0/1).
+    Returns a DataFrame with columns:
+    PUPRN, has_pv, has_hp, has_ev, has_gas_meter, has_export_meter (all 0/1).
     """
     seed_random(seed)
     n_households = len(puprns)
@@ -35,6 +38,8 @@ def generate_household_traits(
     n_pv = int(round(n_households * pv_fraction))
     n_hp = int(round(n_households * hp_fraction))
     n_ev = int(round(n_households * ev_fraction))
+    n_gas_meter = int(round(n_households * gas_meter_fraction))
+    n_export_meter = int(round(n_households * export_meter_fraction))
     
     # Select deterministic subsets
     pv_set = select_household_subset(
@@ -58,6 +63,20 @@ def generate_household_traits(
         seed_offset=800,
         label="ev",
     )
+    gas_meter_set = select_household_subset(
+        puprns=puprns,
+        n_selected=n_gas_meter,
+        seed=seed,
+        seed_offset=900,
+        label="gas_meter",
+    )
+    export_meter_set = select_household_subset(
+        puprns=puprns,
+        n_selected=n_export_meter,
+        seed=seed,
+        seed_offset=1000,
+        label="export_meter",
+    )
     
     # Build DataFrame
     data = []
@@ -67,6 +86,8 @@ def generate_household_traits(
             'has_pv': 1 if puprn in pv_set else 0,
             'has_hp': 1 if puprn in hp_set else 0,
             'has_ev': 1 if puprn in ev_set else 0,
+            'has_gas_meter': 1 if puprn in gas_meter_set else 0,
+            'has_export_meter': 1 if puprn in export_meter_set else 0,
         })
     
     return pd.DataFrame(data)
@@ -85,7 +106,7 @@ def load_household_traits(
 ) -> pd.DataFrame:
     """Load household traits from CSV.
     
-    Returns DataFrame indexed by PUPRN with has_pv, has_hp, has_ev columns (0/1).
+    Returns DataFrame indexed by PUPRN with trait columns (0/1).
     """
     df = pd.read_csv(path)
     df.set_index('PUPRN', inplace=True)
