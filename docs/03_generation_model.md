@@ -99,9 +99,18 @@ Outside the heating season (`gas_seasonal < gas_heating_threshold`) gas is zero 
 ## PV and export generation
 
 - PV households are selected deterministically from the PUPRN list using `household_traits.pv_fraction`.
-- Only PV households receive non-zero electricity export values (`Elec_act_exp_hh_Wh`, `Elec_react_exp_hh_varh`).
-- Non-PV households have zero export values.
-- Import electricity and gas generation logic is unchanged by PV assignment.
+- Export-meter households are selected deterministically using `household_traits.export_meter_fraction`.
+- Only export-meter households receive non-zero electricity export values (`Elec_act_exp_hh_Wh`, `Elec_react_exp_hh_varh`).
+- Non-export-meter households have zero export values.
+- Import electricity and gas generation logic is unchanged by PV/export-meter assignment.
+
+## Cross-generator consistency caveat
+
+This mock model intentionally prioritises reproducibility and structural validity for testing.
+Some cross-dataset interactions are simplified and may not represent all real-world dependencies.
+
+Key links currently enforced consistently include shared PUPRNs, deterministic household traits,
+and aligned PV/meter trait usage in the relevant generators.
 
 ---
 

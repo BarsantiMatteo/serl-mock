@@ -31,6 +31,19 @@ Running the pipeline produces the following files under `data/mock/`:
 
 All datasets share the same PUPRN list so they can be joined reliably.
 
+## Consistency caveat for synthetic outputs
+
+The mock pipeline is built from multiple generators. While it aims to be coherent, some
+cross-dataset combinations may still be synthetic simplifications rather than fully realistic
+joint behaviour.
+
+Important consistency guarantees are already implemented:
+
+- Shared PUPRNs across all generated datasets.
+- Deterministic household trait assignment from `mock_internal/household_traits.csv`.
+- PV ownership alignment across contextual outputs and exporter list generation.
+- Meter-trait alignment for gas and electricity export availability in smart-meter and rt-summary outputs.
+
 ---
 
 ## Key concepts
@@ -43,39 +56,6 @@ SERL releases data in numbered editions (e.g. Edition 07, Edition 08).  The `edi
 
 ### Reproducibility
 Every random draw uses a seeded RNG.  Setting the same `seed` in `serl_mock.yaml` always produces identical output files.
-
----
-
-## Quick start
-
-```bash
-# Install dependencies
-uv sync
-
-# Generate all mock data (reads config/serl_mock.yaml)
-uv run python scripts/generate_mock_data.py
-
-# Skip ERA5 weather download (no CDS credentials needed)
-uv run python scripts/generate_mock_data.py --skip-weather
-```
-
-Output appears in `data/mock/`.
-
-### Weather data (ERA5)
-
-Step 4 downloads real hourly ERA5 reanalysis data from the
-[Copernicus Climate Data Store](https://cds.climate.copernicus.eu/how-to-api)
-and converts each monthly file to a SERL-style CSV under `serl_climate_data_edition08/`.
-
-CDS credentials are required. After registering, create `~/.cdsapirc`:
-
-```
-url: https://cds.climate.copernicus.eu/api
-key: <your-api-key>
-```
-
-Each month is processed independently: if the NetCDF already exists it is not
-re-downloaded; if the CSV already exists it is not re-converted.
 
 ---
 

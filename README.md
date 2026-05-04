@@ -50,6 +50,19 @@ Notes:
 - `serl_climate_data_edition08/` is populated only when weather download is enabled and CDS access is configured.
 - Filename suffixes (`edition08`, year values) come from `config/serl_mock.yaml` and generator defaults.
 
+### Consistency caveat for dummy data
+
+This project generates synthetic data in multiple generator modules. As with most mock systems,
+some combinations of values across datasets may not be fully realistic or perfectly coherent in
+all edge cases.
+
+The code does enforce consistency for key links used in downstream testing, including:
+
+- Shared PUPRN identity across outputs.
+- Deterministic household trait assignment from `mock_internal/household_traits.csv`.
+- PV ownership consistency across contextual fields and exporter list generation.
+- Meter-trait consistency for gas/export availability in smart-meter and read-type summary outputs.
+
 ---
 
 ## Quick start
