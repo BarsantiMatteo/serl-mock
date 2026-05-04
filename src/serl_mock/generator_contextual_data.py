@@ -13,9 +13,8 @@ import pandas as pd
 from .ids import (
     make_alphanumeric_ids_ordered,
     load_puprn_list_csv,
-    select_household_subset,
-    select_pv_households,
 )
+from .generator_household_traits import load_household_traits
 from .utils import (
     read_config, seed_random, ensure_output_dir,
     with_edition_suffix, write_csv, read_survey_dictionary
@@ -73,26 +72,17 @@ class SERLContextualVariablesGenerator:
         )
         self.edition = str(cfg.get("edition", "")).strip() or None
 
+        # Household traits (PV/HP/EV) — load from pre-generated CSV
+        traits_path = cfg.get("household_traits_path")
+        if not traits_path:
+            # Try default location in mock_internal
+            from .paths import MOCK_INTERNAL_DIR
+            traits_path = MOCK_INTERNAL_DIR / "household_traits.csv"
+        self.traits_path = str(traits_path)
+
         devices_cfg = cfg.get("devices", {})
-        pv_cfg = devices_cfg.get("pv", cfg.get("pv", {}))
-        hp_cfg = devices_cfg.get("hp", cfg.get("hp", {}))
-        ev_cfg = devices_cfg.get("ev", cfg.get("ev", {}))
-
-        pv_fraction = float(devices_cfg.get("pv_fraction", pv_cfg.get("fraction", 0.07)))
-        hp_fraction = float(devices_cfg.get("hp_fraction", hp_cfg.get("fraction", 0.0)))
-        ev_fraction = float(devices_cfg.get("ev_fraction", ev_cfg.get("fraction", 0.0)))
-
-        default_n_pv = int(round(self.n_households * pv_fraction))
-        default_n_hp = int(round(self.n_households * hp_fraction))
-        default_n_ev = int(round(self.n_households * ev_fraction))
-
-        explicit_n_pv = devices_cfg.get("pv_households", pv_cfg.get("households", pv_cfg.get("n_households")))
-        explicit_n_hp = devices_cfg.get("hp_households", hp_cfg.get("households", hp_cfg.get("n_households")))
-        explicit_n_ev = devices_cfg.get("ev_households", ev_cfg.get("households", ev_cfg.get("n_households")))
-
-        self.n_pv_households = int(default_n_pv if explicit_n_pv is None else explicit_n_pv)
-        self.n_hp_households = int(default_n_hp if explicit_n_hp is None else explicit_n_hp)
-        self.n_ev_households = int(default_n_ev if explicit_n_ev is None else explicit_n_ev)
+        # Device fractions (pv_fraction, hp_fraction, ev_fraction) are used
+        # during household traits generation, not here.
 
         # Survey dictionary path
         self.survey_dictionary_path = cfg.get(
@@ -111,25 +101,11 @@ class SERLContextualVariablesGenerator:
         else:
             self.puprns = make_alphanumeric_ids_ordered(self.n_households, length=8, seed=self.seed)
 
-        self._pv_households = select_pv_households(
-            puprns=list(self.puprns),
-            n_pv=self.n_pv_households,
-            seed=self.seed,
-        )
-        self._hp_households = select_household_subset(
-            puprns=list(self.puprns),
-            n_selected=self.n_hp_households,
-            seed=self.seed,
-            seed_offset=700,
-            label="hp",
-        )
-        self._ev_households = select_household_subset(
-            puprns=list(self.puprns),
-            n_selected=self.n_ev_households,
-            seed=self.seed,
-            seed_offset=800,
-            label="ev",
-        )
+        # Load household traits from CSV
+        traits_df = load_household_traits(self.traits_path)
+        self._pv_households = set(traits_df[traits_df['has_pv'] == 1].index.tolist())
+        self._hp_households = set(traits_df[traits_df['has_hp'] == 1].index.tolist())
+        self._ev_households = set(traits_df[traits_df['has_ev'] == 1].index.tolist())
 
         # ERA5 grid-cell assignment — used in participant summary.
         # Each PUPRN gets a random location within the weather bounding box,

@@ -37,7 +37,8 @@ from typing import Optional, Union
 import numpy as np
 import pandas as pd
 
-from .ids import make_alphanumeric_ids_ordered, load_puprn_list_csv, select_pv_households
+from .ids import make_alphanumeric_ids_ordered, load_puprn_list_csv
+from .generator_household_traits import load_household_traits
 from .utils import read_config, seed_random, ensure_output_dir, with_edition_suffix, write_csv
 from .profiles import generate_profiles
 from .patterns import (
@@ -79,18 +80,13 @@ class HHSmartMeterGenerator:
 
         self.edition = str(cfg.get("edition", "08"))
 
-        # PV/export household configuration
-        devices_cfg = cfg.get("devices", {})
-        pv_cfg = devices_cfg.get("pv", cfg.get("pv", {}))
-        pv_fraction = float(
-            devices_cfg.get("pv_fraction", pv_cfg.get("fraction", 0.07))
-        )
-        default_n_pv = int(round(self.n_households * pv_fraction))
-        explicit_n_pv = devices_cfg.get(
-            "pv_households",
-            pv_cfg.get("households", pv_cfg.get("n_households")),
-        )
-        self.n_pv_households = int(default_n_pv if explicit_n_pv is None else explicit_n_pv)
+        # Household traits (PV/HP/EV) — load from pre-generated CSV
+        traits_path = cfg.get("household_traits_path")
+        if not traits_path:
+            # Try default location in mock_internal
+            from .paths import MOCK_INTERNAL_DIR
+            traits_path = MOCK_INTERNAL_DIR / "household_traits.csv"
+        self.traits_path = str(traits_path)
 
         # PUPRN handling
         if puprn_list_path and Path(puprn_list_path).exists():
@@ -132,11 +128,9 @@ class HHSmartMeterGenerator:
         self._elec_var  = np.array([self._profiles[p].elec_variance for p in self.households])
         self._has_gas   = np.array([self._profiles[p].has_gas       for p in self.households],
                                    dtype=float)  # 0.0 or 1.0 for vectorised masking
-        self._pv_households = select_pv_households(
-            puprns=list(self.households),
-            n_pv=self.n_pv_households,
-            seed=self.seed,
-        )
+        # Load household traits from CSV
+        traits_df = load_household_traits(self.traits_path)
+        self._pv_households = set(traits_df[traits_df['has_pv'] == 1].index.tolist())
         self._has_pv = np.array([p in self._pv_households for p in self.households], dtype=float)
 
     # ---------- Timestamp formatting helpers ----------

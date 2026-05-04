@@ -39,9 +39,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.serl_mock.paths import CONFIG_DIR, MOCK_DIR, MOCK_HH_DIR, MOCK_DAILY_DIR, MOCK_INTERNAL_DIR, MOCK_AGGREGATED_DIR, REFERENCE_DIR, MOCK_CLIMATE_DIR
-from src.serl_mock.ids import make_alphanumeric_ids_ordered, write_puprn_list_csv
+from src.serl_mock.ids import make_alphanumeric_ids_ordered, write_puprn_list_csv, load_puprn_list_csv
 from src.serl_mock.generator_smartmeter import HHSmartMeterGenerator, DailySmartMeterGenerator, ReadTypeDataQualitySummaryGenerator
 from src.serl_mock.generator_contextual_data import SERLContextualVariablesGenerator
+from src.serl_mock.generator_household_traits import generate_household_traits, write_household_traits
 from src.serl_mock.weather_downloader import WeatherDownloader
 from src.serl_mock.utils import read_config
 
@@ -100,6 +101,27 @@ def run_all(skip_weather: bool = False):
     )
     write_puprn_list_csv(puprns, puprn_csv)
     print(f"  {len(puprns)} PUPRNs written to {puprn_csv}")
+
+    print("\nStep 1b: Generating household device traits")
+    traits_csv = MOCK_INTERNAL_DIR / "household_traits.csv"
+    devices_cfg = cfg.get("devices", {})
+    pv_fraction = float(devices_cfg.get("pv_fraction", 0.07))
+    hp_fraction = float(devices_cfg.get("hp_fraction", 0.0))
+    ev_fraction = float(devices_cfg.get("ev_fraction", 0.0))
+    
+    traits_df = generate_household_traits(
+        puprns=puprns,
+        pv_fraction=pv_fraction,
+        hp_fraction=hp_fraction,
+        ev_fraction=ev_fraction,
+        seed=cfg.get("seed", 42),
+        edition=edition,
+    )
+    write_household_traits(traits_df, traits_csv)
+    print(f"  Household traits written to {traits_csv}")
+    print(f"    PV households: {(traits_df['has_pv'] == 1).sum()}")
+    print(f"    HP households: {(traits_df['has_hp'] == 1).sum()}")
+    print(f"    EV households: {(traits_df['has_ev'] == 1).sum()}")
 
     print(f"\nStep 2: Generating half-hourly smart meter data "
           f"({cfg.get('start_year')}–{cfg.get('end_year')}, "
