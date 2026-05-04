@@ -140,49 +140,51 @@ class SERLContextualVariablesGenerator:
     # ---------- EPC ----------
     @staticmethod
     def _epc_fields() -> List[str]:
-        # Same EPC header set as your previous script
         return [
-            'PUPRN', 'currentEnergyRating', 'POTENTIAL_ENERGY_RATING',
-            'CURRENT_ENERGY_EFFICIENCY', 'POTENTIAL_ENERGY_EFFICIENCY',
-            'PROPERTY_TYPE', 'BUILT_FORM', 'INSPECTION_DATE', 'LOCAL_AUTHORITY',
-            'CONSTITUENCY', 'COUNTY', 'LODGEMENT_DATE', 'TRANSACTION_TYPE',
-            'ENVIRONMENT_IMPACT_CURRENT', 'ENVIRONMENT_IMPACT_POTENTIAL',
-            'ENERGY_CONSUMPTION_CURRENT', 'ENERGY_CONSUMPTION_POTENTIAL',
-            'CO2_EMISSIONS_CURRENT', 'CO2_EMISS_CURR_PER_FLOOR_AREA',
-            'CO2_EMISSIONS_POTENTIAL', 'LIGHTING_COST_CURRENT',
-            'LIGHTING_COST_POTENTIAL', 'HEATING_COST_CURRENT',
-            'HEATING_COST_POTENTIAL', 'HOT_WATER_COST_CURRENT',
-            'HOT_WATER_COST_POTENTIAL', 'totalFloorArea', 'ENERGY_TARIFF',
-            'MAINS_GAS_FLAG', 'FLOOR_LEVEL', 'FLAT_TOP_STOREY',
-            'FLAT_STOREY_COUNT', 'MAIN_HEATING_CONTROLS', 'MULTI_GLAZE_PROPORTION',
-            'GLAZED_TYPE', 'GLAZED_AREA', 'EXTENSION_COUNT', 'NUMBER_HABITABLE_ROOMS',
-            'NUMBER_HEATED_ROOMS', 'LOW_ENERGY_LIGHTING', 'NUMBER_OPEN_FIREPLACES',
-            'HOTWATER_DESCRIPTION', 'HOT_WATER_ENERGY_EFF', 'HOT_WATER_ENV_EFF',
-            'FLOOR_DESCRIPTION', 'FLOOR_ENERGY_EFF', 'FLOOR_ENV_EFF',
-            'WINDOWS_DESCRIPTION', 'WINDOWS_ENERGY_EFF', 'WINDOWS_ENV_EFF',
-            'WALLS_DESCRIPTION', 'WALLS_ENERGY_EFF', 'WALLS_ENV_EFF',
-            'SECONDHEAT_DESCRIPTION', 'SHEATING_ENERGY_EFF', 'SHEATING_ENV_EFF',
-            'ROOF_DESCRIPTION', 'ROOF_ENERGY_EFF', 'ROOF_ENV_EFF',
-            'MAINHEAT_DESCRIPTION', 'MAINHEAT_ENERGY_EFF', 'MAINHEAT_ENV_EFF',
-            'MAINHEATCONT_DESCRIPTION', 'MAINHEATC_ENERGY_EFF', 'MAINHEATC_ENV_EFF',
-            'LIGHTING_DESCRIPTION', 'LIGHTING_ENERGY_EFF', 'LIGHTING_ENV_EFF',
-            'MAIN_FUEL', 'WIND_TURBINE_COUNT', 'HEAT_LOSS_CORRIDOR',
-            'UNHEATED_CORRIDOR_LENGTH', 'FLOOR_HEIGHT', 'PHOTO_SUPPLY',
-            'SOLAR_WATER_HEATING_FLAG', 'MECHANICAL_VENTILATION',
-            'LOCAL_AUTHORITY_LABEL', 'CONSTITUENCY_LABEL', 'POSTTOWN',
-            'CONSTRUCTION_AGE_BAND', 'LODGEMENT_DATETIME', 'TENURE',
-            'FIXED_LIGHTING_OUTLETS_COUNT', 'LOW_ENERGY_FIXED_LIGHT_COUNT'
+            'PUPRN', 'builtForm', 'co2EmissCurrPerFloorArea', 'co2EmissionsCurrent',
+            'co2EmissionsPotential', 'constituency', 'constructionAgeBand',
+            'currentEnergyEfficiency', 'currentEnergyRating', 'energyConsumptionCurrent',
+            'energyConsumptionPotential', 'energyTariff', 'environmentImpactCurrent',
+            'environmentImpactPotential', 'extensionCount', 'fixedLightingOutletsCount',
+            'flatStoreyCount', 'flatTopStorey', 'floorDescription', 'floorEnergyEff',
+            'floorEnvEff', 'floorHeight', 'floorLevel', 'glazedArea', 'glazedType',
+            'heatingCostCurrent', 'heatingCostPotential', 'heatLossCorridor',
+            'hotWaterCostCurrent', 'hotWaterCostPotential', 'hotwaterDescription',
+            'hotWaterEnergyEff', 'hotWaterEnvEff', 'inspectionDate', 'lightingCostCurrent',
+            'lightingCostPotential', 'lightingDescription', 'lightingEnergyEff',
+            'lightingEnvEff', 'localAuthority', 'lodgementDate', 'lodgementDatetime',
+            'lowEnergyFixedLightCount', 'lowEnergyLighting', 'mainFuel',
+            'mainheatcEnergyEff', 'mainheatcEnvEff', 'mainheatcontDescription',
+            'mainheatDescription', 'mainheatEnergyEff', 'mainheatEnvEff',
+            'mainHeatingControls', 'mainsGasFlag', 'mechanicalVentilation',
+            'multiGlazeProportion', 'numberHabitableRooms', 'numberHeatedRooms',
+            'numberOpenFireplaces', 'photoSupply', 'potentialEnergyEfficiency',
+            'potentialEnergyRating', 'propertyType', 'roofDescription', 'roofEnergyEff',
+            'roofEnvEff', 'secondheatDescription', 'sheatingEnergyEff', 'sheatingEnvEff',
+            'solarWaterHeatingFlag', 'tenure', 'totalFloorArea', 'transactionType',
+            'unheatedCorridorLength', 'wallsDescription', 'wallsEnergyEff', 'wallsEnvEff',
+            'windowsDescription', 'windowsEnergyEff', 'windowsEnvEff', 'windTurbineCount',
+            'epcVersion',
         ]
 
     def generate_epc(self) -> pd.DataFrame:
         fields = self._epc_fields()
         energy_ratings = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
         property_types = ['House', 'Flat', 'Maisonette', 'Bungalow']
-        built_forms = ['Detached', 'Semi-Detached', 'Mid-Terrace', 'End-Terrace']
+        built_forms = ['Detached', 'Semi-Detached', 'Mid-Terrace', 'End-Terrace',
+                       'Enclosed Mid-Terrace', 'Enclosed End-Terrace']
         efficiency_ratings = ['Very Good', 'Good', 'Average', 'Poor', 'Very Poor']
         yes_no_flags = ['Y', 'N']
         fuel_types = ['mains gas (not community)', 'electricity', 'oil', 'solid fuel']
-        tenure_types = ['Owner-occupied', 'Rented (private)', 'Rented (social)']
+        tenure_types = ['owner-occupied', 'rented (private)', 'rented (social)']
+        mech_vent_types = ['natural', 'mechanical, extract only',
+                           'mechanical, supply and extract', 'NO DATA!']
+        heat_loss_types = ['no corridor', 'heated corridor', 'unheated corridor', 'NO DATA!']
+        age_bands = ['before 1900', '1900-1929', '1930-1949', '1950-1966',
+                     '1967-1975', '1976-1982', '1983-1990', '1991-1995',
+                     '1996-2002', '2003-2006', '2007-2011', '2012 onwards']
+        transaction_types = ['marketed sale', 'rental', 'new dwelling',
+                             'following green deal', 'assessment for green deal']
 
         data = []
         rnd = random.Random(self.seed + 100)
@@ -190,53 +192,68 @@ class SERLContextualVariablesGenerator:
         for puprn in self.puprns:
             row = {'PUPRN': puprn}
             for field in fields[1:]:
-                if 'RATING' in field and 'EFFICIENCY' not in field:
+                fl = field.lower()
+                if 'rating' in fl and 'efficiency' not in fl:
                     row[field] = np.nan if rnd.random() < 0.3 else rnd.choice(energy_ratings)
-                elif 'EFFICIENCY' in field:
+                elif 'efficiency' in fl:
                     row[field] = rnd.randint(20, 100)
-                elif field == 'PROPERTY_TYPE':
+                elif field == 'propertyType':
                     row[field] = rnd.choice(property_types)
-                elif field == 'BUILT_FORM':
+                elif field == 'builtForm':
                     row[field] = rnd.choice(built_forms)
-                elif 'DATE' in field:
-                    base_date = pd.Timestamp(2020, 1, 1)
-                    row[field] = (base_date + pd.Timedelta(days=rnd.randint(0, 1000))).strftime('%Y-%m-%d')
+                elif field == 'epcVersion':
+                    row[field] = 'England and Wales'
+                elif field == 'mechanicalVentilation':
+                    row[field] = rnd.choice(mech_vent_types)
+                elif field == 'heatLossCorridor':
+                    row[field] = rnd.choice(heat_loss_types)
+                elif field == 'constructionAgeBand':
+                    row[field] = rnd.choice(age_bands)
+                elif field == 'transactionType':
+                    row[field] = rnd.choice(transaction_types)
+                elif field == 'mainFuel':
+                    row[field] = rnd.choice(fuel_types)
+                elif field == 'tenure':
+                    row[field] = rnd.choice(tenure_types)
                 elif field == 'totalFloorArea':
                     row[field] = np.nan if rnd.random() < 0.3 else round(rnd.uniform(30.0, 300.0), 1)
-                elif field == 'FLOOR_HEIGHT':
+                elif field == 'floorHeight':
                     row[field] = round(rnd.uniform(2.0, 3.5), 2)
-                elif 'COST' in field:
-                    row[field] = rnd.randint(50, 2000)
-                elif 'EMISSIONS' in field:
-                    row[field] = round(rnd.uniform(0.5, 10.0), 1)
-                elif 'CONSUMPTION' in field:
-                    row[field] = rnd.randint(50, 500)
-                elif 'ENVIRONMENT_IMPACT' in field:
-                    row[field] = rnd.randint(20, 100)
-                elif 'FLAG' in field:
+                elif field == 'mainHeatingControls':
+                    row[field] = rnd.randint(1000, 9999)
+                elif field == 'lowEnergyLighting':
+                    row[field] = rnd.randint(0, 100)
+                elif field == 'flatTopStorey':
                     row[field] = rnd.choice(yes_no_flags)
-                elif 'ENERGY_EFF' in field or 'ENV_EFF' in field:
-                    row[field] = rnd.choice(efficiency_ratings)
-                elif field == 'MAIN_FUEL':
-                    row[field] = rnd.choice(fuel_types)
-                elif field == 'TENURE':
-                    row[field] = rnd.choice(tenure_types)
-                elif 'COUNT' in field or 'NUMBER' in field:
-                    row[field] = rnd.randint(0, 10)
-                elif 'PROPORTION' in field or 'SUPPLY' in field:
-                    row[field] = round(rnd.uniform(0.0, 100.0), 1)
-                elif 'DESCRIPTION' in field:
-                    row[field] = f"Sample {field.lower().replace('_', ' ')}"
-                elif 'LABEL' in field or field in ['COUNTY', 'POSTTOWN']:
-                    row[field] = f"Sample {field.lower()}"
-                elif field == 'CONSTRUCTION_AGE_BAND':
-                    age_bands = ['before 1900', '1900-1929', '1930-1949', '1950-1966',
-                                 '1967-1975', '1976-1982', '1983-1990', '1991-1995',
-                                 '1996-2002', '2003-2006', '2007-2011', '2012 onwards']
-                    row[field] = rnd.choice(age_bands)
-                elif 'DATETIME' in field:
+                elif field == 'photoSupply':
+                    pct = rnd.randint(0, 50)
+                    row[field] = f"Array: Roof Area: {pct}%; Connection: not applicable (FGHRS or no PV); |"
+                elif 'datetime' in fl:
                     base_dt = pd.Timestamp(2020, 1, 1)
-                    row[field] = (base_dt + pd.Timedelta(days=rnd.randint(0, 1000))).strftime('%Y-%m-%d %H:%M:%S')
+                    row[field] = (base_dt + pd.Timedelta(days=rnd.randint(0, 1000))).strftime('%d/%m/%Y %H:%M')
+                elif 'date' in fl:
+                    base_date = pd.Timestamp(2020, 1, 1)
+                    row[field] = (base_date + pd.Timedelta(days=rnd.randint(0, 1000))).strftime('%d/%m/%Y')
+                elif 'emiss' in fl:
+                    row[field] = round(rnd.uniform(0.5, 10.0), 1)
+                elif 'consumption' in fl:
+                    row[field] = rnd.randint(50, 500)
+                elif 'environmentimpact' in fl:
+                    row[field] = rnd.randint(20, 100)
+                elif 'cost' in fl:
+                    row[field] = rnd.randint(50, 2000)
+                elif 'flag' in fl:
+                    row[field] = rnd.choice(yes_no_flags)
+                elif 'energyeff' in fl or 'enveff' in fl:
+                    row[field] = rnd.choice(efficiency_ratings)
+                elif 'count' in fl or 'number' in fl:
+                    row[field] = rnd.randint(0, 10)
+                elif 'proportion' in fl:
+                    row[field] = rnd.randint(0, 100)
+                elif 'unheated' in fl:
+                    row[field] = round(rnd.uniform(0.0, 10.0), 1)
+                elif 'description' in fl:
+                    row[field] = f"Sample {field} description"
                 else:
                     row[field] = f"Sample_{field}"
             data.append(row)

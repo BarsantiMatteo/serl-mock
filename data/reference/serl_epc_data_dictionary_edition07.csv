@@ -1,0 +1,220 @@
+Variable,Value,ValueDescription,QuestionOrMeaning,FreeText,Type,CountriesAvailable
+PUPRN,"","",Pseudonymised unique participant identifier used across SERL datasets,FALSE,Assigned,All
+builtForm,"","Missing / not applicable",Attachment type of the property,FALSE,character,All
+builtForm,Detached,Detached,Attachment type of the property,FALSE,character,All
+builtForm,Enclosed End-Terrace,Enclosed End-Terrace,Attachment type of the property,FALSE,character,All
+builtForm,Enclosed Mid-Terrace,Enclosed Mid-Terrace,Attachment type of the property,FALSE,character,All
+builtForm,End-Terrace,End-Terrace,Attachment type of the property,FALSE,character,All
+builtForm,Mid-Terrace,Mid-Terrace,Attachment type of the property,FALSE,character,All
+builtForm,NO DATA!,No data available,Attachment type of the property,FALSE,character,All
+builtForm,Semi-Detached,Semi-Detached,Attachment type of the property,FALSE,character,All
+co2EmissCurrPerFloorArea,"","",Current CO2 emissions per unit floor area (tonnes/m2/year),FALSE,numeric,All
+co2EmissionsCurrent,"","",Current CO2 emissions from the property (tonnes/year),FALSE,numeric,All
+co2EmissionsPotential,"","",Potential CO2 emissions after recommended improvements (tonnes/year),FALSE,numeric,All
+constituency,"","",Parliamentary constituency code,FALSE,character,All
+constructionAgeBand,"","",Decade band indicating when the property was built (e.g. 1976-1983),FALSE,character,All
+currentEnergyEfficiency,"","",Current SAP energy efficiency score (1-100; higher is more efficient),FALSE,integer,All
+currentEnergyRating,A,A,Current EPC energy efficiency band (A-G; A is most efficient),FALSE,character,All
+currentEnergyRating,B,B,Current EPC energy efficiency band (A-G; A is most efficient),FALSE,character,All
+currentEnergyRating,C,C,Current EPC energy efficiency band (A-G; A is most efficient),FALSE,character,All
+currentEnergyRating,D,D,Current EPC energy efficiency band (A-G; A is most efficient),FALSE,character,All
+currentEnergyRating,E,E,Current EPC energy efficiency band (A-G; A is most efficient),FALSE,character,All
+currentEnergyRating,F,F,Current EPC energy efficiency band (A-G; A is most efficient),FALSE,character,All
+currentEnergyRating,G,G,Current EPC energy efficiency band (A-G; A is most efficient),FALSE,character,All
+energyConsumptionCurrent,"","",Current energy consumption (kWh/m2/year),FALSE,integer,All
+energyConsumptionPotential,"","",Potential energy consumption after improvements (kWh/m2/year),FALSE,integer,All
+energyTariff,"","",Type of energy tariff (e.g. Single; Economy 7),FALSE,character,All
+environmentImpactCurrent,"","",Current environmental impact score based on CO2 emissions (1-100; higher is better),FALSE,integer,All
+environmentImpactPotential,"","",Potential environmental impact score after improvements (1-100; higher is better),FALSE,integer,All
+extensionCount,"","Missing / not applicable",Number of extensions to the property,FALSE,integer,All
+extensionCount,0,0,Number of extensions to the property,FALSE,integer,All
+extensionCount,1,1,Number of extensions to the property,FALSE,integer,All
+extensionCount,2,2,Number of extensions to the property,FALSE,integer,All
+extensionCount,3,3,Number of extensions to the property,FALSE,integer,All
+extensionCount,4,4,Number of extensions to the property,FALSE,integer,All
+fixedLightingOutletsCount,"","",Total number of fixed lighting outlets in the property,FALSE,integer,All
+flatStoreyCount,"","",Number of storeys in the block (for flats only),FALSE,integer,England and Wales
+flatTopStorey,"","",Whether the flat is on the top storey (Y/N),FALSE,character,All
+floorDescription,"","",Description of the floor construction type and insulation,TRUE,character,All
+floorEnergyEff,"","Missing / not applicable",Energy efficiency rating of the floor,FALSE,character,All
+floorEnergyEff,Good,Good,Energy efficiency rating of the floor,FALSE,character,All
+floorEnergyEff,N/A,Not applicable,Energy efficiency rating of the floor,FALSE,character,All
+floorEnergyEff,N/A | N/A,Not applicable (multiple elements),Energy efficiency rating of the floor,FALSE,character,All
+floorEnergyEff,NO DATA!,No data available,Energy efficiency rating of the floor,FALSE,character,All
+floorEnergyEff,Very Good,Very Good,Energy efficiency rating of the floor,FALSE,character,All
+floorEnvEff,"","Missing / not applicable",Environmental efficiency rating of the floor,FALSE,character,All
+floorEnvEff,Good,Good,Environmental efficiency rating of the floor,FALSE,character,All
+floorEnvEff,N/A,Not applicable,Environmental efficiency rating of the floor,FALSE,character,All
+floorEnvEff,N/A | N/A,Not applicable (multiple elements),Environmental efficiency rating of the floor,FALSE,character,All
+floorEnvEff,Very Good,Very Good,Environmental efficiency rating of the floor,FALSE,character,All
+floorHeight,"","",Average floor-to-ceiling height (metres),FALSE,numeric,All
+floorLevel,"","",Floor level of the property (relevant for flats),FALSE,character,All
+glazedArea,"","",Description of the glazed area relative to the floor area (e.g. Normal),FALSE,character,All
+glazedType,"","",Type of glazing installed (e.g. double glazing; triple glazing),FALSE,character,All
+heatingCostCurrent,"","",Current estimated annual space heating cost (GBP),FALSE,integer,All
+heatingCostPotential,"","",Potential annual space heating cost after improvements (GBP),FALSE,integer,All
+heatLossCorridor,"","Missing / not applicable",Type of heat loss corridor associated with the property,FALSE,character,England and Wales
+heatLossCorridor,heated corridor,Heated corridor,Type of heat loss corridor associated with the property,FALSE,character,England and Wales
+heatLossCorridor,NO DATA!,No data available,Type of heat loss corridor associated with the property,FALSE,character,England and Wales
+heatLossCorridor,no corridor,No corridor,Type of heat loss corridor associated with the property,FALSE,character,England and Wales
+heatLossCorridor,unheated corridor,Unheated corridor,Type of heat loss corridor associated with the property,FALSE,character,England and Wales
+hotWaterCostCurrent,"","",Current estimated annual hot water heating cost (GBP),FALSE,integer,All
+hotWaterCostPotential,"","",Potential annual hot water heating cost after improvements (GBP),FALSE,integer,All
+hotwaterDescription,"","",Description of the hot water system,TRUE,character,All
+hotWaterEnergyEff,"","Missing / not applicable",Energy efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnergyEff,Average,Average,Energy efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnergyEff,Good,Good,Energy efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnergyEff,Poor,Poor,Energy efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnergyEff,Very Good,Very Good,Energy efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnergyEff,Very Poor,Very Poor,Energy efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnvEff,"","Missing / not applicable",Environmental efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnvEff,Average,Average,Environmental efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnvEff,Good,Good,Environmental efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnvEff,Poor,Poor,Environmental efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnvEff,Very Good,Very Good,Environmental efficiency rating of the hot water system,FALSE,character,All
+hotWaterEnvEff,Very Poor,Very Poor,Environmental efficiency rating of the hot water system,FALSE,character,All
+inspectionDate,"","",Date of the EPC inspection (DD/MM/YYYY),FALSE,character,All
+lightingCostCurrent,"","",Current estimated annual lighting cost (GBP),FALSE,integer,All
+lightingCostPotential,"","",Potential annual lighting cost after improvements (GBP),FALSE,integer,All
+lightingDescription,"","",Description of the lighting installed in the property,TRUE,character,All
+lightingEnergyEff,Average,Average,Energy efficiency rating of the lighting,FALSE,character,All
+lightingEnergyEff,Good,Good,Energy efficiency rating of the lighting,FALSE,character,All
+lightingEnergyEff,Poor,Poor,Energy efficiency rating of the lighting,FALSE,character,All
+lightingEnergyEff,Very Good,Very Good,Energy efficiency rating of the lighting,FALSE,character,All
+lightingEnergyEff,Very Poor,Very Poor,Energy efficiency rating of the lighting,FALSE,character,All
+lightingEnvEff,Average,Average,Environmental efficiency rating of the lighting,FALSE,character,All
+lightingEnvEff,Good,Good,Environmental efficiency rating of the lighting,FALSE,character,All
+lightingEnvEff,Poor,Poor,Environmental efficiency rating of the lighting,FALSE,character,All
+lightingEnvEff,Very Good,Very Good,Environmental efficiency rating of the lighting,FALSE,character,All
+lightingEnvEff,Very Poor,Very Poor,Environmental efficiency rating of the lighting,FALSE,character,All
+localAuthority,"","",Local authority code,FALSE,character,England and Wales
+lodgementDate,"","",Date the EPC was lodged on the register,FALSE,character,All
+lodgementDatetime,"","",Full datetime the EPC was lodged on the register (DD/MM/YYYY HH:MM),FALSE,character,England and Wales
+lowEnergyFixedLightCount,"","",Number of fixed light fittings that are low energy,FALSE,integer,All
+lowEnergyLighting,"","",Percentage of fixed light fittings that are low energy (%),FALSE,integer,All
+mainFuel,"","",Primary fuel type used for space heating (e.g. mains gas; electricity; oil),FALSE,character,All
+mainheatcEnergyEff,"","Missing / not applicable",Energy efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnergyEff,Average,Average,Energy efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnergyEff,Good,Good,Energy efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnergyEff,Poor,Poor,Energy efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnergyEff,Very Good,Very Good,Energy efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnergyEff,Very Poor,Very Poor,Energy efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnvEff,"","Missing / not applicable",Environmental efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnvEff,Average,Average,Environmental efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnvEff,Good,Good,Environmental efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnvEff,Poor,Poor,Environmental efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnvEff,Very Good,Very Good,Environmental efficiency rating of the main heating controls,FALSE,character,All
+mainheatcEnvEff,Very Poor,Very Poor,Environmental efficiency rating of the main heating controls,FALSE,character,All
+mainheatcontDescription,"","",Description of the main heating controls,TRUE,character,All
+mainheatDescription,"","",Description of the main heating system,TRUE,character,All
+mainheatEnergyEff,"","",Energy efficiency rating of the main heating system,FALSE,character,All
+mainheatEnvEff,"","Missing / not applicable",Environmental efficiency rating of the main heating system,FALSE,character,All
+mainheatEnvEff,Average,Average,Environmental efficiency rating of the main heating system,FALSE,character,All
+mainheatEnvEff,Good,Good,Environmental efficiency rating of the main heating system,FALSE,character,All
+mainheatEnvEff,Poor,Poor,Environmental efficiency rating of the main heating system,FALSE,character,All
+mainheatEnvEff,Very Good,Very Good,Environmental efficiency rating of the main heating system,FALSE,character,All
+mainheatEnvEff,Very Poor,Very Poor,Environmental efficiency rating of the main heating system,FALSE,character,All
+mainHeatingControls,"","",SAP code identifying the type of main heating controls installed,FALSE,integer,All
+mainsGasFlag,"","Missing / not applicable",Whether the property is connected to mains gas,FALSE,character,All
+mainsGasFlag,N,No,Whether the property is connected to mains gas,FALSE,character,All
+mainsGasFlag,Y,Yes,Whether the property is connected to mains gas,FALSE,character,All
+mechanicalVentilation,NO DATA!,No data available,Type of mechanical ventilation system in the property,FALSE,character,All
+mechanicalVentilation,"mechanical, extract only",Mechanical extract only,Type of mechanical ventilation system in the property,FALSE,character,All
+mechanicalVentilation,"mechanical, supply and extract",Mechanical supply and extract,Type of mechanical ventilation system in the property,FALSE,character,All
+mechanicalVentilation,natural,Natural ventilation,Type of mechanical ventilation system in the property,FALSE,character,All
+multiGlazeProportion,"","",Percentage of windows that are double or triple glazed (%),FALSE,integer,All
+numberHabitableRooms,"","",Number of habitable rooms in the property,FALSE,integer,All
+numberHeatedRooms,"","",Number of heated rooms in the property,FALSE,integer,All
+numberOpenFireplaces,"","",Number of open fireplaces in the property,FALSE,integer,All
+photoSupply,"","",Photovoltaic solar panel supply details including roof area and connection type,TRUE,character,All
+potentialEnergyEfficiency,"","",Potential SAP energy efficiency score after improvements (1-100; higher is more efficient),FALSE,integer,All
+potentialEnergyRating,A,A,Potential EPC energy efficiency band after improvements (A-G; A is most efficient),FALSE,character,All
+potentialEnergyRating,B,B,Potential EPC energy efficiency band after improvements (A-G; A is most efficient),FALSE,character,All
+potentialEnergyRating,C,C,Potential EPC energy efficiency band after improvements (A-G; A is most efficient),FALSE,character,All
+potentialEnergyRating,D,D,Potential EPC energy efficiency band after improvements (A-G; A is most efficient),FALSE,character,All
+potentialEnergyRating,E,E,Potential EPC energy efficiency band after improvements (A-G; A is most efficient),FALSE,character,All
+potentialEnergyRating,F,F,Potential EPC energy efficiency band after improvements (A-G; A is most efficient),FALSE,character,All
+propertyType,Bungalow,Bungalow,Type of property,FALSE,character,All
+propertyType,Flat,Flat,Type of property,FALSE,character,All
+propertyType,House,House,Type of property,FALSE,character,All
+propertyType,Maisonette,Maisonette,Type of property,FALSE,character,All
+roofDescription,"","",Description of the roof construction type and insulation,TRUE,character,All
+roofEnergyEff,"","",Energy efficiency rating of the roof,FALSE,character,All
+roofEnvEff,"","",Environmental efficiency rating of the roof,FALSE,character,All
+secondheatDescription,"","",Description of the secondary heating system (if present),TRUE,character,All
+sheatingEnergyEff,"","Missing / not applicable",Energy efficiency rating of the secondary heating system,FALSE,character,All
+sheatingEnergyEff,N/A,Not applicable,Energy efficiency rating of the secondary heating system,FALSE,character,All
+sheatingEnvEff,"","Missing / not applicable",Environmental efficiency rating of the secondary heating system,FALSE,character,All
+sheatingEnvEff,N/A,Not applicable,Environmental efficiency rating of the secondary heating system,FALSE,character,All
+solarWaterHeatingFlag,"","Missing / not applicable",Whether the property has solar water heating,FALSE,character,All
+solarWaterHeatingFlag,N,No,Whether the property has solar water heating,FALSE,character,All
+solarWaterHeatingFlag,Y,Yes,Whether the property has solar water heating,FALSE,character,All
+tenure,"","",Tenure type of the property (e.g. owner-occupied; rented (private); rented (social)),FALSE,character,All
+totalFloorArea,"","",Total floor area of the property (m2),FALSE,numeric,All
+transactionType,"","",Reason for the EPC assessment (e.g. marketed sale; rental; new dwelling),FALSE,character,All
+unheatedCorridorLength,"","",Length of any unheated corridor associated with the property (metres),FALSE,numeric,All
+wallsDescription,"","",Description of the wall construction type and insulation,TRUE,character,England and Wales
+wallsEnergyEff,"","Missing / not applicable",Energy efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnergyEff,Average,Average,Energy efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnergyEff,Good,Good,Energy efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnergyEff,Poor,Poor,Energy efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnergyEff,Very Good,Very Good,Energy efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnergyEff,Very Poor,Very Poor,Energy efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnvEff,"","Missing / not applicable",Environmental efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnvEff,Average,Average,Environmental efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnvEff,Good,Good,Environmental efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnvEff,Poor,Poor,Environmental efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnvEff,Very Good,Very Good,Environmental efficiency rating of the walls,FALSE,character,England and Wales
+wallsEnvEff,Very Poor,Very Poor,Environmental efficiency rating of the walls,FALSE,character,England and Wales
+windowsDescription,"","",Description of the windows installed,TRUE,character,All
+windowsEnergyEff,Average,Average,Energy efficiency rating of the windows,FALSE,character,All
+windowsEnergyEff,Good,Good,Energy efficiency rating of the windows,FALSE,character,All
+windowsEnergyEff,Poor,Poor,Energy efficiency rating of the windows,FALSE,character,All
+windowsEnergyEff,Very Good,Very Good,Energy efficiency rating of the windows,FALSE,character,All
+windowsEnergyEff,Very Poor,Very Poor,Energy efficiency rating of the windows,FALSE,character,All
+windowsEnvEff,Average,Average,Environmental efficiency rating of the windows,FALSE,character,All
+windowsEnvEff,Good,Good,Environmental efficiency rating of the windows,FALSE,character,All
+windowsEnvEff,Poor,Poor,Environmental efficiency rating of the windows,FALSE,character,All
+windowsEnvEff,Very Good,Very Good,Environmental efficiency rating of the windows,FALSE,character,All
+windowsEnvEff,Very Poor,Very Poor,Environmental efficiency rating of the windows,FALSE,character,All
+windTurbineCount,"","Missing / not applicable",Number of wind turbines associated with the property,FALSE,integer,All
+windTurbineCount,0,0,Number of wind turbines associated with the property,FALSE,integer,All
+3YrEnergyCostCurrent,"","",Estimated energy cost over 3 years (Scotland only),FALSE,integer,Scotland
+3YrEnergySavingPotential,"","",Potential energy cost saving over 3 years after improvements (Scotland only),FALSE,integer,Scotland
+airTightnessDescription,"","",Description of the air tightness of the property (Scotland only),TRUE,character,Scotland
+airTightnessEnergyEff,"","",Energy efficiency rating of the air tightness (Scotland only),FALSE,character,Scotland
+airTightnessEnvEff,"","",Environmental efficiency rating of the air tightness (Scotland only),FALSE,character,Scotland
+alternativeImprovements,"","",Alternative improvement measures recommended for the property (Scotland only),TRUE,character,Scotland
+currentEnvironmentalRating,"","Missing / not applicable",Current environmental impact rating band (Scotland only),FALSE,character,Scotland
+currentEnvironmentalRating,B,B,Current environmental impact rating band (Scotland only),FALSE,character,Scotland
+currentEnvironmentalRating,C,C,Current environmental impact rating band (Scotland only),FALSE,character,Scotland
+currentEnvironmentalRating,D,D,Current environmental impact rating band (Scotland only),FALSE,character,Scotland
+currentEnvironmentalRating,E,E,Current environmental impact rating band (Scotland only),FALSE,character,Scotland
+currentEnvironmentalRating,F,F,Current environmental impact rating band (Scotland only),FALSE,character,Scotland
+dataZone,"","",Scottish data zone identifier (Scotland only),FALSE,character,Scotland
+heatLossCorridoor,"","Missing / not applicable","Type of heat loss corridor associated with the property (Scotland only; note: original variable name contains a typo - double o)",FALSE,character,Scotland
+heatLossCorridoor,no corridor,No corridor,"Type of heat loss corridor associated with the property (Scotland only; note: original variable name contains a typo - double o)",FALSE,character,Scotland
+heatLossCorridoor,unheated corridor,Unheated corridor,"Type of heat loss corridor associated with the property (Scotland only; note: original variable name contains a typo - double o)",FALSE,character,Scotland
+impactCavityWallInsulation,"","",Estimated energy saving impact of installing cavity wall insulation (Scotland only),FALSE,integer,Scotland
+impactLoftInsulation,"","",Estimated energy saving impact of installing loft insulation (Scotland only),FALSE,integer,Scotland
+impactSolidWallInsulation,"","",Estimated energy saving impact of installing solid wall insulation (Scotland only),FALSE,integer,Scotland
+improvements,"","",Recommended improvement measures for the property (Scotland only),TRUE,character,Scotland
+lzcEnergySources,"","",Low or zero carbon energy sources installed in the property (Scotland only),TRUE,character,Scotland
+mainHeatingCategory,"","Missing / not applicable",Category of main heating system (Scotland only),FALSE,character,Scotland
+mainHeatingCategory,boiler with radiators or underfloor heating,Boiler with radiators or underfloor heating,Category of main heating system (Scotland only),FALSE,character,Scotland
+mainHeatingCategory,electric storage heaters,Electric storage heaters,Category of main heating system (Scotland only),FALSE,character,Scotland
+mainHeatingCategory,heat pump with radiators or underfloor heating,Heat pump with radiators or underfloor heating,Category of main heating system (Scotland only),FALSE,character,Scotland
+potentialEnvironmentalRating,"","Missing / not applicable",Potential environmental impact rating band after improvements (Scotland only),FALSE,character,Scotland
+potentialEnvironmentalRating,A,A,Potential environmental impact rating band after improvements (Scotland only),FALSE,character,Scotland
+potentialEnvironmentalRating,B,B,Potential environmental impact rating band after improvements (Scotland only),FALSE,character,Scotland
+potentialEnvironmentalRating,C,C,Potential environmental impact rating band after improvements (Scotland only),FALSE,character,Scotland
+potentialEnvironmentalRating,D,D,Potential environmental impact rating band after improvements (Scotland only),FALSE,character,Scotland
+spaceHeatingDemand,"","",Space heating demand of the property (Scotland only),FALSE,integer,Scotland
+typeOfAssessment,"","Missing / not applicable",Type of EPC assessment methodology used (Scotland only),FALSE,character,Scotland
+typeOfAssessment,RdSAP existing dwelling,RdSAP existing dwelling,Type of EPC assessment methodology used (Scotland only),FALSE,character,Scotland
+wallDescription,"","",Description of the wall construction type and insulation (Scotland only; may contain multiple values separated by |),TRUE,character,Scotland
+wallEnergyEff,"","",Energy efficiency rating of the walls (Scotland only; may contain multiple values separated by |),FALSE,character,Scotland
+wallEnvEff,"","",Environmental efficiency rating of the walls (Scotland only; may contain multiple values separated by |),FALSE,character,Scotland
+waterHeatingDemand,"","",Water heating demand of the property (Scotland only),FALSE,integer,Scotland
+epcVersion,England and Wales,England and Wales,EPC data format version indicating whether the record uses the England/Wales or Scotland EPC system,FALSE,character,All
+epcVersion,Scotland,Scotland,EPC data format version indicating whether the record uses the England/Wales or Scotland EPC system,FALSE,character,All

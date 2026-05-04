@@ -3,8 +3,7 @@
 A lightweight Python package that generates mock datasets matching the structure
 and naming conventions of the **SERL (Smart Energy Research Lab) Observatory** data Edition08 release.
 
-Use it to build and test analysis pipelines locally, without needing access to the real data in
-the Data Safe Haven (DSH) or Trusted Research Environment (TRE).
+Use it to build and test analysis pipelines locally, without needing access to the real data in the Data Safe Haven (DSH) or Trusted Research Environment (TRE).
 
 ---
 
@@ -57,19 +56,26 @@ Notes:
 
 Use this path if you want to generate mock smart-meter and contextual datasets without downloading weather data.
 
-1. Install uv (if not already installed):
+1. Clone the repository:
+
+```bash
+git clone https://github.com/BarsantiMatteo/serl-mock.git
+cd serl-mock
+```
+
+2. Install uv (if not already installed):
 
 ```bash
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-2. Sync the project environment:
+3. Sync the project environment:
 
 ```bash
 uv sync
 ```
 
-3. Run the generator:
+4. Run the generator:
 
 ```bash
 uv run python scripts/generate_mock_data.py --skip-weather
