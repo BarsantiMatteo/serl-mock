@@ -37,7 +37,7 @@ from typing import Optional, Union
 import numpy as np
 import pandas as pd
 
-from .ids import make_alphanumeric_ids_ordered, load_puprn_list_csv
+from .ids import make_alphanumeric_ids_ordered, load_puprn_list_csv, select_pv_households
 from .utils import read_config, seed_random, ensure_output_dir, with_edition_suffix, write_csv
 from .profiles import generate_profiles
 from .patterns import (
@@ -79,6 +79,19 @@ class HHSmartMeterGenerator:
 
         self.edition = str(cfg.get("edition", "08"))
 
+        # PV/export household configuration
+        devices_cfg = cfg.get("devices", {})
+        pv_cfg = devices_cfg.get("pv", cfg.get("pv", {}))
+        pv_fraction = float(
+            devices_cfg.get("pv_fraction", pv_cfg.get("fraction", 0.07))
+        )
+        default_n_pv = int(round(self.n_households * pv_fraction))
+        explicit_n_pv = devices_cfg.get(
+            "pv_households",
+            pv_cfg.get("households", pv_cfg.get("n_households")),
+        )
+        self.n_pv_households = int(default_n_pv if explicit_n_pv is None else explicit_n_pv)
+
         # PUPRN handling
         if puprn_list_path and Path(puprn_list_path).exists():
             puprns = load_puprn_list_csv(puprn_list_path)
@@ -119,6 +132,12 @@ class HHSmartMeterGenerator:
         self._elec_var  = np.array([self._profiles[p].elec_variance for p in self.households])
         self._has_gas   = np.array([self._profiles[p].has_gas       for p in self.households],
                                    dtype=float)  # 0.0 or 1.0 for vectorised masking
+        self._pv_households = select_pv_households(
+            puprns=list(self.households),
+            n_pv=self.n_pv_households,
+            seed=self.seed,
+        )
+        self._has_pv = np.array([p in self._pv_households for p in self.households], dtype=float)
 
     # ---------- Timestamp formatting helpers ----------
 
@@ -187,6 +206,7 @@ class HHSmartMeterGenerator:
         base_gas_n  = np.tile(self._base_gas,  T)
         elec_var_n  = np.tile(self._elec_var,  T)
         has_gas_n   = np.tile(self._has_gas,   T)
+        has_pv_n    = np.tile(self._has_pv,    T)
 
         # --- Electricity (active import) ---
         elec_mean = base_elec_n * e_seas_n * e_day_n
@@ -203,9 +223,13 @@ class HHSmartMeterGenerator:
             0.0,
             self.rng.normal(elec_wh * 0.15, np.maximum(elec_wh * 0.05, 1.0)),
         )
-        # Export and reactive export: minimal (no solar profile yet)
-        elec_exp_wh    = self.rng.integers(0, 50, size=N).astype(float)
-        elec_react_exp = self.rng.integers(0, 30, size=N).astype(float)
+        # Export and reactive export only for PV households.
+        # Non-PV households are kept at 0 and their import/gas generation is unchanged.
+        solar_day = np.maximum(0.0, np.sin(np.pi * (hour_float - 6.0) / 12.0))
+        solar_season = np.clip(1.0 - self._elec_seasonal_amp * np.cos(2.0 * np.pi * (doy - 15.0) / 365.0), 0.3, 1.7)
+        solar_gen = np.repeat((150.0 * solar_day * solar_season), H)
+        elec_exp_wh = np.maximum(0.0, self.rng.normal(solar_gen, np.maximum(solar_gen * 0.25, 1.0))) * has_pv_n
+        elec_react_exp = np.maximum(0.0, self.rng.normal(elec_exp_wh * 0.1, np.maximum(elec_exp_wh * 0.05, 1.0)))
 
         # --- Gas ---
         is_heating    = g_seas_n > self._gas_heat_threshold

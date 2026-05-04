@@ -10,7 +10,12 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from .ids import make_alphanumeric_ids_ordered, load_puprn_list_csv
+from .ids import (
+    make_alphanumeric_ids_ordered,
+    load_puprn_list_csv,
+    select_household_subset,
+    select_pv_households,
+)
 from .utils import (
     read_config, seed_random, ensure_output_dir,
     with_edition_suffix, write_csv, read_survey_dictionary
@@ -68,6 +73,27 @@ class SERLContextualVariablesGenerator:
         )
         self.edition = str(cfg.get("edition", "")).strip() or None
 
+        devices_cfg = cfg.get("devices", {})
+        pv_cfg = devices_cfg.get("pv", cfg.get("pv", {}))
+        hp_cfg = devices_cfg.get("hp", cfg.get("hp", {}))
+        ev_cfg = devices_cfg.get("ev", cfg.get("ev", {}))
+
+        pv_fraction = float(devices_cfg.get("pv_fraction", pv_cfg.get("fraction", 0.07)))
+        hp_fraction = float(devices_cfg.get("hp_fraction", hp_cfg.get("fraction", 0.0)))
+        ev_fraction = float(devices_cfg.get("ev_fraction", ev_cfg.get("fraction", 0.0)))
+
+        default_n_pv = int(round(self.n_households * pv_fraction))
+        default_n_hp = int(round(self.n_households * hp_fraction))
+        default_n_ev = int(round(self.n_households * ev_fraction))
+
+        explicit_n_pv = devices_cfg.get("pv_households", pv_cfg.get("households", pv_cfg.get("n_households")))
+        explicit_n_hp = devices_cfg.get("hp_households", hp_cfg.get("households", hp_cfg.get("n_households")))
+        explicit_n_ev = devices_cfg.get("ev_households", ev_cfg.get("households", ev_cfg.get("n_households")))
+
+        self.n_pv_households = int(default_n_pv if explicit_n_pv is None else explicit_n_pv)
+        self.n_hp_households = int(default_n_hp if explicit_n_hp is None else explicit_n_hp)
+        self.n_ev_households = int(default_n_ev if explicit_n_ev is None else explicit_n_ev)
+
         # Survey dictionary path
         self.survey_dictionary_path = cfg.get(
             "survey_dictionary_path",
@@ -84,6 +110,26 @@ class SERLContextualVariablesGenerator:
             self.puprns = puprns[: self.n_households]
         else:
             self.puprns = make_alphanumeric_ids_ordered(self.n_households, length=8, seed=self.seed)
+
+        self._pv_households = select_pv_households(
+            puprns=list(self.puprns),
+            n_pv=self.n_pv_households,
+            seed=self.seed,
+        )
+        self._hp_households = select_household_subset(
+            puprns=list(self.puprns),
+            n_selected=self.n_hp_households,
+            seed=self.seed,
+            seed_offset=700,
+            label="hp",
+        )
+        self._ev_households = select_household_subset(
+            puprns=list(self.puprns),
+            n_selected=self.n_ev_households,
+            seed=self.seed,
+            seed_offset=800,
+            label="ev",
+        )
 
         # ERA5 grid-cell assignment — used in participant summary.
         # Each PUPRN gets a random location within the weather bounding box,
@@ -190,7 +236,7 @@ class SERLContextualVariablesGenerator:
         rnd = random.Random(self.seed + 100)
 
         for puprn in self.puprns:
-            row = {'PUPRN': puprn}
+            row: Dict[str, object] = {'PUPRN': puprn}
             for field in fields[1:]:
                 fl = field.lower()
                 if 'rating' in fl and 'efficiency' not in fl:
@@ -274,7 +320,7 @@ class SERLContextualVariablesGenerator:
         rnd = random.Random(self.seed + 200)
 
         for puprn in self.puprns:
-            row = {'PUPRN': puprn}
+            row: Dict[str, object] = {'PUPRN': puprn}
             for field in survey_fields[1:]:
                 if field == 'Survey_version':
                     row[field] = rnd.choice(survey_versions)
@@ -324,6 +370,15 @@ class SERLContextualVariablesGenerator:
                     row[field] = rnd.choice(binary_responses)
                 else:
                     row[field] = rnd.choice(missing_codes) if rnd.random() < 0.08 else rnd.choice(multi_choice_responses)
+
+            # Device-aware overrides from config fractions.
+            # These are applied after generic random generation to keep consistency.
+            if 'A1607' in row:
+                row['A1607'] = 1 if puprn in self._hp_households else 0
+            if 'C5' in row:
+                row['C5'] = 1 if puprn in self._ev_households else 2
+            if 'C6' in row:
+                row['C6'] = rnd.choice([1, 2, 3, 4]) if puprn in self._ev_households else -9
             data.append(row)
 
         return pd.DataFrame(data)
@@ -474,29 +529,28 @@ class SERLContextualVariablesGenerator:
             '£40,001 to £50,000','£50,001 to £60,000','£60,001 to £70,000','£70,001 to £80,000',
             '£80,001 to £90,000','£90,0001 to £100,000','Above £100,000','Prefer not to answer'
         ]
-        yes_or_no = ['Yes', 'No', 'No response']
         wfh = ['Always work from home','Sometimes work from home','Never work from home','Not applicable /prefer not to say']
-        evs = ['0','1','2','3 or more',"Don't know"]
 
         rnd = random.Random(self.seed + 400)
         rows = []
         for puprn in self.puprns:
+            has_pv = puprn in self._pv_households
+            has_ev = puprn in self._ev_households
             rows.append({
                 'PUPRN': puprn,
                 'A1_corr_C': (np.nan if rnd.random() < 0.4 else round(rnd.uniform(15, 25), 1)),
                 'A1_err': True if rnd.random() < 0.1 else False,
-                'B3_1_yes': (np.nan if rnd.random() < 0.4 else rnd.choice(yes_or_no)),
-                'B3_4_yes': (np.nan if rnd.random() < 0.4 else rnd.choice(yes_or_no)),
+                'B3_1_yes': ('Yes' if has_pv else 'No'),
+                'B3_4_yes': ('Yes' if has_ev else 'No'),
                 'C1': (np.nan if rnd.random() < 0.4 else rnd.choice(incomes)),
                 'D4': (np.nan if rnd.random() < 0.4 else rnd.choice(wfh)),
-                'D5': (np.nan if rnd.random() < 0.4 else rnd.choice(evs)),
+                'D5': (rnd.choice(['1', '2', '3 or more']) if has_ev else '0'),
             })
         return pd.DataFrame(rows, columns=fields)
 
     # ---------- Exporters list ----------
     def generate_list_of_exporters(self) -> pd.DataFrame:
-        rnd = random.Random(self.seed + 500)
-        exporters = [p for p in self.puprns if rnd.random() < 0.07]
+        exporters = sorted(self._pv_households)
         return pd.DataFrame(exporters, columns=['PUPRN'])
 
     # ---------- Write all ----------

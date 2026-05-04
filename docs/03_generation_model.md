@@ -96,6 +96,15 @@ Outside the heating season (`gas_seasonal < gas_heating_threshold`) gas is zero 
 
 ---
 
+## PV and export generation
+
+- PV households are selected deterministically from the PUPRN list using `devices.pv_fraction`.
+- Only PV households receive non-zero electricity export values (`Elec_act_exp_hh_Wh`, `Elec_react_exp_hh_varh`).
+- Non-PV households have zero export values.
+- Import electricity and gas generation logic is unchanged by PV assignment.
+
+---
+
 ## Edition 07 timestamp rules
 
 | Rule | Implementation |
