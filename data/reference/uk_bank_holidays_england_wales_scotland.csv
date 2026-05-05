@@ -1,0 +1,81 @@
+date,name,england_wales,scotland
+2019-01-01,New Year's Day,true,true
+2019-01-02,2nd January,false,true
+2019-04-19,Good Friday,true,true
+2019-04-22,Easter Monday,true,false
+2019-05-06,Early May Bank Holiday,true,true
+2019-05-27,Spring Bank Holiday,true,true
+2019-08-05,Summer Bank Holiday,false,true
+2019-08-26,Summer Bank Holiday,true,false
+2019-12-02,St Andrew's Day (substitute),false,true
+2019-12-25,Christmas Day,true,true
+2019-12-26,Boxing Day,true,true
+2020-01-01,New Year's Day,true,true
+2020-01-02,2nd January,false,true
+2020-04-10,Good Friday,true,true
+2020-04-13,Easter Monday,true,false
+2020-05-08,Early May Bank Holiday (VE Day 75th),true,true
+2020-05-25,Spring Bank Holiday,true,true
+2020-08-03,Summer Bank Holiday,false,true
+2020-08-31,Summer Bank Holiday,true,false
+2020-11-30,St Andrew's Day,false,true
+2020-12-25,Christmas Day,true,true
+2020-12-28,Boxing Day (substitute),true,true
+2021-01-01,New Year's Day,true,true
+2021-01-04,2nd January (substitute),false,true
+2021-04-02,Good Friday,true,true
+2021-04-05,Easter Monday,true,false
+2021-05-03,Early May Bank Holiday,true,true
+2021-05-31,Spring Bank Holiday,true,true
+2021-08-02,Summer Bank Holiday,false,true
+2021-08-30,Summer Bank Holiday,true,false
+2021-11-30,St Andrew's Day,false,true
+2021-12-27,Christmas Day (substitute),true,true
+2021-12-28,Boxing Day (substitute),true,true
+2022-01-03,New Year's Day (substitute),true,true
+2022-01-04,2nd January (substitute),false,true
+2022-04-15,Good Friday,true,true
+2022-04-18,Easter Monday,true,false
+2022-05-02,Early May Bank Holiday,true,true
+2022-06-02,Spring Bank Holiday (Platinum Jubilee),true,true
+2022-06-03,Platinum Jubilee Bank Holiday,true,true
+2022-08-01,Summer Bank Holiday,false,true
+2022-08-29,Summer Bank Holiday,true,false
+2022-09-19,Bank Holiday for the State Funeral of Queen Elizabeth II,true,true
+2022-11-30,St Andrew's Day,false,true
+2022-12-26,Boxing Day,true,true
+2022-12-27,Christmas Day (substitute),true,true
+2023-01-02,New Year's Day (substitute),true,true
+2023-01-03,2nd January,false,true
+2023-04-07,Good Friday,true,true
+2023-04-10,Easter Monday,true,false
+2023-05-01,Early May Bank Holiday,true,true
+2023-05-08,Coronation of King Charles III,true,true
+2023-05-29,Spring Bank Holiday,true,true
+2023-08-07,Summer Bank Holiday,false,true
+2023-08-28,Summer Bank Holiday,true,false
+2023-11-30,St Andrew's Day,false,true
+2023-12-25,Christmas Day,true,true
+2023-12-26,Boxing Day,true,true
+2024-01-01,New Year's Day,true,true
+2024-01-02,2nd January,false,true
+2024-03-29,Good Friday,true,true
+2024-04-01,Easter Monday,true,false
+2024-05-06,Early May Bank Holiday,true,true
+2024-05-27,Spring Bank Holiday,true,true
+2024-08-05,Summer Bank Holiday,false,true
+2024-08-26,Summer Bank Holiday,true,false
+2024-12-02,St Andrew's Day (substitute),false,true
+2024-12-25,Christmas Day,true,true
+2024-12-26,Boxing Day,true,true
+2025-01-01,New Year's Day,true,true
+2025-01-02,2nd January,false,true
+2025-04-18,Good Friday,true,true
+2025-04-21,Easter Monday,true,false
+2025-05-05,Early May Bank Holiday,true,true
+2025-05-26,Spring Bank Holiday,true,true
+2025-08-04,Summer Bank Holiday,false,true
+2025-08-25,Summer Bank Holiday,true,false
+2025-12-01,St Andrew's Day (substitute),false,true
+2025-12-25,Christmas Day,true,true
+2025-12-26,Boxing Day,true,true

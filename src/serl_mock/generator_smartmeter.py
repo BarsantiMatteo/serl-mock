@@ -546,20 +546,26 @@ class ReadTypeDataQualitySummaryGenerator:
         puprn_grp = {k: g for k, g in df.groupby("PUPRN", sort=False)}
 
         for puprn in self.households:
+            row_max_reads = household_max_reads.get(puprn, max_poss_reads) if household_max_reads else max_poss_reads
+
+            # For meter-gated read types (e.g. gas/export), drop rows entirely
+            # when the household does not have the relevant meter.
+            if row_max_reads <= 0:
+                continue
+
             g = puprn_grp.get(puprn)
 
             if g is None or g.empty:
-                row_max_reads = household_max_reads.get(puprn, max_poss_reads) if household_max_reads else max_poss_reads
                 rows.append({
                     "PUPRN": puprn,
                     "deviceType": device_type,
                     "readType": read_type,
                     "firstValidReadDate": pd.NA,
                     "lastValidReadDate": pd.NA,
-                    "percValid": 0.0 if row_max_reads > 0 else pd.NA,
-                    "percValidOrUnitError": 0.0 if row_max_reads > 0 else pd.NA,
-                    "percMissing": 0.0 if row_max_reads > 0 else pd.NA,
-                    "percError": 0.0 if row_max_reads > 0 else pd.NA,
+                    "percValid": 0.0,
+                    "percValidOrUnitError": 0.0,
+                    "percMissing": 0.0,
+                    "percError": 0.0,
                     "valid": 0,
                     "validOrHHsumValid": 0,
                     "validWrongTime": 0,
@@ -612,17 +618,10 @@ class ReadTypeDataQualitySummaryGenerator:
                 mean_valid = round(float(valid_vals.mean()), 2)
 
             suspicious_zero_n = int(((vals.fillna(np.nan) == 0) & valid_time).sum()) if suspicious_zero else 0
-            row_max_reads = household_max_reads.get(puprn, max_poss_reads) if household_max_reads else max_poss_reads
-            if row_max_reads > 0:
-                perc_valid = round((100.0 * valid_n) / row_max_reads, 2)
-                perc_valid_or_unit_error = round((100.0 * (valid_n + wrong_units)) / row_max_reads, 2)
-                perc_missing = round((100.0 * missing) / row_max_reads, 2)
-                perc_error = round((100.0 * error_n) / row_max_reads, 2)
-            else:
-                perc_valid = pd.NA
-                perc_valid_or_unit_error = pd.NA
-                perc_missing = pd.NA
-                perc_error = pd.NA
+            perc_valid = round((100.0 * valid_n) / row_max_reads, 2)
+            perc_valid_or_unit_error = round((100.0 * (valid_n + wrong_units)) / row_max_reads, 2)
+            perc_missing = round((100.0 * missing) / row_max_reads, 2)
+            perc_error = round((100.0 * error_n) / row_max_reads, 2)
 
             rows.append({
                 "PUPRN": puprn,
