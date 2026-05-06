@@ -97,11 +97,30 @@ uv run python scripts/generate_mock_data.py --skip-weather
 This command generates all mock datasets except ERA5 weather files.
 
 All settings (number of households, time period, random seed, consumption parameters)
-are controlled by a single file:
+are controlled by a single configuration file:
 
-```
-config/serl_mock.yaml
-```
+**[config/serl_mock.yaml](config/serl_mock.yaml)**
+
+Key options you can adjust before running the generator:
+
+| Setting | Description | Default |
+|---|---|---|
+| `n_households` | Number of synthetic households to generate | `100` |
+| `seed` | Random seed for reproducible outputs | `42` |
+| `edition` | Dataset edition suffix used in output filenames | `"08"` |
+| `start_year` / `end_year` | Time period for smart-meter data | `2019` / `2019` |
+| `household_traits.pv_fraction` | Share of households with PV | `0.15` |
+| `household_traits.hp_fraction` | Share of households with a heat pump | `0.07` |
+| `household_traits.ev_fraction` | Share of households with an EV | `0.10` |
+| `household_traits.gas_meter_fraction` | Share of households with a gas meter | `0.85` |
+| `household_traits.export_meter_fraction` | Share of households with an export meter | `0.15` |
+| `profiles.base_elec_mean_wh` | Mean baseline electricity per half-hour period (Wh) | `175` |
+| `profiles.base_gas_mean_wh` | Mean baseline gas at peak heating demand (Wh) | `1500` |
+| `patterns.elec_seasonal_amplitude` | Seasonal swing around annual mean electricity | `0.3` |
+| `patterns.gas_seasonal_amplitude` | Winter gas heating multiplier | `2.0` |
+| `weather.*` | ERA5/CDS download settings (dataset, variables, bounding box) | see file |
+
+See [docs/02_configuration.md](docs/02_configuration.md) for a full description of every option.
 
 ### Weather data (ERA5 via CDS API)
 

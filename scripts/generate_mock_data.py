@@ -4,7 +4,7 @@ Generate mock SERL smart-meter and contextual data.
 Loads settings from config/serl_mock.yaml and produces:
 
   1. puprn_master.csv               — shared household ID list
-    household_traits.csv           — household traits (PV/HP/EV + meter types)
+     household_traits.csv           — household traits (PV/HP/EV + meter types)
   2. Monthly half-hourly CSVs       — realistic electricity and gas time series
                                        with seasonal and intraday patterns
                                        (see src/serl_mock/patterns.py)
