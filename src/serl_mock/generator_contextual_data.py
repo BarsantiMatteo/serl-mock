@@ -83,10 +83,18 @@ class SERLContextualVariablesGenerator:
         # Household-trait fractions are used during household traits generation,
         # not directly in this contextual generator.
 
-        # Survey dictionary path
+        # Survey dictionary paths
         self.survey_dictionary_path = cfg.get(
             "survey_dictionary_path",
             "data/reference/serl_survey_data_dictionary_edition07.csv",
+        )
+        self.followup_survey_dictionary_path = cfg.get(
+            "followup_survey_dictionary_path",
+            "data/reference/serl_follow_up_survey_data_dictionary_edition07.csv",
+        )
+        self.covid19_survey_dictionary_path = cfg.get(
+            "covid19_survey_dictionary_path",
+            "data/reference/serl_covid19_survey_data_dictionary_edition07.csv",
         )
 
         # PUPRN: load from master list or generate deterministically
@@ -359,117 +367,112 @@ class SERLContextualVariablesGenerator:
         return pd.DataFrame(data)
 
     # ---------- COVID-19 survey ----------
-    def generate_covid19_survey(self) -> pd.DataFrame:
-        rnd = random.Random(self.seed + 600)
+    def generate_covid19_survey(self) -> pd.DataFrame:  # noqa: C901
+        # Field list comes from the data dictionary — mirrors how generate_serl_survey works.
+        fields = read_survey_dictionary(self.covid19_survey_dictionary_path)
+
         missing_codes = [-1, -2, -9]
 
-        def maybe_missing(choices, p=0.05):
+        # Fields with a direct option-set lookup.
+        # Branching/routing fields (Q1→Q2, Q3→Q3a, Q11a→Q11b, Q12a→Q12b) are
+        # handled explicitly in the field loop below.
+        _field_opts: Dict[str, List] = {
+            'Q1':  [1, 2, 3, 4, 5, 6, 7],
+            'Q5':  [1, 2, 3, 4, 5],
+            'Q7':  [1, 2, 3],
+            'Q8b': [1, 2, 3, 4],
+            'Q9':  [1, 2, 4],          # 3 not a valid code
+            'Q10': [1, 2, 3, 4],
+            'Q17': [1, 2, 3, 4],
+            'Q18': [1, 4, 5, 6],       # 2 and 3 not valid codes
+            'Q19': [1, 2, 3, 4, 5, 6, 7],
+            'Q21': [1, 2, 3, 4],
+            'Q24': list(range(1, 13)),
+            'Q25': list(range(1, 13)),
+        }
+
+        rnd = random.Random(self.seed + 600)
+
+        def mm(choices, p: float = 0.05):
             return rnd.choice(missing_codes) if rnd.random() < p else rnd.choice(choices)
 
-        data = []
+        rows: List[dict] = []
         for puprn in self.puprns:
-            row: dict = {'PUPRN': puprn}
+            _q1 = None
+            _q3 = None
 
-            # Q1: Smart meter IHD usage frequency during lockdown (1=most days … 7=don't know)
-            row['Q1'] = maybe_missing([1, 2, 3, 4, 5, 6, 7])
+            row: dict = {}
+            for field in fields:
 
-            # Q2: IHD usage vs. pre-lockdown (skip if Q1=6 "I don't have this")
-            row['Q2'] = 4 if row['Q1'] == 6 else maybe_missing([1, 2, 3, 4, 5])
+                # ── PUPRN ─────────────────────────────────────────────────
+                if field == 'PUPRN':
+                    row[field] = puprn
 
-            # Q3: Switched energy tariff/supplier during lockdown
-            q3 = rnd.choice([1, 2])
-            row['Q3'] = q3
+                # ── Q1 (state) / Q2 routed from Q1 ───────────────────────
+                elif field == 'Q1':
+                    v = mm([1, 2, 3, 4, 5, 6, 7])
+                    row[field] = v; _q1 = v
+                elif field == 'Q2':
+                    # Q1=6 means "I don't have this" → Q2 code 4 = same
+                    row[field] = 4 if _q1 == 6 else mm([1, 2, 3, 4, 5])
 
-            # Q3a: Motivations for switching (multi-select binary; only if Q3=1)
-            for i in range(1, 8):
-                row[f'Q3a_{i}'] = rnd.choice([0, 1]) if q3 == 1 else np.nan
+                # ── Q3 (state) / Q3a only applicable if Q3=1 ─────────────
+                elif field == 'Q3':
+                    v = rnd.choice([1, 2])
+                    row[field] = v; _q3 = v
+                elif field.startswith('Q3a_'):
+                    row[field] = rnd.choice([0, 1]) if _q3 == 1 else np.nan
 
-            # Q4: Outdoor/green-space access (multi-select binary)
-            for i in range(1, 7):
-                row[f'Q4_{i}'] = rnd.choice([0, 1])
+                # ── Q4: outdoor-access checkboxes (always answered) ───────
+                elif field.startswith('Q4_'):
+                    row[field] = rnd.choice([0, 1])
 
-            # Q5: Energy conservation effort (1=great deal … 5=don't know)
-            row['Q5'] = maybe_missing([1, 2, 3, 4, 5])
+                # ── Q6: window-opening frequency (non-sequential codes) ───
+                elif field.startswith('Q6_'):
+                    row[field] = mm([7, 14, 15, 16, 17, 18])
 
-            # Q6: Window-opening frequency on cold/warm days
-            # Response codes: 7=always, 14=very often, 15=quite often, 16=not very often, 17=never, 18=don't know
-            for i in range(1, 3):
-                row[f'Q6_{i}'] = maybe_missing([7, 14, 15, 16, 17, 18])
+                # ── Q11a: "don't have appliance" flags ────────────────────
+                elif field.startswith('Q11a_'):
+                    row[field] = rnd.choice([0, 1])
 
-            # Q7: Damp/condensation/mould (1=yes, 2=no, 3=don't know)
-            row['Q7'] = rnd.choice([1, 2, 3])
+                # ── Q11b: appliance use vs pre-lockdown ───────────────────
+                # Skip (NaN) when the household indicated they don't have the
+                # appliance via the corresponding Q11a_2_N_1 flag.
+                elif field.startswith('Q11b_'):
+                    n = field.split('_')[1]
+                    row[field] = (np.nan if row.get(f'Q11a_2_{n}_1') == 1
+                                  else mm([1, 2, 3, 4]))
 
-            # Q8b: Heating hours vs. pre-lockdown (1=more … 4=N/A)
-            row['Q8b'] = maybe_missing([1, 2, 3, 4])
+                # ── Q12a: "don't have device" flags ───────────────────────
+                elif field.startswith('Q12a_'):
+                    row[field] = rnd.choice([0, 1])
 
-            # Q9: Thermostat unit (1=Celsius, 2=Fahrenheit, 4=can't remember/N/A)
-            row['Q9'] = maybe_missing([1, 2, 4])
+                # ── Q12b: device use vs pre-lockdown ──────────────────────
+                elif field.startswith('Q12b_'):
+                    n = field.split('_')[1]
+                    row[field] = (np.nan if row.get(f'Q12a_2_{n}_1') == 1
+                                  else mm([1, 2, 3, 4]))
 
-            # Q10: Number of heated rooms vs. pre-lockdown
-            row['Q10'] = maybe_missing([1, 2, 3, 4])
+                # ── Q22a / Q22b: time-of-day checkboxes (0/1) ────────────
+                elif field.startswith('Q22a_') or field.startswith('Q22b_'):
+                    row[field] = rnd.choice([0, 1])
 
-            # Q11a: "Don't have this appliance" flags
-            # Appliances: 1=baths, 2=showers, 3=washing machine, 4=tumble dryer, 5=dishwasher, 6=cooker/oven/grill
-            for idx in range(1, 7):
-                row[f'Q11a_2_{idx}_1'] = rnd.choice([0, 1])
+                # ── RC1/RC2: research consent; Finished: always answered ──
+                elif field in ('RC1', 'RC2'):
+                    row[field] = rnd.choice([1, 2])
+                elif field == 'Finished':
+                    row[field] = rnd.choice([0, 1])
 
-            # Q11b: Appliance usage frequency vs. pre-lockdown (1=more … 4=don't know)
-            for i in range(1, 7):
-                row[f'Q11b_{i}'] = maybe_missing([1, 2, 3, 4])
+                # ── direct option lookup (with small missing probability) ─
+                elif field in _field_opts:
+                    row[field] = mm(_field_opts[field])
 
-            # Q12a: "Don't have this device" flags
-            # Devices: 1=TV, 2=laptop/computer/tablet, 3=electric gym equipment
-            for idx in range(1, 4):
-                row[f'Q12a_2_{idx}_1'] = rnd.choice([0, 1])
+                else:
+                    row[field] = np.nan
 
-            # Q12b: Device usage duration vs. pre-lockdown (1=more … 4=don't know)
-            for i in range(1, 4):
-                row[f'Q12b_{i}'] = maybe_missing([1, 2, 3, 4])
+            rows.append(row)
 
-            # Q22a: Time-of-day during lockdown for 9 activities × 6 slots (multi-select binary)
-            # Activities: 1=baths, 2=showers, 3=washing machine, 4=tumble dryer,
-            #             5=dishwasher, 6=oven/cooker/grill, 7=TV, 8=laptop/tablet, 9=gym equipment
-            # Slots: 1=4am-7:59am, 2=8am-11:59am, 3=12pm-3:59pm,
-            #        4=4pm-7:59pm, 5=8pm-11:59pm, 6=12am-3:59am
-            for act in range(1, 10):
-                for slot in range(1, 7):
-                    row[f'Q22a_1_{act}_{slot}'] = rnd.choice([0, 1])
-                row[f'Q22a_2_{act}_1'] = rnd.choice([0, 1])  # "don't know" flag
-
-            # Q22b: Time-of-day before lockdown for the same 9 activities × 6 slots
-            for act in range(1, 10):
-                for slot in range(1, 7):
-                    row[f'Q22b_1_{act}_{slot}'] = rnd.choice([0, 1])
-                row[f'Q22b_2_{act}_1'] = rnd.choice([0, 1])  # "don't know" flag
-
-            # Q17: Increased time at home before formal lockdown start
-            row['Q17'] = maybe_missing([1, 2, 3, 4])
-
-            # Q18: Expect to continue spending more time at home (codes: 1,4,5,6)
-            row['Q18'] = maybe_missing([1, 4, 5, 6])
-
-            # Q19: Financial wellbeing (1=living comfortably … 7=prefer not to say)
-            row['Q19'] = maybe_missing([1, 2, 3, 4, 5, 6, 7])
-
-            # Q21: Easing of restrictions caused substantial household changes
-            row['Q21'] = maybe_missing([1, 2, 3, 4])
-
-            # Q24: Usual travel-to-work mode BEFORE lockdown (1=car driver … 12=N/A)
-            row['Q24'] = maybe_missing(list(range(1, 13)))
-
-            # Q25: Usual travel-to-work mode DURING lockdown (1=car driver … 12=N/A)
-            row['Q25'] = maybe_missing(list(range(1, 13)))
-
-            # RC1/RC2: Research consent
-            row['RC1'] = rnd.choice([1, 2])
-            row['RC2'] = rnd.choice([1, 2])
-
-            # Finished indicator (0=FALSE, 1=TRUE)
-            row['Finished'] = rnd.choice([0, 1])
-
-            data.append(row)
-
-        return pd.DataFrame(data)
+        return pd.DataFrame(rows, columns=fields)
 
     # ---------- Participant summary ----------
     def generate_participant_summary(self) -> pd.DataFrame:
@@ -497,30 +500,298 @@ class SERLContextualVariablesGenerator:
         return pd.DataFrame(data, columns=fields)
 
     # ---------- Follow-up survey ----------
-    def generate_follow_up_survey(self) -> pd.DataFrame:
-        fields = ['PUPRN','A1_corr_C','A1_err','B3_1_yes','B3_4_yes','C1','D4','D5']
-        incomes = [
-            'Below £10,000','£10,001 to £20,000','£20,001 to £30,000','£30,001 to £40,000',
-            '£40,001 to £50,000','£50,001 to £60,000','£60,001 to £70,000','£70,001 to £80,000',
-            '£80,001 to £90,000','£90,0001 to £100,000','Above £100,000','Prefer not to answer'
+    def generate_follow_up_survey(self) -> pd.DataFrame:  # noqa: C901
+        # Field list comes from the data dictionary — mirrors how generate_serl_survey works.
+        fields = read_survey_dictionary(self.followup_survey_dictionary_path)
+
+        # ── response-option lists (full text, as in actual SERL data) ─────
+        YES_NO_NR  = ['Yes', 'No', 'No response']
+        FREQ_6     = ['Always', 'Very often', 'Quite often', 'Not very often',
+                      'Never', 'Not applicable, cannot do this']
+        CHANGE_6   = ['A lot more', 'A little more', 'About the same',
+                      'A little less', 'A lot less', 'Not applicable, cannot do this']
+        FREQ_UNOCC = ['Always', 'Very often', 'Quite often', 'Not very often',
+                      'Never', 'Not applicable']
+        A9_OPTS    = [
+            'Yes, some or all have their own source of fuel (e.g., logs, coal, bottled gas etc.)',
+            'No, they are all powered by mains gas or electricity',
+            'No response',
         ]
-        wfh = ['Always work from home','Sometimes work from home','Never work from home','Not applicable /prefer not to say']
+        A10_OPTS   = ['Daily', 'Most days', 'Rarely - only if I/we really have to',
+                      'Never', 'Varies - depends on temperature or other reasons', "Don't know"]
+        A11_OPTS   = ['More often', 'Less often', 'About the same',
+                      "I don't have this", 'It is not working', "Don't know"]
+        A12_OPTS   = ['A great deal of effort', 'Some effort', 'A little effort',
+                      'No effort at all', "Don't know"]
+        BATHROOMS  = ['0', '1', '2', '3', '4 or more']
+        ADD_REP    = ['Has been added or replaced in the last 12 months', 'No']
+        PEOPLE     = ['0 people', '1 person', '2 people', '3 people', '4 or more people']
+        INCOMES    = [
+            'Below £10,000', '£10,001 to £20,000', '£20,001 to £30,000',
+            '£30,001 to £40,000', '£40,001 to £50,000', '£50,001 to £60,000',
+            '£60,001 to £70,000', '£70,001 to £80,000', '£80,001 to £90,000',
+            '£90,0001 to £100,000', 'Above £100,000', 'Prefer not to answer',
+        ]
+        PAYMENT    = [
+            'Direct debit (including online direct debit)',
+            'Payment on receipt of bill (by post, telephone, online or at bank/post office)',
+            'Pre-payment meter', 'Included in rent', 'Other', "Don't know",
+        ]
+        C5_OPTS    = ['Very easy', 'Fairly easy', 'Neither easy nor difficult',
+                      'Fairly difficult', 'Very difficult', "Don't know"]
+        C6_OPTS    = ['Daily', 'Most days', 'Rarely', 'never', "Don't know", 'Prefer not to say']
+        WFH        = ['Always work from home', 'Sometimes work from home',
+                      'Never work from home', 'Not applicable /prefer not to say']
+        E1_OPTS    = ['Living comfortably', 'Doing alright', 'Just about getting by',
+                      'Finding it quite difficult', 'Finding it very difficult',
+                      "Don't know", 'Prefer not to say']
+        MOULD      = ['Minor', 'Substantial', "Don't know"]
+
+        # Fields with a direct option-set lookup (not derivable from name pattern alone).
+        # Branching/stateful fields (A8/A9/A10, B5/B6, C3/C4, D1/D2/D3, D5/D6, E2/E3)
+        # are handled explicitly in the field loop below.
+        _field_opts: Dict[str, List] = {
+            'A2': YES_NO_NR, 'A3': YES_NO_NR, 'A4': YES_NO_NR,
+            'A7': FREQ_UNOCC, 'A11': A11_OPTS, 'A12': A12_OPTS,
+            'B1': BATHROOMS,
+            'C1': INCOMES, 'C2_electricity': PAYMENT,
+            'C5': C5_OPTS, 'C6': C6_OPTS,
+            'D4': WFH,
+            'E1': E1_OPTS,
+            'Collection_method': ['Online', 'Postal'],
+        }
+
+        # B2/B3/B4 sub-field probabilities for *_yes generation
+        _B2_PROBS = {1:0.03, 2:0.70, 3:0.05, 4:0.05, 5:0.01, 6:0.02,
+                     7:0.03, 8:0.01, 9:0.01, 10:0.01, 11:0.01}
+        _B3_PROBS = {2:0.05, 5:0.80, 6:0.70, 7:0.60, 8:0.15, 9:0.03,
+                     10:0.80, 11:0.70, 12:0.30, 13:0.40, 14:0.30, 15:0.35, 16:0.05}
+        _B4_PROBS = {1:0.70, 2:0.50, 3:0.15, 4:0.20, 5:0.85, 6:0.40, 7:0.05}
+
+        _C4_ANSWERS = {
+            'C4_1': 'You feel your home is difficult to heat',
+            'C4_2': 'You feel it is difficult to afford the fuel to heat your home',
+            'C4_3': 'Prefer not to say',
+            'C4_4': 'None of the above',
+            'C4_5': 'Other reason',
+        }
+
+        _D2_DERIVED = {'D2_ignored', 'D2_min_total'}
+        _pcount     = {'0 people': 0, '1 person': 1, '2 people': 2,
+                       '3 people': 3, '4 or more people': 4}
 
         rnd = random.Random(self.seed + 400)
-        rows = []
+
+        def nr(choices, p: float = 0.08):
+            return np.nan if rnd.random() < p else rnd.choice(choices)
+
+        rows: List[dict] = []
         for puprn in self.puprns:
             has_pv = puprn in self._pv_households
+            has_hp = puprn in self._hp_households
             has_ev = puprn in self._ev_households
-            rows.append({
-                'PUPRN': puprn,
-                'A1_corr_C': (np.nan if rnd.random() < 0.4 else round(rnd.uniform(15, 25), 1)),
-                'A1_err': True if rnd.random() < 0.1 else False,
-                'B3_1_yes': ('Yes' if has_pv else 'No'),
-                'B3_4_yes': ('Yes' if has_ev else 'No'),
-                'C1': (np.nan if rnd.random() < 0.4 else rnd.choice(incomes)),
-                'D4': (np.nan if rnd.random() < 0.4 else rnd.choice(wfh)),
-                'D5': (rnd.choice(['1', '2', '3 or more']) if has_ev else '0'),
-            })
+
+            # State tracked across fields for branching and derived computations
+            _a8 = _a9 = _b5 = _c3 = _c4_chosen = None
+            _d1 = None
+            _d2_answered = _d3_answered = None
+            _d2_vals: dict = {}
+            _d3_vals: dict = {}
+
+            row: dict = {}
+            for field in fields:
+
+                # ── PUPRN ─────────────────────────────────────────────────
+                if field == 'PUPRN':
+                    row[field] = puprn
+
+                # ── A1: temperature (internally consistent group) ──────────
+                elif field == 'A1_units':
+                    v = nr(['Celsius', 'Fahrenheit', "Don't know/can't do this"], p=0.12)
+                    row[field] = v
+                elif field == 'A1_degC':
+                    row[field] = (rnd.randint(15, 25)
+                                  if row.get('A1_units') == 'Celsius' else np.nan)
+                elif field == 'A1_degF':
+                    row[field] = (rnd.randint(59, 77)
+                                  if row.get('A1_units') == 'Fahrenheit' else np.nan)
+                elif field == 'A1_corr_C':
+                    u = row.get('A1_units')
+                    if u == 'Celsius':    row[field] = float(row['A1_degC'])
+                    elif u == 'Fahrenheit': row[field] = round((row['A1_degF'] - 32) * 5/9, 1)
+                    else:                  row[field] = np.nan
+                elif field == 'A1_edit':
+                    row[field] = (row.get('A1_units') == 'Fahrenheit')
+                elif field == 'A1_err':
+                    row[field] = (row.get('A1_units') not in ('Celsius', 'Fahrenheit')
+                                  and rnd.random() < 0.05)
+
+                # ── A5 frequency / A6 change ──────────────────────────────
+                elif field.startswith('A5_'):
+                    row[field] = nr(FREQ_6)
+                elif field.startswith('A6_'):
+                    row[field] = nr(CHANGE_6)
+
+                # ── A8/A9/A10: branching on standalone heaters ────────────
+                elif field == 'A8':
+                    v = nr(YES_NO_NR); row[field] = v; _a8 = v
+                elif field == 'A9':
+                    if _a8 == 'No':
+                        row[field] = 'NA'
+                    elif _a8 == 'Yes':
+                        v = nr(A9_OPTS); row[field] = v; _a9 = v
+                    else:
+                        row[field] = 'No response'
+                elif field == 'A10':
+                    if _a8 in (None, 'No'):
+                        row[field] = 'NA'
+                    elif _a9 == 'No, they are all powered by mains gas or electricity':
+                        row[field] = 'NA'
+                    elif _a9 and _a9 != 'No response':
+                        row[field] = nr(A10_OPTS)
+                    else:
+                        row[field] = 'No response'
+
+                # ── B2_N: heating types (HP trait-aligned) ────────────────
+                elif field.startswith('B2_') and field.endswith('_yes'):
+                    n = int(field.split('_')[1])
+                    if n == 5 and has_hp:    row[field] = 'Yes'
+                    elif n == 2 and has_hp:  row[field] = 'No'
+                    else: row[field] = 'Yes' if rnd.random() < _B2_PROBS.get(n, 0.02) else 'No'
+                elif field.startswith('B2_') and field.endswith('_add_rep'):
+                    n = int(field.split('_')[1])
+                    row[field] = (rnd.choice(ADD_REP)
+                                  if row.get(f'B2_{n}_yes') == 'Yes' else 'No')
+                elif field.startswith('B2_') and field.endswith('_err'):
+                    row[field] = rnd.random() < 0.03
+
+                # ── B3_N: technologies (PV/EV trait-aligned) ──────────────
+                elif field.startswith('B3_') and field.endswith('_yes'):
+                    n = int(field.split('_')[1])
+                    if n == 1:    row[field] = 'Yes' if has_pv else 'No'
+                    elif n == 3:  row[field] = 'Yes' if (has_pv and rnd.random() < 0.30) else 'No'
+                    elif n == 4:  row[field] = 'Yes' if has_ev else 'No'
+                    else: row[field] = 'Yes' if rnd.random() < _B3_PROBS.get(n, 0.10) else 'No'
+                elif field.startswith('B3_') and field.endswith('_add_rep'):
+                    n = int(field.split('_')[1])
+                    row[field] = (rnd.choice(ADD_REP)
+                                  if row.get(f'B3_{n}_yes') == 'Yes' else 'No')
+                elif field.startswith('B3_') and field.endswith('_err'):
+                    row[field] = rnd.random() < 0.03
+
+                # ── B4_N: insulation ──────────────────────────────────────
+                elif field.startswith('B4_') and field.endswith('_yes'):
+                    n = int(field.split('_')[1])
+                    row[field] = 'Yes' if rnd.random() < _B4_PROBS.get(n, 0.20) else 'No'
+                elif field.startswith('B4_') and field.endswith('_add_rep'):
+                    n = int(field.split('_')[1])
+                    row[field] = (rnd.choice(ADD_REP)
+                                  if row.get(f'B4_{n}_yes') == 'Yes' else 'No')
+                elif field.startswith('B4_') and field.endswith('_err'):
+                    row[field] = rnd.random() < 0.03
+
+                # ── B5 (state) / B6 (branching) ───────────────────────────
+                elif field == 'B5':
+                    v = nr(['Yes', 'No', "Don't know"]); row[field] = v; _b5 = v
+                elif field.startswith('B6_'):
+                    if _b5 == 'Yes':                     row[field] = rnd.choice(MOULD + ['No'])
+                    elif _b5 in ('No', "Don't know"):    row[field] = 'NA'
+                    else:                                row[field] = 'No response'
+
+                # ── C2_gas: not applicable without a gas supply ───────────
+                elif field == 'C2_gas':
+                    has_gas = (row.get('B2_2_yes') == 'Yes' or row.get('B2_9_yes') == 'Yes')
+                    row[field] = nr(PAYMENT) if has_gas else 'Not applicable / no mains gas'
+
+                # ── C3 (state) / C4 (branching) ───────────────────────────
+                elif field == 'C3':
+                    v = nr(['Yes', 'No', "Don't know", 'No response'])
+                    row[field] = v; _c3 = v
+                elif field.startswith('C4_'):
+                    if _c3 == 'No':
+                        if _c4_chosen is None:
+                            _c4_chosen = rnd.choice(list(_C4_ANSWERS))
+                        row[field] = (_C4_ANSWERS[field] if field == _c4_chosen else 'No')
+                    else:
+                        row[field] = 'NA'
+
+                # ── D1 (state) / D1_flag (derived) ───────────────────────
+                elif field == 'D1':
+                    v = rnd.randint(1, 5) if rnd.random() < 0.92 else np.nan
+                    row[field] = v; _d1 = v
+                elif field == 'D1_flag':
+                    d1_nan = isinstance(_d1, float) and math.isnan(_d1)
+                    d2_min = (sum(_pcount.get(v, 0) for v in _d2_vals.values())
+                              if _d2_vals else None)
+                    row[field] = d1_nan or (
+                        d2_min is not None and not d1_nan and d2_min != _d1)
+
+                # ── D2 age groups (all-or-nothing answered) ───────────────
+                elif field.startswith('D2_') and field not in _D2_DERIVED:
+                    if _d2_answered is None:
+                        _d2_answered = rnd.random() < 0.88
+                    v = rnd.choice(PEOPLE) if _d2_answered else 'No response'
+                    row[field] = v; _d2_vals[field] = v
+                elif field == 'D2_ignored':
+                    row[field] = not bool(_d2_answered)
+                elif field == 'D2_min_total':
+                    row[field] = (sum(_pcount.get(v, 0) for v in _d2_vals.values())
+                                  if _d2_answered else np.nan)
+
+                # ── D3 working situation (all-or-nothing answered) ────────
+                elif field.startswith('D3_') and field.split('_')[1].isdigit():
+                    if _d3_answered is None:
+                        _d3_answered = rnd.random() < 0.88
+                    v = rnd.choice(PEOPLE) if _d3_answered else 'No response'
+                    row[field] = v; _d3_vals[field] = v
+                elif field in ('D3_flag_high', 'D3_flag_low'):
+                    row[field] = False
+                elif field == 'D3_ignored':
+                    row[field] = not bool(_d3_answered)
+                elif field == 'D3_total_over16':
+                    row[field] = (
+                        sum(_pcount.get(_d3_vals.get(f'D3_{i}', '0 people'), 0)
+                            for i in range(1, 7))
+                        if _d3_answered else np.nan)
+
+                # ── D4_flag (derived from D3 + D4) ───────────────────────
+                elif field == 'D4_flag':
+                    if not _d3_answered:
+                        row[field] = False
+                    else:
+                        working = sum(_pcount.get(_d3_vals.get(f'D3_{i}', '0 people'), 0)
+                                      for i in (1, 2, 5))
+                        d4 = row.get('D4')
+                        d4_answered = not (d4 is None or
+                                           isinstance(d4, float) and math.isnan(d4))
+                        row[field] = (working == 0 and d4_answered)
+
+                # ── D5/D6: EVs (trait-aligned, D6 ≤ D5) ─────────────────
+                elif field == 'D5':
+                    row[field] = rnd.choice(['1', '2', '3 or more']) if has_ev else '0'
+                elif field == 'D6':
+                    d5_n = {'0':0,'1':1,'2':2,'3 or more':3}.get(row.get('D5','0'), 0)
+                    row[field] = '0' if d5_n == 0 else rnd.choice(['0', '1'])
+                elif field == 'D6_err':
+                    row[field] = False
+
+                # ── E2/E3: numeric satisfaction scales ────────────────────
+                elif field == 'E2':
+                    row[field] = nr([str(i) for i in range(11)], p=0.08)
+                elif field == 'E3':
+                    row[field] = nr([str(i) for i in range(10)] + ['11'], p=0.08)
+
+                # ── fields with a direct option lookup ────────────────────
+                elif field in _field_opts:
+                    p = 0.35 if field == 'C1' else 0.08
+                    row[field] = nr(_field_opts[field], p=p)
+
+                # ── fallback: any unrecognised derived flag ────────────────
+                else:
+                    row[field] = False
+
+            rows.append(row)
+
         return pd.DataFrame(rows, columns=fields)
 
     # ---------- Exporters list ----------
