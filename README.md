@@ -1,4 +1,8 @@
-﻿# serl-mock
+﻿<p align="center">
+  <img src="docs/serl-mock_logo.png" alt="serl-mock logo" width="400"/>
+</p>
+
+# serl-mock
 
 A lightweight Python package that generates mock datasets matching the structure
 and naming conventions of the **SERL (Smart Energy Research Lab) Observatory** data Edition08 release.
