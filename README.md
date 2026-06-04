@@ -61,9 +61,10 @@ serl-mock/
 │   ├── serl_climate_data_edition08/           # Populated only when weather download is enabled
 │   │   ├── serl_climate_data_<YYYY>_<MM>_edition08.nc
 │   │   └── serl_climate_data_<YYYY>_<MM>_edition08.csv
-│   ├── serl_aggregated_data/              # Not yet generated (TODO)
+│   ├── serl_aggregated_data/                  # placeholder
 │   └── mock_internal/
 │       ├── puprn_master.csv
+│       ├── household_traits.csv
 │       └── Elec_2023_list_of_exporter_puprns_edition08.csv
 └── pyproject.toml
 ```
@@ -103,8 +104,14 @@ cd serl-mock
 
 2. Install uv (if not already installed):
 
+**Windows (PowerShell):**
 ```bash
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+**macOS / Linux:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 3. Sync the project environment:
@@ -200,14 +207,14 @@ The output files are for **pipeline testing and local development only**. They d
 
 If you use this package in your work, please cite it using the Zenodo DOI:
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20544814.svg)](https://doi.org/10.5281/zenodo.20544814)
 
 ```bibtex
 @software{serl_mock,
   author  = {Barsanti, Matteo},
-  title   = {serl-mock: Mock SERL Observatory data for pipeline development and testing},
+  title   = {serl-mock: Dummy version of SERL Observatory data for pipeline development and testing},
   year    = {2026},
-  doi     = {10.5281/zenodo.XXXXXXX},
+  doi     = {10.5281/zenodo.20544814},
   url     = {https://github.com/BarsantiMatteo/serl-mock}
 }
 ```
