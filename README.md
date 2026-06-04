@@ -13,38 +13,59 @@ Use it to build and test analysis pipelines locally, without needing access to t
 
 ## What is generated
 
-Running the pipeline writes outputs under `data/mock/` with this structure:
+Running the pipeline writes outputs under `data/mock/`. The full repository layout is:
 
 ```text
-data/mock/
-	bst_dates_to_2030.csv
-	serl_survey_data_dictionary_edition08.csv
-	serl_covid19_survey_data_dictionary_edition08.csv
-	serl_tariff_data_edition08.csv
-	serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv
-
-	serl_epc_data_edition08.csv
-	serl_survey_data_edition08.csv
-	serl_covid19_survey_data_edition08.csv
-	serl_participant_summary_edition08.csv
-	serl_2023_follow_up_survey_data_edition08.csv
-	serl_smart_meter_rt_summary_edition08.csv
-
-	serl_smart_meter_hh_edition08/
-		serl_half_hourly_<YYYY>_<MM>_edition08.csv
-
-	serl_smart_meter_daily_edition08/
-		serl_smart_meter_daily_<YYYY>_edition08.csv
-
-	serl_climate_data_edition08/
-		serl_climate_data_<YYYY>_<MM>_edition08.nc
-		serl_climate_data_<YYYY>_<MM>_edition08.csv
-
-	serl_aggregated_data/
-
-	mock_internal/
-		puprn_master.csv
-		Elec_2023_list_of_exporter_puprns_edition08.csv
+serl-mock/
+├── config/
+│   └── serl_mock.yaml                         # Central configuration (households, seed, edition, profiles…)
+├── docs/
+│   ├── 00_overview.md                         # Project overview and key concepts
+│   ├── 01_structure.md                        # Module descriptions
+│   ├── 02_configuration.md                    # Full configuration reference
+│   ├── 03_generation_model.md                 # How smart-meter values are synthesised
+│   ├── 04_metadata.md                         # SERL column reference
+│   └── documentation/                         # Official SERL dataset PDFs
+├── notebooks/
+│   └── explore_mock_data.ipynb
+├── scripts/
+│   ├── generate_mock_data.py                  # Main entry point — runs the full pipeline
+│   └── generate_bank_holidays_csv.py
+├── src/
+│   └── serl_mock/
+│       ├── generator_contextual_data.py       # EPC, survey, participant summary generators
+│       ├── generator_household_traits.py      # Household trait assignment (PV, HP, EV…)
+│       ├── generator_smartmeter.py            # Half-hourly and daily smart-meter generators
+│       ├── ids.py                             # PUPRN generation and management
+│       ├── paths.py                           # Output path helpers
+│       ├── patterns.py                        # Seasonal and diurnal load patterns
+│       ├── profiles.py                        # Per-household consumption profiles
+│       ├── utils.py                           # Shared utilities
+│       └── weather_downloader.py              # ERA5/CDS download and conversion
+├── data/mock/                                 # Generated output (created at runtime)
+│   ├── bst_dates_to_2030.csv
+│   ├── serl_survey_data_dictionary_edition08.csv
+│   ├── serl_covid19_survey_data_dictionary_edition08.csv
+│   ├── serl_tariff_data_edition08.csv
+│   ├── serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv
+│   ├── serl_epc_data_edition08.csv
+│   ├── serl_survey_data_edition08.csv
+│   ├── serl_covid19_survey_data_edition08.csv
+│   ├── serl_participant_summary_edition08.csv
+│   ├── serl_2023_follow_up_survey_data_edition08.csv
+│   ├── serl_smart_meter_rt_summary_edition08.csv
+│   ├── serl_smart_meter_hh_edition08/
+│   │   └── serl_half_hourly_<YYYY>_<MM>_edition08.csv
+│   ├── serl_smart_meter_daily_edition08/
+│   │   └── serl_smart_meter_daily_<YYYY>_edition08.csv
+│   ├── serl_climate_data_edition08/           # Populated only when weather download is enabled
+│   │   ├── serl_climate_data_<YYYY>_<MM>_edition08.nc
+│   │   └── serl_climate_data_<YYYY>_<MM>_edition08.csv
+│   ├── serl_aggregated_data/              # Not yet generated (TODO)
+│   └── mock_internal/
+│       ├── puprn_master.csv
+│       └── Elec_2023_list_of_exporter_puprns_edition08.csv
+└── pyproject.toml
 ```
 
 Notes:
@@ -171,6 +192,38 @@ uv run python scripts/generate_mock_data.py --skip-weather
 
 ## Generated data is not real
 
-The output files are for **pipeline testing and local development only**. They do not
-represent real households or real consumption, and should never be used for analysis
-or reporting.
+The output files are for **pipeline testing and local development only**. They do not represent real households or real consumption, and should never be used for analysis or reporting.
+
+---
+
+## Citation
+
+If you use this package in your work, please cite it using the Zenodo DOI:
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+
+```bibtex
+@software{serl_mock,
+  author  = {Barsanti, Matteo},
+  title   = {serl-mock: Mock SERL Observatory data for pipeline development and testing},
+  year    = {2026},
+  doi     = {10.5281/zenodo.XXXXXXX},
+  url     = {https://github.com/BarsantiMatteo/serl-mock}
+}
+```
+
+
+---
+
+## Contributing
+
+Bug reports, suggestions, and pull requests are welcome.
+
+- **Questions or feedback** — open a [GitHub issue](https://github.com/BarsantiMatteo/serl-mock/issues) or email [m.barsanti@ucl.ac.uk](mailto:m.barsanti@ucl.ac.uk).
+- **Bug fixes or improvements** — fork the repository, make your changes on a branch, and open a pull request against `master`.
+
+---
+
+## License
+
+This project is released under the [MIT License](LICENSE).

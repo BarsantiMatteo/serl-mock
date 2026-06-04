@@ -23,7 +23,7 @@ Running the pipeline produces the following files under `data/mock/`:
 | `serl_smart_meter_daily_edition08/` | One CSV per calendar year with daily electricity and gas readings |
 | `serl_smart_meter_rt_summary_edition08.csv` | Read-type data quality summary (one row per PUPRN/read type) |
 | `serl_climate_data_edition08/` | One CSV per calendar month with hourly ERA5 weather data |
-| `epc_data_edition08.csv` | EPC (Energy Performance Certificate) records |
+| `serl_epc_data_edition08.csv` | EPC (Energy Performance Certificate) records |
 | `serl_survey_data_edition08.csv` | Household survey responses |
 | `serl_participant_summary_edition08.csv` | Region, LSOA, ERA5 grid cell and deprivation index per household |
 | `serl_2023_follow_up_survey_data_edition08.csv` | Follow-up survey responses |
