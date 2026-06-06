@@ -207,7 +207,7 @@ The output files are for **pipeline testing and local development only**. They d
 
 If you use this package in your work, please cite it using the Zenodo DOI:
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20544814.svg)](https://doi.org/10.5281/zenodo.20544814)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20544814-blue)](https://doi.org/10.5281/zenodo.20544814)
 
 ```bibtex
 @software{serl_mock,
@@ -233,4 +233,4 @@ Bug reports, suggestions, and pull requests are welcome.
 
 ## License
 
-This project is released under the [MIT License](LICENSE).
+This project is released under the [MIT License](https://opensource.org/license/mit).
