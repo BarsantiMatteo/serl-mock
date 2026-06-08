@@ -207,14 +207,14 @@ The output files are for **pipeline testing and local development only**. They d
 
 If you use this package in your work, please cite it using the Zenodo DOI:
 
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20544814-blue)](https://doi.org/10.5281/zenodo.20544814)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20544813-blue)](https://doi.org/10.5281/zenodo.20544813)
 
 ```bibtex
 @software{serl_mock,
   author  = {Barsanti, Matteo},
   title   = {serl-mock: Dummy version of SERL Observatory data for pipeline development and testing},
   year    = {2026},
-  doi     = {10.5281/zenodo.20544814},
+  doi     = {10.5281/zenodo.20544813},
   url     = {https://github.com/BarsantiMatteo/serl-mock}
 }
 ```
