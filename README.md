@@ -42,6 +42,7 @@ serl-mock/
 │       ├── profiles.py                        # Per-household consumption profiles
 │       ├── utils.py                           # Shared utilities
 │       └── weather_downloader.py              # ERA5/CDS download and conversion
+│
 ├── data/mock/                                 # Generated output (created at runtime)
 │   ├── bst_dates_to_2030.csv
 │   ├── serl_survey_data_dictionary_edition08.csv

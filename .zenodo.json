@@ -11,8 +11,9 @@
   "keywords": [
     "SERL",
     "smart meter",
+    "contextual data",
     "mock data",
-    "synthetic data",
-    "energy"
+    "energy consumption",
+    "pipeline development"
   ]
 }
