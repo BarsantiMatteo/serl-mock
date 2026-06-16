@@ -629,9 +629,28 @@ class SERLContextualVariablesGenerator:
             'C4_5': 'Other reason',
         }
 
-        _D2_DERIVED = {'D2_ignored', 'D2_min_total'}
-        _pcount     = {'0 people': 0, '1 person': 1, '2 people': 2,
-                       '3 people': 3, '4 or more people': 4}
+        _D2_DERIVED  = {'D2_ignored', 'D2_min_total'}
+        _D2_FIELDS   = ['D2_0_5', 'D2_6-15', 'D2_16-24', 'D2_24_44',
+                        'D2_45-64', 'D2_65_74', 'D2_75_85', 'D2_85plus']
+        _D2_WEIGHTS  = [0.05, 0.10, 0.09, 0.30, 0.27, 0.11, 0.06, 0.02]
+        _D3_WEIGHTS  = [0.35, 0.20, 0.12, 0.05, 0.08, 0.20]   # D3_1..D3_6
+        _D2_OVER16   = ['D2_16-24', 'D2_24_44', 'D2_45-64',
+                        'D2_65_74', 'D2_75_85', 'D2_85plus']
+        _pcount      = {'0 people': 0, '1 person': 1, '2 people': 2,
+                        '3 people': 3, '4 or more people': 4}
+
+        def _spread(total: int, weights: list) -> list:
+            """Distribute `total` people across len(weights) buckets by sampling."""
+            counts = [0] * len(weights)
+            for _ in range(total):
+                r = rnd.random(); cum = 0.0
+                for i, w in enumerate(weights):
+                    cum += w
+                    if r < cum:
+                        counts[i] += 1; break
+                else:
+                    counts[-1] += 1
+            return counts
 
         rnd = random.Random(self.seed + 400)
 
@@ -650,6 +669,8 @@ class SERLContextualVariablesGenerator:
             _d2_answered = _d3_answered = None
             _d2_vals: dict = {}
             _d3_vals: dict = {}
+            _d2_distribution: dict = {}
+            _d3_distribution: dict = {}
 
             row: dict = {}
             for field in fields:
@@ -783,7 +804,15 @@ class SERLContextualVariablesGenerator:
                 elif field.startswith('D2_') and field not in _D2_DERIVED:
                     if _d2_answered is None:
                         _d2_answered = rnd.random() < 0.88
-                    v = rnd.choice(PEOPLE) if _d2_answered else 'No response'
+                        if _d2_answered:
+                            d1_nan = _d1 is None or (isinstance(_d1, float) and math.isnan(_d1))
+                            total = rnd.randint(1, 5) if d1_nan else int(_d1)
+                            counts = _spread(total, _D2_WEIGHTS)
+                            _d2_distribution = dict(zip(_D2_FIELDS, counts))
+                    if _d2_answered:
+                        v = PEOPLE[min(_d2_distribution.get(field, 0), 4)]
+                    else:
+                        v = 'No response'
                     row[field] = v; _d2_vals[field] = v
                 elif field == 'D2_ignored':
                     row[field] = not bool(_d2_answered)
@@ -795,7 +824,19 @@ class SERLContextualVariablesGenerator:
                 elif field.startswith('D3_') and field.split('_')[1].isdigit():
                     if _d3_answered is None:
                         _d3_answered = rnd.random() < 0.88
-                    v = rnd.choice(PEOPLE) if _d3_answered else 'No response'
+                        if _d3_answered:
+                            if _d2_distribution:
+                                over16 = sum(_d2_distribution.get(f, 0) for f in _D2_OVER16)
+                            elif _d1 is not None and not (isinstance(_d1, float) and math.isnan(_d1)):
+                                over16 = max(1, round(int(_d1) * 0.75))
+                            else:
+                                over16 = rnd.randint(1, 4)
+                            counts = _spread(over16, _D3_WEIGHTS)
+                            _d3_distribution = {f'D3_{i+1}': counts[i] for i in range(6)}
+                    if _d3_answered:
+                        v = PEOPLE[min(_d3_distribution.get(field, 0), 4)]
+                    else:
+                        v = 'No response'
                     row[field] = v; _d3_vals[field] = v
                 elif field in ('D3_flag_high', 'D3_flag_low'):
                     row[field] = False
