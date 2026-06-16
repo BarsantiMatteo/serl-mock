@@ -298,6 +298,20 @@ class SERLContextualVariablesGenerator:
         binary_responses = [0, 1]
         multi_choice_responses = [1, 2, 3, 4, 5]
         missing_codes = [-1, -2, -9]
+        # Per-field valid missing codes, derived from serl_survey_data_dictionary.
+        # Fields not listed here fall back to missing_codes.
+        _field_missing: Dict[str, List] = {
+            'A1':    [-2], 'A6': [-2], 'A7': [-9, -2], 'A10': [-2], 'A11': [-2],
+            'A14':   [-2, -1], 'A1501': [-2, -1], 'A1502': [-2, -1],
+            'A401':  [-9], 'A402': [-9], 'A403': [-9],
+            'A404':  [-9], 'A405': [-9], 'A406': [-9],
+            'B2':    [-2], 'B3': [-9, -2], 'B6': [-2, -4], 'B7': [-2, -1], 'B8': [-2, -1],
+            'C1':    [-2],
+            'C301':  [-2], 'C302': [-2], 'C303': [-2],
+            'C304':  [-2], 'C305': [-2], 'C306': [-2], 'C307': [-2],
+            'C4':    [-2, -1],
+            'D1':    [-9, -2], 'D2': [-9, -3, -2], 'D3': [-9, -3, -2],
+        }
 
         data = []
         rnd = random.Random(self.seed + 200)
@@ -323,13 +337,13 @@ class SERLContextualVariablesGenerator:
                 elif field == 'B5_err':
                     row[field] = 0
                 elif field == 'B9':
-                    row[field] = rnd.randint(-2, 7)
+                    row[field] = rnd.choice([-2, -1]) if rnd.random() < 0.1 else rnd.randint(1, 7)
                 elif field == 'C1_new':
                     row[field] = rnd.choice([1, 2, 3])
                 elif field == 'C5':
                     row[field] = rnd.randint(-2, 2)
                 elif field == 'D4':
-                    row[field] = rnd.randint(-3, 5)
+                    row[field] = rnd.choice([-3, -2, -1]) if rnd.random() < 0.15 else rnd.randint(1, 5)
                 elif field.startswith('A3'):
                     if not field.endswith('_err'):
                         row[field] = rnd.choice([0, 1])
@@ -342,13 +356,13 @@ class SERLContextualVariablesGenerator:
                 elif field.endswith('_err') or field.endswith('_edit'):
                     row[field] = rnd.choice([True, False])
                 elif field.startswith('A') and field[1:].isdigit():
-                    row[field] = rnd.choice(missing_codes) if rnd.random() < 0.1 else rnd.choice(multi_choice_responses)
+                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.1 else rnd.choice(multi_choice_responses)
                 elif field.startswith('B') and field[1:].isdigit():
-                    row[field] = rnd.choice(missing_codes) if rnd.random() < 0.05 else rnd.choice(multi_choice_responses)
+                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.05 else rnd.choice(multi_choice_responses)
                 elif field.startswith('C') and field[1:].isdigit():
-                    row[field] = rnd.choice(missing_codes) if rnd.random() < 0.05 else rnd.randint(0, 15)
+                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.05 else rnd.randint(0, 15)
                 elif field.startswith('D') and field[1:].isdigit():
-                    row[field] = rnd.choice(missing_codes) if rnd.random() < 0.15 else rnd.choice(multi_choice_responses)
+                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.15 else rnd.choice(multi_choice_responses)
                 elif field.endswith('01') or field.endswith('02') or field.endswith('03'):
                     row[field] = rnd.choice(binary_responses)
                 else:

@@ -5,7 +5,7 @@
 # -------------------------
 # Global
 # -------------------------
-n_households: 100
+n_households: 200
 seed: 42  # Random seed for reproducibility of synthetic data generation
 edition: "08"
 
