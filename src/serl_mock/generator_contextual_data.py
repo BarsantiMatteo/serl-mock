@@ -302,15 +302,40 @@ class SERLContextualVariablesGenerator:
         # Fields not listed here fall back to missing_codes.
         _field_missing: Dict[str, List] = {
             'A1':    [-2], 'A6': [-2], 'A7': [-9, -2], 'A10': [-2], 'A11': [-2],
+            'A13_01': [-2], 'A13_02': [-2],
             'A14':   [-2, -1], 'A1501': [-2, -1], 'A1502': [-2, -1],
             'A401':  [-9], 'A402': [-9], 'A403': [-9],
             'A404':  [-9], 'A405': [-9], 'A406': [-9],
             'B2':    [-2], 'B3': [-9, -2], 'B6': [-2, -4], 'B7': [-2, -1], 'B8': [-2, -1],
-            'C1':    [-2],
             'C301':  [-2], 'C302': [-2], 'C303': [-2],
             'C304':  [-2], 'C305': [-2], 'C306': [-2], 'C307': [-2],
             'C4':    [-2, -1],
             'D1':    [-9, -2], 'D2': [-9, -3, -2], 'D3': [-9, -3, -2],
+        }
+        # Per-field valid (non-missing) options, derived from serl_survey_data_dictionary.
+        # Fields not listed here fall back to multi_choice_responses.
+        _field_opts: Dict[str, List] = {
+            'A1':    [1, 2],
+            'A2':    [1, 2, 3, 4],
+            'A5':    [1, 2, 3],
+            'A6':    [1, 2],
+            'A7':    [1, 2],
+            'A8':    [1, 2, 3, 4, 5],
+            **{f'A9{i:02d}': [0, 1] for i in range(1, 8)},
+            'A10':   [1, 2, 3, 4, 5, 6],
+            'A11':   [1, 2],
+            'A14':   [1, 2, 3, 4],
+            'A1501': [1, 2, 3, 4, 5],
+            'A1502': [1, 2, 3, 4, 5],
+            **{f'A4{i:02d}': [0, 1] for i in range(1, 7)},
+            **{f'A16{i:02d}': [0, 1] for i in range(1, 11)},
+            'B2':    [1, 2],
+            'B7':    [1, 2],
+            'B8':    [1, 2],
+            **{f'B10{i:02d}': [0, 1] for i in range(1, 15)},
+            'D1':    [1, 2, 3, 4, 5, 6, 7],
+            'D2':    [1, 2, 3],
+            'D3':    [1, 2, 3, 4, 5, 6, 7],
         }
 
         data = []
@@ -340,6 +365,8 @@ class SERLContextualVariablesGenerator:
                     row[field] = rnd.choice([-2, -1]) if rnd.random() < 0.1 else rnd.randint(1, 7)
                 elif field == 'C1_new':
                     row[field] = rnd.choice([1, 2, 3])
+                elif field == 'C1':
+                    row[field] = -2 if rnd.random() < 0.05 else rnd.randint(1, 8)
                 elif field == 'C5':
                     row[field] = rnd.randint(-2, 2)
                 elif field == 'D4':
@@ -349,6 +376,12 @@ class SERLContextualVariablesGenerator:
                         row[field] = rnd.choice([0, 1])
                     else:
                         row[field] = True if rnd.random() < 0.1 else False
+                elif field.startswith('A12_'):
+                    row[field] = rnd.choice([0, 1])
+                elif field.startswith('A13_'):
+                    row[field] = rnd.choice(_field_missing.get(field, [-2])) if rnd.random() < 0.1 else rnd.choice([1, 2, 3, 4, 5, 6])
+                elif field.startswith('C2_'):
+                    row[field] = -2 if rnd.random() < 0.05 else rnd.randint(0, 3)
                 elif '_text' in field.lower() or '_other' in field.lower():
                     row[field] = f"Sample text for {field}"
                 elif field.endswith('_sum') or field.endswith('_diff'):
@@ -356,13 +389,13 @@ class SERLContextualVariablesGenerator:
                 elif field.endswith('_err') or field.endswith('_edit'):
                     row[field] = rnd.choice([True, False])
                 elif field.startswith('A') and field[1:].isdigit():
-                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.1 else rnd.choice(multi_choice_responses)
+                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.1 else rnd.choice(_field_opts.get(field, multi_choice_responses))
                 elif field.startswith('B') and field[1:].isdigit():
-                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.05 else rnd.choice(multi_choice_responses)
+                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.05 else rnd.choice(_field_opts.get(field, multi_choice_responses))
                 elif field.startswith('C') and field[1:].isdigit():
                     row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.05 else rnd.randint(0, 15)
                 elif field.startswith('D') and field[1:].isdigit():
-                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.15 else rnd.choice(multi_choice_responses)
+                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.15 else rnd.choice(_field_opts.get(field, multi_choice_responses))
                 elif field.endswith('01') or field.endswith('02') or field.endswith('03'):
                     row[field] = rnd.choice(binary_responses)
                 else:
@@ -544,7 +577,7 @@ class SERLContextualVariablesGenerator:
             'Below £10,000', '£10,001 to £20,000', '£20,001 to £30,000',
             '£30,001 to £40,000', '£40,001 to £50,000', '£50,001 to £60,000',
             '£60,001 to £70,000', '£70,001 to £80,000', '£80,001 to £90,000',
-            '£90,0001 to £100,000', 'Above £100,000', 'Prefer not to answer',
+            '£90,001 to £100,000', 'Above £100,000', 'Prefer not to answer',
         ]
         PAYMENT    = [
             'Direct debit (including online direct debit)',
@@ -675,7 +708,7 @@ class SERLContextualVariablesGenerator:
                 elif field.startswith('B2_') and field.endswith('_add_rep'):
                     n = int(field.split('_')[1])
                     row[field] = (rnd.choice(ADD_REP)
-                                  if row.get(f'B2_{n}_yes') == 'Yes' else 'No')
+                                  if row.get(f'B2_{n}_yes') == 'Yes' else 'NA')
                 elif field.startswith('B2_') and field.endswith('_err'):
                     row[field] = rnd.random() < 0.03
 
@@ -689,7 +722,7 @@ class SERLContextualVariablesGenerator:
                 elif field.startswith('B3_') and field.endswith('_add_rep'):
                     n = int(field.split('_')[1])
                     row[field] = (rnd.choice(ADD_REP)
-                                  if row.get(f'B3_{n}_yes') == 'Yes' else 'No')
+                                  if row.get(f'B3_{n}_yes') == 'Yes' else 'NA')
                 elif field.startswith('B3_') and field.endswith('_err'):
                     row[field] = rnd.random() < 0.03
 
@@ -700,7 +733,7 @@ class SERLContextualVariablesGenerator:
                 elif field.startswith('B4_') and field.endswith('_add_rep'):
                     n = int(field.split('_')[1])
                     row[field] = (rnd.choice(ADD_REP)
-                                  if row.get(f'B4_{n}_yes') == 'Yes' else 'No')
+                                  if row.get(f'B4_{n}_yes') == 'Yes' else 'NA')
                 elif field.startswith('B4_') and field.endswith('_err'):
                     row[field] = rnd.random() < 0.03
 
@@ -708,7 +741,7 @@ class SERLContextualVariablesGenerator:
                 elif field == 'B5':
                     v = nr(['Yes', 'No', "Don't know"]); row[field] = v; _b5 = v
                 elif field.startswith('B6_'):
-                    if _b5 == 'Yes':                     row[field] = rnd.choice(MOULD + ['No'])
+                    if _b5 == 'Yes':                     row[field] = rnd.choice(MOULD)
                     elif _b5 in ('No', "Don't know"):    row[field] = 'NA'
                     else:                                row[field] = 'No response'
 
@@ -782,10 +815,14 @@ class SERLContextualVariablesGenerator:
 
                 # ── D5/D6: EVs (trait-aligned, D6 ≤ D5) ─────────────────
                 elif field == 'D5':
-                    row[field] = rnd.choice(['1', '2', '3 or more']) if has_ev else '0'
+                    row[field] = (rnd.choice(['1', '2', '3 or more']) if has_ev
+                                  else rnd.choice(['0', "Don't know"]) if rnd.random() < 0.02
+                                  else '0')
                 elif field == 'D6':
                     d5_n = {'0':0,'1':1,'2':2,'3 or more':3}.get(row.get('D5','0'), 0)
-                    row[field] = '0' if d5_n == 0 else rnd.choice(['0', '1'])
+                    row[field] = ('0' if d5_n == 0
+                                  else rnd.choice(['0', '1', '2', '3 or more'])
+                                  if d5_n >= 3 else rnd.choice(['0'] + [str(i) for i in range(1, d5_n+1)]))
                 elif field == 'D6_err':
                     row[field] = False
 
