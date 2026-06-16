@@ -121,6 +121,7 @@ def run_all(skip_weather: bool = False, survey_only: bool = False):
             ev_fraction=float(traits_cfg.get("ev_fraction", 0.0)),
             gas_meter_fraction=float(traits_cfg.get("gas_meter_fraction", 0.85)),
             export_meter_fraction=float(traits_cfg.get("export_meter_fraction", 0.15)),
+            solar_thermal_fraction=float(traits_cfg.get("solar_thermal_fraction", 0.0)),
             seed=cfg.get("seed", 42),
             edition=edition,
         )
@@ -129,6 +130,7 @@ def run_all(skip_weather: bool = False, survey_only: bool = False):
         print(f"    PV households: {(traits_df['has_pv'] == 1).sum()}")
         print(f"    HP households: {(traits_df['has_hp'] == 1).sum()}")
         print(f"    EV households: {(traits_df['has_ev'] == 1).sum()}")
+        print(f"    Solar thermal households: {(traits_df['has_solar_thermal'] == 1).sum()}")
         print(f"    Gas meter households: {(traits_df['has_gas_meter'] == 1).sum()}")
         print(f"    Export meter households: {(traits_df['has_export_meter'] == 1).sum()}")
 

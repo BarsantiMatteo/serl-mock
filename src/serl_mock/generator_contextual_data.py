@@ -113,6 +113,10 @@ class SERLContextualVariablesGenerator:
         self._pv_households = set(traits_df[traits_df['has_pv'] == 1].index.tolist())
         self._hp_households = set(traits_df[traits_df['has_hp'] == 1].index.tolist())
         self._ev_households = set(traits_df[traits_df['has_ev'] == 1].index.tolist())
+        self._solar_thermal_households = (
+            set(traits_df[traits_df['has_solar_thermal'] == 1].index.tolist())
+            if 'has_solar_thermal' in traits_df.columns else set()
+        )
 
         # ERA5 grid-cell assignment — used in participant summary.
         # Each PUPRN gets a random location within the weather bounding box,
@@ -254,6 +258,8 @@ class SERLContextualVariablesGenerator:
                     row[field] = rnd.randint(0, 100)
                 elif field == 'flatTopStorey':
                     row[field] = rnd.choice(yes_no_flags)
+                elif field == 'solarWaterHeatingFlag':
+                    row[field] = 'Y' if puprn in self._solar_thermal_households else 'N'
                 elif field == 'photoSupply':
                     pct = rnd.randint(0, 50)
                     row[field] = f"Array: Roof Area: {pct}%; Connection: not applicable (FGHRS or no PV); |"
