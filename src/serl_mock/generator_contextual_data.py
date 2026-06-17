@@ -361,6 +361,8 @@ class SERLContextualVariablesGenerator:
                     row[field] = rnd.choice(languages)
                 elif field == 'B1':
                     row[field] = rnd.choice([-2, 1, 2, 3, 4, 5, 6])
+                elif field == 'B2':
+                    row[field] = 2 if rnd.random() < 0.03 else 1  # ~3% not self-contained
                 elif field == 'B4':
                     row[field] = rnd.choice([-2, 1, 2, 3, 4, 5])
                 elif field == 'B5':
@@ -382,6 +384,8 @@ class SERLContextualVariablesGenerator:
                         row[field] = rnd.choice([0, 1])
                     else:
                         row[field] = True if rnd.random() < 0.1 else False
+                elif field in ('A12_Taps_SWH', 'A12_Shower_SWH'):
+                    row[field] = 1 if puprn in self._solar_thermal_households else 0
                 elif field.startswith('A12_'):
                     row[field] = rnd.choice([0, 1])
                 elif field.startswith('A13_'):
