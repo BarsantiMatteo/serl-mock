@@ -12,8 +12,8 @@ edition: "08"
 # -------------------------
 # Time period for smart-meter data
 # -------------------------
-start_year: 2019
-end_year: 2019
+start_year: 2024
+end_year: 2024
 
 # -------------------------
 # Household traits
@@ -77,10 +77,9 @@ weather:
     - "10m_v_component_of_wind"
 
   # Bounding box [north, west, south, east] in decimal degrees
-  # Default covers Great Britain and Northern Ireland
   area:
-    - 60.0   # north
-    - -8.0   # west
+    - 52.0   # north
+    - -4.0   # west
     - 49.0   # south
     -  2.0   # east
 

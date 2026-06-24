@@ -5,7 +5,7 @@ import os
 import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -343,6 +343,40 @@ class SERLContextualVariablesGenerator:
             'D2':    [1, 2, 3],
             'D3':    [1, 2, 3, 4, 5, 6, 7],
         }
+        # Sum fields derived from binary constituent fields. Computed after those
+        # fields are assigned so the sum is always consistent with the row values.
+        _C3_individual = ['C301', 'C302', 'C303', 'C304', 'C305', 'C306', 'C307']
+        _binary_sum_fields: Dict[str, List[str]] = {
+            'A3_sum':         [f'A3{i:02d}' for i in range(1, 11)],
+            'A4_sum':         [f'A4{i:02d}' for i in range(1, 7)],
+            'A9_sum':         [f'A9{i:02d}' for i in range(1, 8)],
+            'A12_Taps_sum':   ['A12_Taps_GB', 'A12_Taps_EH', 'A12_Taps_SWH',
+                               'A12_Taps_Other', 'A12_Taps_NA', 'A12_Taps_DK'],
+            'A12_Shower_sum': ['A12_Shower_GB', 'A12_Shower_EH', 'A12_Shower_SWH',
+                               'A12_Shower_Other', 'A12_Shower_NA', 'A12_Shower_DK'],
+            'A16_sum':        [f'A16{i:02d}' for i in range(1, 11)],
+            'B10_sum':        [f'B10{i:02d}' for i in range(1, 15)],
+            'C3_sum':         _C3_individual,
+        }
+        # C2 occupant-count fields (14 gender × age-band categories).
+        _C2_individual = [
+            'C2_Male_0_15',    'C2_Male_16_24',   'C2_Male_25_44',   'C2_Male_45_64',
+            'C2_Male_65_74',   'C2_Male_75_84',   'C2_Male_85_plus',
+            'C2_Female_0_15',  'C2_Female_16_24', 'C2_Female_25_44', 'C2_Female_45_64',
+            'C2_Female_65_74', 'C2_Female_75_84', 'C2_Female_85_plus',
+        ]
+        _C2_child  = ['C2_Male_0_15', 'C2_Female_0_15']
+        _C2_adult  = [
+            'C2_Male_16_24',   'C2_Male_25_44',   'C2_Male_45_64',
+            'C2_Male_65_74',   'C2_Male_75_84',   'C2_Male_85_plus',
+            'C2_Female_16_24', 'C2_Female_25_44', 'C2_Female_45_64',
+            'C2_Female_65_74', 'C2_Female_75_84', 'C2_Female_85_plus',
+        ]
+        _C2_65plus = [
+            'C2_Male_65_74',   'C2_Male_75_84',   'C2_Male_85_plus',
+            'C2_Female_65_74', 'C2_Female_75_84', 'C2_Female_85_plus',
+        ]
+        _C2_individual_skip = set(_C2_individual[1:])
 
         data = []
         rnd = random.Random(self.seed + 200)
@@ -379,6 +413,8 @@ class SERLContextualVariablesGenerator:
                     row[field] = rnd.randint(-2, 2)
                 elif field == 'D4':
                     row[field] = rnd.choice([-3, -2, -1]) if rnd.random() < 0.15 else rnd.randint(1, 5)
+                elif field in _binary_sum_fields:
+                    row[field] = sum(1 for f in _binary_sum_fields[field] if row.get(f) == 1)
                 elif field.startswith('A3'):
                     if not field.endswith('_err'):
                         row[field] = rnd.choice([0, 1])
@@ -390,6 +426,60 @@ class SERLContextualVariablesGenerator:
                     row[field] = rnd.choice([0, 1])
                 elif field.startswith('A13_'):
                     row[field] = rnd.choice(_field_missing.get(field, [-2])) if rnd.random() < 0.1 else rnd.choice([1, 2, 3, 4, 5, 6])
+                elif field == 'C2_Male_0_15':
+                    # Batch-generate all 14 C2 occupant-count fields together so
+                    # their sum matches C1_new. A 5% error rate introduces occasional
+                    # mismatches, reflected in C2_sum_diff / C2_error below.
+                    target = cast(int, row.get('C1_new', 2))
+                    if rnd.random() < 0.05:
+                        target = max(0, target + rnd.choice([-1, 1]))
+                    counts = [0] * 14
+                    for _ in range(target):
+                        counts[rnd.randint(0, 13)] += 1
+                    for i, f in enumerate(_C2_individual):
+                        row[f] = counts[i]
+                elif field in _C2_individual_skip:
+                    pass  # already set by C2_Male_0_15 handler
+                elif field == 'C2_sum':
+                    row[field] = sum(max(0, cast(int, row.get(f, 0))) for f in _C2_individual)
+                elif field == 'C2_sum_diff':
+                    row[field] = cast(int, row.get('C2_sum', 0)) - cast(int, row.get('C1_new', 0))
+                elif field == 'C2_error':
+                    row[field] = cast(int, row.get('C2_sum_diff', 0)) != 0
+                elif field == 'C2_tot_child':
+                    row[field] = sum(max(0, cast(int, row.get(f, 0))) for f in _C2_child)
+                elif field == 'C2_tot_adult':
+                    row[field] = sum(max(0, cast(int, row.get(f, 0))) for f in _C2_adult)
+                elif field == 'C2_tot_65_plus':
+                    row[field] = sum(max(0, cast(int, row.get(f, 0))) for f in _C2_65plus)
+                elif field == 'C2_all_65_plus':
+                    c2s = cast(int, row.get('C2_sum', 0))
+                    row[field] = 1 if c2s > 0 and cast(int, row.get('C2_tot_65_plus', 0)) == c2s else 0
+                elif field == 'C301':
+                    # Batch-generate all 7 C3 working-status fields. The number
+                    # selected sums to C2_tot_adult in ~95% of cases.
+                    n_adults = cast(int, row.get('C2_tot_adult', 0))
+                    target = min(n_adults, 7)
+                    if rnd.random() < 0.05:
+                        target = max(0, min(7, target + rnd.choice([-1, 1])))
+                    selected = set(rnd.sample(range(7), target))
+                    for i, f in enumerate(_C3_individual):
+                        row[f] = 1 if i in selected else 0
+                elif field in ('C302', 'C303', 'C304', 'C305', 'C306', 'C307'):
+                    pass  # already set by C301 handler
+                elif field == 'C3_sum_diff':
+                    row[field] = cast(int, row.get('C3_sum', 0)) - cast(int, row.get('C2_tot_adult', 0))
+                elif field == 'C3_error':
+                    row[field] = cast(int, row.get('C3_sum_diff', 0)) != 0
+                elif field == 'None_working':
+                    n_adults = cast(int, row.get('C2_tot_adult', 0))
+                    c3s = cast(int, row.get('C3_sum', 0))
+                    if n_adults == 0:
+                        row[field] = None   # not possible to determine
+                    elif c3s == 0:
+                        row[field] = 1      # no adults working
+                    else:
+                        row[field] = 0      # some adults working
                 elif field.startswith('C2_'):
                     row[field] = -2 if rnd.random() < 0.05 else rnd.randint(0, 3)
                 elif '_text' in field.lower() or '_other' in field.lower():
@@ -402,6 +492,9 @@ class SERLContextualVariablesGenerator:
                     row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.1 else rnd.choice(_field_opts.get(field, multi_choice_responses))
                 elif field.startswith('B') and field[1:].isdigit():
                     row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.05 else rnd.choice(_field_opts.get(field, multi_choice_responses))
+                elif field == 'C6':
+                    row[field] = (rnd.choice([-9, -2, -1]) if rnd.random() < 0.1
+                                  else rnd.choice([1, 2, 3, 4, 5])) if puprn in self._ev_households else -9
                 elif field.startswith('C') and field[1:].isdigit():
                     row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.05 else rnd.randint(0, 15)
                 elif field.startswith('D') and field[1:].isdigit():
