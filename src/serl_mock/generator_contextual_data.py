@@ -15,6 +15,7 @@ from .ids import (
     load_puprn_list_csv,
 )
 from .generator_household_traits import load_household_traits
+from .paths import MOCK_CLIMATE_DIR
 from .utils import (
     read_config, seed_random, ensure_output_dir,
     with_edition_suffix, write_csv, read_survey_dictionary
@@ -119,21 +120,46 @@ class SERLContextualVariablesGenerator:
         )
 
         # ERA5 grid-cell assignment — used in participant summary.
-        # Each PUPRN gets a random location within the weather bounding box,
-        # snapped to the nearest grid point.  This uses the same area/grid
-        # settings as WeatherDownloader, so every assigned cell is guaranteed
-        # to exist in the downloaded ERA5 files.
+        # Prefer sampling from grid cells that actually appear in the downloaded
+        # climate CSVs so every assigned cell is guaranteed to be joinable.
+        # Falls back to the geometric approach if no CSVs exist yet.
         wcfg = cfg.get("weather", {})
-        area = wcfg.get("area", [60.0, -8.0, 49.0, 2.0])
-        grid = wcfg.get("grid", [0.25, 0.25])
-        self._grid_cells: Dict[str, str] = self._assign_grid_cells(
-            puprns=list(self.puprns),
-            area=area,
-            grid=grid,
-            seed=self.seed,
-        )
+        climate_dir = Path(wcfg.get("output_dir", str(MOCK_CLIMATE_DIR)))
+        available_cells = self._read_climate_grid_cells(climate_dir)
+        if available_cells:
+            rng = np.random.default_rng(self.seed)
+            chosen = rng.choice(available_cells, size=len(self.puprns))
+            self._grid_cells: Dict[str, str] = {
+                puprn: str(cell) for puprn, cell in zip(self.puprns, chosen)
+            }
+        else:
+            area = wcfg.get("area", [60.0, -8.0, 49.0, 2.0])
+            grid = wcfg.get("grid", [0.25, 0.25])
+            self._grid_cells = self._assign_grid_cells(
+                puprns=list(self.puprns),
+                area=area,
+                grid=grid,
+                seed=self.seed,
+            )
 
     # ---------- Grid-cell assignment ----------
+    @staticmethod
+    def _read_climate_grid_cells(climate_dir: Path) -> List[str]:
+        """Return sorted unique grid_cell values from the first climate CSV found.
+
+        ERA5 grid coverage is identical across months, so reading one file is
+        sufficient and avoids scanning every monthly CSV.  Returns [] when no
+        CSVs are present (climate data not yet downloaded).
+        """
+        csv_files = sorted(climate_dir.glob("*.csv"))
+        if not csv_files:
+            return []
+        try:
+            df = pd.read_csv(csv_files[0], usecols=["grid_cell"])
+            return sorted(df["grid_cell"].dropna().unique().tolist())
+        except Exception:
+            return []
+
     @staticmethod
     def _assign_grid_cells(
         puprns: List[str],
@@ -141,12 +167,12 @@ class SERLContextualVariablesGenerator:
         grid: List[float],
         seed: int,
     ) -> Dict[str, str]:
-        """Randomly assign each PUPRN to the nearest ERA5 grid cell.
+        """Geometric fallback: assign each PUPRN to a randomly sampled ERA5 grid cell.
 
-        Locations are drawn uniformly within *area* and snapped to the grid
-        defined by *grid*.  The resulting ``grid_cell`` identifier uses the
-        format ``<col>_<row>`` (0-based, origin at the NW corner of *area*),
-        consistent with the SERL climate data schema.
+        Used only when climate CSVs are not yet available.  Locations are drawn
+        uniformly within *area* and snapped to the nearest grid point.  The
+        ``grid_cell`` identifier uses the same zero-padded ``<col>_<row>`` format
+        as the SERL climate data schema (e.g. ``03_01``).
         """
         north, west, south, east = (
             float(area[0]), float(area[1]), float(area[2]), float(area[3])
@@ -163,7 +189,7 @@ class SERLContextualVariablesGenerator:
         for puprn, raw_lat, raw_lon in zip(puprns, raw_lats, raw_lons):
             row = max(0, min(round((north - float(raw_lat)) / lat_step), max_row))
             col = max(0, min(round((float(raw_lon) - west) / lon_step), max_col))
-            result[puprn] = f"{col}_{row}"
+            result[puprn] = f"{col:02d}_{row:02d}"
         return result
 
     # ---------- File naming ----------
