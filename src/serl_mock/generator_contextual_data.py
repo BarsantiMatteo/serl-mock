@@ -403,6 +403,11 @@ class SERLContextualVariablesGenerator:
             'C2_Female_65_74', 'C2_Female_75_84', 'C2_Female_85_plus',
         ]
         _C2_individual_skip = set(_C2_individual[1:])
+        # Age-band weights from ONS 2021 Census (England & Wales).
+        # Bands: 0-15, 16-24, 25-44, 45-64, 65-74, 75-84, 85+
+        # Equal male/female split: male slots first, female slots second.
+        _C2_age_weights = [18, 10, 26, 26, 11, 7, 2]
+        _C2_weights = _C2_age_weights + _C2_age_weights
 
         data = []
         rnd = random.Random(self.seed + 200)
@@ -432,9 +437,23 @@ class SERLContextualVariablesGenerator:
                 elif field == 'B9':
                     row[field] = rnd.choice([-2, -1]) if rnd.random() < 0.1 else rnd.randint(1, 7)
                 elif field == 'C1_new':
-                    row[field] = rnd.choice([1, 2, 3])
+                    c1 = row.get('C1')
+                    if isinstance(c1, int) and c1 > 0:
+                        if rnd.random() < 0.01:
+                            row[field] = max(1, c1 + rnd.choice([-1, 1]))
+                        else:
+                            row[field] = c1
+                    else:
+                        row[field] = rnd.randint(1, 4)  # C1 missing/invalid
                 elif field == 'C1':
-                    row[field] = -2 if rnd.random() < 0.05 else rnd.randint(1, 8)
+                    if rnd.random() < 0.05:
+                        row[field] = -2
+                    else:
+                        # Approximate ONS 2021 Census England & Wales distribution
+                        row[field] = rnd.choices(
+                            [1, 2, 3, 4, 5, 6, 7, 8],
+                            weights=[29, 34, 15, 13, 6, 2, 1, 0.3],
+                        )[0]
                 elif field == 'C5':
                     row[field] = rnd.randint(-2, 2)
                 elif field == 'D4':
@@ -460,8 +479,8 @@ class SERLContextualVariablesGenerator:
                     if rnd.random() < 0.05:
                         target = max(0, target + rnd.choice([-1, 1]))
                     counts = [0] * 14
-                    for _ in range(target):
-                        counts[rnd.randint(0, 13)] += 1
+                    for slot in rnd.choices(range(14), weights=_C2_weights, k=target):
+                        counts[slot] += 1
                     for i, f in enumerate(_C2_individual):
                         row[f] = counts[i]
                 elif field in _C2_individual_skip:
@@ -506,6 +525,16 @@ class SERLContextualVariablesGenerator:
                         row[field] = 1      # no adults working
                     else:
                         row[field] = 0      # some adults working
+                elif field == 'C4':
+                    n_adults = cast(int, row.get('C2_tot_adult', 0))
+                    if rnd.random() < 0.05:
+                        row[field] = rnd.choice(_field_missing.get('C4', [-2, -1]))
+                    else:
+                        row[field] = rnd.randint(0, max(0, n_adults))
+                elif field == 'C4_error':
+                    c4 = row.get('C4')
+                    c1_new = cast(int, row.get('C1_new', 0))
+                    row[field] = isinstance(c4, int) and c4 >= 0 and c4 > c1_new
                 elif field.startswith('C2_'):
                     row[field] = -2 if rnd.random() < 0.05 else rnd.randint(0, 3)
                 elif '_text' in field.lower() or '_other' in field.lower():
