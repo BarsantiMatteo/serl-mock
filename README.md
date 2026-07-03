@@ -25,6 +25,8 @@ serl-mock/
 │   ├── 02_configuration.md                    # Full configuration reference
 │   ├── 03_generation_model.md                 # How smart-meter values are synthesised
 │   ├── 04_metadata.md                         # SERL column reference
+│   ├── 05_epc_reference.md                    # EPC quirks and region differences (E&W vs Scotland)
+│   ├── 06_working_notes.md                    # Working notes and TODOs
 │   └── documentation/                         # Official SERL dataset PDFs
 ├── notebooks/
 │   └── explore_mock_data.ipynb
@@ -89,6 +91,8 @@ The code does enforce consistency for key links used in downstream testing, incl
 - Deterministic household trait assignment from `mock_internal/household_traits.csv`.
 - PV ownership consistency across contextual fields and exporter list generation.
 - Meter-trait consistency for gas/export availability in smart-meter and read-type summary outputs.
+- Solar-thermal trait consistency between `household_traits.csv` and the EPC / survey solar-water-heating fields.
+- Nation assignment (England & Wales vs Scotland) shared between EPC records and the participant summary's `Region`.
 
 ---
 
@@ -147,6 +151,7 @@ Key options you can adjust before running the generator:
 | `household_traits.ev_fraction` | Share of households with an EV | `0.10` |
 | `household_traits.gas_meter_fraction` | Share of households with a gas meter | `0.85` |
 | `household_traits.export_meter_fraction` | Share of households with an export meter | `0.15` |
+| `household_traits.solar_thermal_fraction` | Share of households with solar thermal (solar water heating) | `0.02` |
 | `profiles.base_elec_mean_wh` | Mean baseline electricity per half-hour period (Wh) | `175` |
 | `profiles.base_gas_mean_wh` | Mean baseline gas at peak heating demand (Wh) | `1500` |
 | `patterns.elec_seasonal_amplitude` | Seasonal swing around annual mean electricity | `0.3` |
@@ -195,6 +200,8 @@ uv run python scripts/generate_mock_data.py --skip-weather
 | How smart-meter values are generated | [docs/03_generation_model.md](docs/03_generation_model.md) |
 | All configuration options | [docs/02_configuration.md](docs/02_configuration.md) |
 | SERL dataset column reference | [docs/04_metadata.md](docs/04_metadata.md) |
+| EPC quirks and region differences (England & Wales vs Scotland) | [docs/05_epc_reference.md](docs/05_epc_reference.md) |
+| Working notes and TODOs | [docs/06_working_notes.md](docs/06_working_notes.md) |
 
 ---
 
