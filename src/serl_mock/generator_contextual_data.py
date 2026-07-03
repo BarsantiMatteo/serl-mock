@@ -142,6 +142,18 @@ class SERLContextualVariablesGenerator:
                 seed=self.seed,
             )
 
+        # Nation assignment (England & Wales vs Scotland) — shared across EPC
+        # generation and the participant summary so a PUPRN's epcVersion and
+        # Region never contradict each other. Matches the real edition07
+        # split (~91.3% England and Wales / ~8.6% Scotland).
+        nation_rnd = random.Random(self.seed + 700)
+        self._nation: Dict[str, str] = {
+            puprn: nation_rnd.choices(
+                ['England and Wales', 'Scotland'], weights=[91.3, 8.6], k=1
+            )[0]
+            for puprn in self.puprns
+        }
+
     # ---------- Grid-cell assignment ----------
     @staticmethod
     def _read_climate_grid_cells(climate_dir: Path) -> List[str]:
@@ -233,15 +245,63 @@ class SERLContextualVariablesGenerator:
         built_forms = ['Detached', 'Semi-Detached', 'Mid-Terrace', 'End-Terrace',
                        'Enclosed Mid-Terrace', 'Enclosed End-Terrace']
         efficiency_ratings = ['Very Good', 'Good', 'Average', 'Poor', 'Very Poor']
+        # floorEnergyEff: mostly a single rating, occasionally "N/A". Multi-
+        # element "N/A | N/A" values only occur on Scotland-schema records —
+        # per the SERL EPC technical documentation, Scotland reports each
+        # element of a multi-part floor separately, joined by "|", whereas
+        # England & Wales always reports a single element.
+        floor_energy_eff_singles = ['Average', 'Good', 'N/A', 'Poor', 'Very Good', 'Very Poor']
+        floor_energy_eff_single_weights = [19, 19, 4, 19, 19, 19]
+        floor_energy_eff_combos = ['N/A | N/A', 'N/A | N/A | N/A']
+        floor_energy_eff_combo_weights = [0.5, 0.5]
+        # roofEnergyEff: same single-vs-Scotland-multi-element convention as
+        # floorEnergyEff above. Single ratings dominate; multi-element
+        # combinations (including the mixed "N/A | Very Poor" case) only
+        # occur for Scotland rows.
+        _roof_ratings = ['Average', 'Good', 'Poor', 'Very Good', 'Very Poor']
+        roof_energy_eff_singles = list(_roof_ratings)
+        roof_energy_eff_single_weights = [17] * len(roof_energy_eff_singles)
+        roof_energy_eff_pairs = [
+            f"{a} | {b}"
+            for i, a in enumerate(_roof_ratings)
+            for b in _roof_ratings[i:]
+        ]
+        roof_energy_eff_triples = [
+            f"{a} | {b} | {c}"
+            for i, a in enumerate(_roof_ratings)
+            for j, b in enumerate(_roof_ratings[i:], start=i)
+            for c in _roof_ratings[j:]
+        ]
+        roof_energy_eff_combos = roof_energy_eff_pairs + roof_energy_eff_triples + ['N/A | Very Poor']
+        roof_energy_eff_combo_weights = (
+            [1] * len(roof_energy_eff_pairs) + [0.3] * len(roof_energy_eff_triples) + [0.5]
+        )
+        # glazedArea: England & Wales EPCs describe glazed area with text
+        # labels; Scotland EPCs report a numeric band code with different
+        # value semantics (0=New dwelling, 1=Typical, 2=More than typical,
+        # 4=Much more than typical, 5=Much less than typical), per the
+        # Scotland EPC data dictionary.
+        glazed_area_ew_values = [
+            'Less Than Typical', 'More Than Typical', 'Much Less Than Typical',
+            'Much More Than Typical', 'NO DATA!', 'Normal',
+        ]
+        glazed_area_ew_weights = [6, 6, 3, 3, 2, 70]
+        glazed_area_scotland_values = ['0', '1', '2', '4', '5', 'NO DATA!']
+        glazed_area_scotland_weights = [2, 70, 10, 5, 5, 2]
         yes_no_flags = ['Y', 'N']
         fuel_types = ['mains gas (not community)', 'electricity', 'oil', 'solid fuel']
         tenure_types = ['owner-occupied', 'rented (private)', 'rented (social)']
         mech_vent_types = ['natural', 'mechanical, extract only',
                            'mechanical, supply and extract', 'NO DATA!']
         heat_loss_types = ['no corridor', 'heated corridor', 'unheated corridor', 'NO DATA!']
-        age_bands = ['before 1900', '1900-1929', '1930-1949', '1950-1966',
-                     '1967-1975', '1976-1982', '1983-1990', '1991-1995',
-                     '1996-2002', '2003-2006', '2007-2011', '2012 onwards']
+        # constructionAgeBand boundaries differ by nation, per each nation's
+        # EPC data dictionary (Scotland's bands are offset from E&W's).
+        age_bands_ew = ['before 1900', '1900-1929', '1930-1949', '1950-1966',
+                        '1967-1975', '1976-1982', '1983-1990', '1991-1995',
+                        '1996-2002', '2003-2006', '2007-2011', '2012 onwards']
+        age_bands_scotland = ['before 1919', '1919-1929', '1930-1949', '1950-1964',
+                              '1965-1975', '1976-1983', '1984-1991', '1992-1998',
+                              '1999-2002', '2003-2007', '2008-2011', '2012 onwards']
         transaction_types = ['marketed sale', 'rental', 'new dwelling',
                              'following green deal', 'assessment for green deal']
 
@@ -249,6 +309,7 @@ class SERLContextualVariablesGenerator:
         rnd = random.Random(self.seed + 100)
 
         for puprn in self.puprns:
+            nation = self._nation[puprn]
             row: Dict[str, object] = {'PUPRN': puprn}
             for field in fields[1:]:
                 fl = field.lower()
@@ -261,13 +322,13 @@ class SERLContextualVariablesGenerator:
                 elif field == 'builtForm':
                     row[field] = rnd.choice(built_forms)
                 elif field == 'epcVersion':
-                    row[field] = 'England and Wales'
+                    row[field] = nation
                 elif field == 'mechanicalVentilation':
                     row[field] = rnd.choice(mech_vent_types)
                 elif field == 'heatLossCorridor':
                     row[field] = rnd.choice(heat_loss_types)
                 elif field == 'constructionAgeBand':
-                    row[field] = rnd.choice(age_bands)
+                    row[field] = rnd.choice(age_bands_scotland if nation == 'Scotland' else age_bands_ew)
                 elif field == 'transactionType':
                     row[field] = rnd.choice(transaction_types)
                 elif field == 'mainFuel':
@@ -305,6 +366,26 @@ class SERLContextualVariablesGenerator:
                     row[field] = rnd.randint(50, 2000)
                 elif 'flag' in fl:
                     row[field] = rnd.choice(yes_no_flags)
+                elif field == 'floorEnergyEff':
+                    if nation == 'Scotland':
+                        values = floor_energy_eff_singles + floor_energy_eff_combos
+                        weights = floor_energy_eff_single_weights + floor_energy_eff_combo_weights
+                    else:
+                        values, weights = floor_energy_eff_singles, floor_energy_eff_single_weights
+                    row[field] = rnd.choices(values, weights=weights, k=1)[0]
+                elif field == 'roofEnergyEff':
+                    if nation == 'Scotland':
+                        values = roof_energy_eff_singles + roof_energy_eff_combos
+                        weights = roof_energy_eff_single_weights + roof_energy_eff_combo_weights
+                    else:
+                        values, weights = roof_energy_eff_singles, roof_energy_eff_single_weights
+                    row[field] = rnd.choices(values, weights=weights, k=1)[0]
+                elif field == 'glazedArea':
+                    if nation == 'Scotland':
+                        values, weights = glazed_area_scotland_values, glazed_area_scotland_weights
+                    else:
+                        values, weights = glazed_area_ew_values, glazed_area_ew_weights
+                    row[field] = rnd.choices(values, weights=weights, k=1)[0]
                 elif 'energyeff' in fl or 'enveff' in fl:
                     row[field] = rnd.choice(efficiency_ratings)
                 elif 'count' in fl or 'number' in fl:
@@ -682,17 +763,20 @@ class SERLContextualVariablesGenerator:
     # ---------- Participant summary ----------
     def generate_participant_summary(self) -> pd.DataFrame:
         fields = ['PUPRN', 'Region', 'LSOA', 'grid_cell', 'IMD_quintile']
-        regions = [
+        # England/Wales regions to choose among when the PUPRN's nation (see
+        # self._nation, shared with EPC generation) is "England and Wales" —
+        # keeps Region consistent with epcVersion for the same household.
+        regions_ew = [
             'NORTH EAST','NORTH WEST','YORKSHIRE AND THE HUMBER','EAST MIDLANDS',
             'WEST MIDLANDS','EAST OF ENGLAND','LONDON','SOUTH EAST','SOUTH WEST',
-            'SCOTLAND','WALES'
+            'WALES'
         ]
         # LSOA prefix by nation; all other regions are in England (E01)
         _lsoa_prefix = {'WALES': 'W01', 'SCOTLAND': 'S01'}
         data = []
         rnd = random.Random(self.seed + 300)
         for puprn in self.puprns:
-            region = rnd.choice(regions)
+            region = 'SCOTLAND' if self._nation[puprn] == 'Scotland' else rnd.choice(regions_ew)
             prefix = _lsoa_prefix.get(region, 'E01')
             lsoa = f"{prefix}{rnd.randint(0, 999999):06d}"
             data.append({
