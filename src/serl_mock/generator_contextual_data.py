@@ -295,13 +295,24 @@ class SERLContextualVariablesGenerator:
                            'mechanical, supply and extract', 'NO DATA!']
         heat_loss_types = ['no corridor', 'heated corridor', 'unheated corridor', 'NO DATA!']
         # constructionAgeBand boundaries differ by nation, per each nation's
-        # EPC data dictionary (Scotland's bands are offset from E&W's).
-        age_bands_ew = ['before 1900', '1900-1929', '1930-1949', '1950-1966',
-                        '1967-1975', '1976-1982', '1983-1990', '1991-1995',
-                        '1996-2002', '2003-2006', '2007-2011', '2012 onwards']
+        # EPC data dictionary (Scotland's bands are offset from E&W's). In the real
+        # edition08 SERL EPC data, England & Wales values carry an "England and
+        # Wales: " prefix (e.g. "England and Wales: 1950-1966"); Scotland's values
+        # do not carry a nation prefix. Both nations can also be NULL, INVALID, or
+        # "NO DATA!" instead of a band.
+        age_bands_ew = ['England and Wales: before 1900', 'England and Wales: 1900-1929',
+                        'England and Wales: 1930-1949', 'England and Wales: 1950-1966',
+                        'England and Wales: 1967-1975', 'England and Wales: 1976-1982',
+                        'England and Wales: 1983-1990', 'England and Wales: 1991-1995',
+                        'England and Wales: 1996-2002', 'England and Wales: 2003-2006',
+                        'England and Wales: 2007-2011', 'England and Wales: 2012 onwards',
+                        'NULL', 'INVALID', 'NO DATA!']
+        age_bands_ew_weights = [8] * 12 + [1, 1, 1]
         age_bands_scotland = ['before 1919', '1919-1929', '1930-1949', '1950-1964',
                               '1965-1975', '1976-1983', '1984-1991', '1992-1998',
-                              '1999-2002', '2003-2007', '2008-2011', '2012 onwards']
+                              '1999-2002', '2003-2007', '2008-2011', '2012 onwards',
+                              'NULL', 'INVALID', 'NO DATA!']
+        age_bands_scotland_weights = [8] * 12 + [1, 1, 1]
         transaction_types = ['marketed sale', 'rental', 'new dwelling',
                              'following green deal', 'assessment for green deal']
 
@@ -328,7 +339,10 @@ class SERLContextualVariablesGenerator:
                 elif field == 'heatLossCorridor':
                     row[field] = rnd.choice(heat_loss_types)
                 elif field == 'constructionAgeBand':
-                    row[field] = rnd.choice(age_bands_scotland if nation == 'Scotland' else age_bands_ew)
+                    if nation == 'Scotland':
+                        row[field] = rnd.choices(age_bands_scotland, weights=age_bands_scotland_weights, k=1)[0]
+                    else:
+                        row[field] = rnd.choices(age_bands_ew, weights=age_bands_ew_weights, k=1)[0]
                 elif field == 'transactionType':
                     row[field] = rnd.choice(transaction_types)
                 elif field == 'mainFuel':

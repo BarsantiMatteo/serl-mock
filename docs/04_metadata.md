@@ -131,7 +131,7 @@ For flag value codes see the [Flag codes](#flag-codes) section at the bottom.
 | totalFloorArea | float | Total floor area of the property (m²); `NaN` if not answered |
 | energyTariff | text | Energy tariff type (e.g. standard, Economy 7) |
 | mainsGasFlag | text | Whether the property has mains gas (`Y` / `N`) |
-| constructionAgeBand | text | Decade band when the property was built; boundaries differ by nation (e.g. 1967–1975 in England & Wales vs 1965–1975 in Scotland) |
+| constructionAgeBand | text | Decade band when the property was built; boundaries differ by nation (e.g. 1967–1975 in England & Wales vs 1965–1975 in Scotland). England & Wales values are prefixed `England and Wales: <band>`; Scotland values are unprefixed. Can also be `NULL`, `INVALID`, or `NO DATA!` |
 | tenure | text | Tenure type (owner-occupied, rented (private), rented (social)) |
 | mainFuel | text | Primary heating fuel (e.g. mains gas (not community), electricity, oil, solid fuel) |
 | mainheatDescription | text | Description of the main heating system |
