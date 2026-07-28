@@ -50,6 +50,8 @@ class SERLContextualVariablesGenerator:
         seed: Optional[int] = None,
         puprn_list_path: Optional[str] = None,
         write_puprn_list: bool = False,
+        traits_path: Optional[str] = None,
+        climate_dir: Optional[str] = None,
     ):
         cfg = read_config(config_path)
 
@@ -74,7 +76,8 @@ class SERLContextualVariablesGenerator:
         self.edition = str(cfg.get("edition", "")).strip() or None
 
         # Household traits (PV/HP/EV) — load from pre-generated CSV
-        traits_path = cfg.get("household_traits_path")
+        if not traits_path:
+            traits_path = cfg.get("household_traits_path")
         if not traits_path:
             # Try default location in mock_internal
             from .paths import MOCK_INTERNAL_DIR
@@ -124,7 +127,9 @@ class SERLContextualVariablesGenerator:
         # climate CSVs so every assigned cell is guaranteed to be joinable.
         # Falls back to the geometric approach if no CSVs exist yet.
         wcfg = cfg.get("weather", {})
-        climate_dir = Path(wcfg.get("output_dir", str(MOCK_CLIMATE_DIR)))
+        if not climate_dir:
+            climate_dir = wcfg.get("output_dir", str(MOCK_CLIMATE_DIR))
+        climate_dir = Path(climate_dir)
         available_cells = self._read_climate_grid_cells(climate_dir)
         if available_cells:
             rng = np.random.default_rng(self.seed)

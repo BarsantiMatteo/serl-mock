@@ -47,26 +47,31 @@ neither a format change nor a schema change; it needs its own pluggable strategy
 The goal is a tripwire that fires on *any* unintended structural change during Phases 1-3,
 without assuming a fixed shape that later editions are free to legitimately change. Concretely:
 
-- [ ] **Set up `tests/` with pytest** (add as a dev dependency in `pyproject.toml`) and a
-  `conftest.py` fixture that builds a tiny deterministic config (`n_households=5`,
-  `start_year=end_year=2021`, fixed `seed`) plus a temp PUPRN list, all under `tmp_path` so
-  nothing touches real `config/`/`data/`.
-- [ ] **Give `run_all()` an injectable config/output path.** It currently hardcodes
-  `CONFIG_DIR / "serl_mock.yaml"` (`scripts/generate_mock_data.py:53`), so there's no way to
-  run the full pipeline against a temp config today. This is a prerequisite for any end-to-end
-  test, independent of the edition work.
-- [ ] **Per-dataset unit tests** (`tests/test_household_traits.py`, `test_smartmeter.py`,
-  `test_contextual_data.py`): columns/dtypes match a committed baseline list, value-domain
-  checks for categorical fields (EPC rating, nation, quality flags), and the cross-dataset
-  consistency guarantees already claimed in `00_overview.md` (trait alignment, PUPRN
-  consistency, nation↔region agreement) checked automatically instead of by eye.
-- [ ] **Golden manifests, scoped per edition — not one global snapshot.** Commit
-  `tests/golden/edition08_manifest.json` capturing today's actual output (file paths, columns,
-  dtypes, row counts) for the tiny fixture config. When Edition09 lands with different columns
-  or a different layout, it gets its *own* `edition09_manifest.json` — it is never diffed
-  against edition08's. A manifest only fires when *that specific* edition's own committed
-  behaviour drifts, which keeps this safety net compatible with editions legitimately changing
-  shape.
+- [x] **Set up `tests/` with pytest** (added as a dev dependency in `pyproject.toml`) and a
+  `conftest.py` fixture (`tiny_config_path`, `generated_output_dir`) that builds a tiny
+  deterministic config (`n_households=5`, `start_year=end_year=2021`, fixed `seed`) plus a
+  temp PUPRN list, all under `tmp_path` so nothing touches real `config/`/`data/`.
+- [x] **Give `run_all()` an injectable config/output path.** Added `config_path` and
+  `output_dir` parameters to `run_all()`; both default to the real locations so normal CLI use
+  is unaffected. While wiring this up, found and fixed a real isolation bug: `HHSmartMeterGenerator`,
+  `DailySmartMeterGenerator`, `ReadTypeDataQualitySummaryGenerator`, and
+  `SERLContextualVariablesGenerator` all fell back to the hardcoded real `MOCK_INTERNAL_DIR` /
+  `MOCK_CLIMATE_DIR` paths for household traits / climate grid cells whenever
+  `household_traits_path` wasn't set in config — meaning a test run with an overridden
+  `output_dir` would have silently read the developer's real `data/mock/` traits file instead
+  of its own. Added explicit `traits_path` (and `climate_dir` for the contextual generator)
+  constructor parameters so callers can override this directly.
+- [x] **Per-dataset unit tests**: `tests/test_household_traits.py` covers
+  `generate_household_traits()` directly (columns/dtypes, trait counts matching fractions,
+  reproducibility). `tests/test_pipeline_smoke.py` covers cross-dataset PUPRN consistency and
+  expected file sets via the full pipeline. EPC/survey value-domain checks and the smart-meter
+  trait-alignment checks are not yet written — follow-up work, not blocking Phases 1-3.
+- [x] **Golden manifests, scoped per edition — not one global snapshot.** `tests/golden/edition08_manifest.json`
+  is committed, generated via `scripts/update_golden_manifest.py` (run manually, never
+  automatically — regenerating it is a deliberate, reviewed action). `tests/test_golden_manifest.py`
+  diffs a fresh run against it; verified it actually fails on a structural change (tested by
+  corrupting a row count locally, confirmed the test catches it, then restored). When Edition09
+  lands it gets its own `edition09_manifest.json`, never diffed against edition08's.
 - [ ] **Write structural tests against the logical dataset, not the physical files.** Shared
   test helpers should read *whatever files match a given edition's pattern* for a dataset,
   concatenate them, and assert on the reassembled table (one row per `PUPRN`/timestamp, no

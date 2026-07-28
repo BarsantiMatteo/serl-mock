@@ -67,7 +67,12 @@ class HHSmartMeterGenerator:
         "gas_very_high_m3":      8.0,
     }
 
-    def __init__(self, config_path: str, puprn_list_path: Optional[str] = None):
+    def __init__(
+        self,
+        config_path: str,
+        puprn_list_path: Optional[str] = None,
+        traits_path: Optional[str] = None,
+    ):
         cfg = read_config(config_path)
 
         # Core config
@@ -81,7 +86,8 @@ class HHSmartMeterGenerator:
         self.edition = str(cfg.get("edition", "08"))
 
         # Household traits (PV/HP/EV) — load from pre-generated CSV
-        traits_path = cfg.get("household_traits_path")
+        if not traits_path:
+            traits_path = cfg.get("household_traits_path")
         if not traits_path:
             # Try default location in mock_internal
             from .paths import MOCK_INTERNAL_DIR
@@ -331,8 +337,13 @@ class DailySmartMeterGenerator:
     DAILY_ELEC_VERY_HIGH_WH = 100_000  # ~4× HH threshold × 48 HH
     DAILY_GAS_VERY_HIGH_M3  = 200.0
 
-    def __init__(self, config_path: str, puprn_list_path: Optional[str] = None):
-        self._hh      = HHSmartMeterGenerator(config_path, puprn_list_path)
+    def __init__(
+        self,
+        config_path: str,
+        puprn_list_path: Optional[str] = None,
+        traits_path: Optional[str] = None,
+    ):
+        self._hh      = HHSmartMeterGenerator(config_path, puprn_list_path, traits_path)
         self.start_year = self._hh.start_year
         self.end_year   = self._hh.end_year
         self.edition    = self._hh.edition
@@ -452,7 +463,12 @@ class ReadTypeDataQualitySummaryGenerator:
     One row is produced per (PUPRN, deviceType, readType).
     """
 
-    def __init__(self, config_path: str, puprn_list_path: Optional[str] = None):
+    def __init__(
+        self,
+        config_path: str,
+        puprn_list_path: Optional[str] = None,
+        traits_path: Optional[str] = None,
+    ):
         cfg = read_config(config_path)
 
         self.n_households = int(cfg["n_households"])
@@ -461,7 +477,8 @@ class ReadTypeDataQualitySummaryGenerator:
         self.edition = str(cfg.get("edition", "08"))
         self.seed = int(cfg.get("seed", 42))
 
-        traits_path = cfg.get("household_traits_path")
+        if not traits_path:
+            traits_path = cfg.get("household_traits_path")
         if not traits_path:
             from .paths import MOCK_INTERNAL_DIR
             traits_path = MOCK_INTERNAL_DIR / "household_traits.csv"

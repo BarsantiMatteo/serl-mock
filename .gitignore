@@ -97,6 +97,7 @@ desktop.ini
 __snapshots__/
 coverage/
 htmlcov/
+.pytest_cache/
 
 # -----------------------------------------------------------
 # PROJECT-SPECIFIC IGNORE RULES

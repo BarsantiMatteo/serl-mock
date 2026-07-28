@@ -35,6 +35,7 @@ import argparse
 import shutil
 import sys
 from pathlib import Path
+from typing import Optional
 PROJECT_ROOT = Path(__file__).resolve().parents[1]  # repo root
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -49,25 +50,46 @@ from src.serl_mock.utils import read_config
 
 
 
-def run_all(skip_weather: bool = False, survey_only: bool = False):
-    cfg_path = CONFIG_DIR / "serl_mock.yaml"
+def run_all(
+    skip_weather: bool = False,
+    survey_only: bool = False,
+    config_path: Optional[Path] = None,
+    output_dir: Optional[Path] = None,
+):
+    """Run the full mock-data pipeline.
+
+    config_path / output_dir let callers (tests, `--survey-only` re-runs
+    against a scratch location, etc.) redirect the pipeline away from the
+    real config/serl_mock.yaml and data/mock/ tree. Both default to the
+    real locations so normal CLI usage is unaffected.
+    """
+    cfg_path = Path(config_path) if config_path is not None else (CONFIG_DIR / "serl_mock.yaml")
     cfg = read_config(cfg_path)
 
     edition = str(cfg.get("edition", "08")).zfill(2)
 
+    # Output folders — mirror the default data/mock/ layout under an
+    # override root when one is given, otherwise use the real locations.
+    mock_dir = Path(output_dir) if output_dir is not None else MOCK_DIR
+    mock_hh_dir = mock_dir / MOCK_HH_DIR.name
+    mock_daily_dir = mock_dir / MOCK_DAILY_DIR.name
+    mock_climate_dir = mock_dir / MOCK_CLIMATE_DIR.name
+    mock_internal_dir = mock_dir / MOCK_INTERNAL_DIR.name
+    mock_aggregated_dir = mock_dir / MOCK_AGGREGATED_DIR.name
+
     # Ensure target folders exist
-    MOCK_DIR.mkdir(parents=True, exist_ok=True)
-    MOCK_HH_DIR.mkdir(parents=True, exist_ok=True)
-    MOCK_DAILY_DIR.mkdir(parents=True, exist_ok=True)
-    MOCK_INTERNAL_DIR.mkdir(parents=True, exist_ok=True)
-    MOCK_AGGREGATED_DIR.mkdir(parents=True, exist_ok=True)
+    mock_dir.mkdir(parents=True, exist_ok=True)
+    mock_hh_dir.mkdir(parents=True, exist_ok=True)
+    mock_daily_dir.mkdir(parents=True, exist_ok=True)
+    mock_internal_dir.mkdir(parents=True, exist_ok=True)
+    mock_aggregated_dir.mkdir(parents=True, exist_ok=True)
 
     print("\nStep 0: Copying reference files to mock folder")
     # Files copied as-is (name unchanged)
     for fname in ["bst_dates_to_2030.csv"]:
         src = REFERENCE_DIR / fname
         if src.exists():
-            shutil.copy2(src, MOCK_DIR / fname)
+            shutil.copy2(src, mock_dir / fname)
             print(f"  Copied {fname}")
     # Data dictionaries: copy from reference with edition suffix updated
     dict_renames = {
@@ -79,7 +101,7 @@ def run_all(skip_weather: bool = False, survey_only: bool = False):
     for src_name, dst_name in dict_renames.items():
         src = REFERENCE_DIR / src_name
         if src.exists():
-            shutil.copy2(src, MOCK_DIR / dst_name)
+            shutil.copy2(src, mock_dir / dst_name)
             print(f"  Copied {src_name} -> {dst_name}")
 
     print("\nStep 0b: Creating placeholder files")
@@ -88,13 +110,13 @@ def run_all(skip_weather: bool = False, survey_only: bool = False):
         "serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv",
     ]
     for fname in placeholders:
-        p = MOCK_DIR / fname
+        p = mock_dir / fname
         if not p.exists():
             p.write_text("# placeholder\n", encoding="utf-8")
             print(f"  Created {fname}")
 
-    puprn_csv = MOCK_INTERNAL_DIR / "puprn_master.csv"
-    traits_csv = MOCK_INTERNAL_DIR / "household_traits.csv"
+    puprn_csv = mock_internal_dir / "puprn_master.csv"
+    traits_csv = mock_internal_dir / "household_traits.csv"
 
     if survey_only:
         if not puprn_csv.exists() or not traits_csv.exists():
@@ -140,8 +162,9 @@ def run_all(skip_weather: bool = False, survey_only: bool = False):
         gen_sm = HHSmartMeterGenerator(
             config_path=str(cfg_path),
             puprn_list_path=str(puprn_csv),
+            traits_path=str(traits_csv),
         )
-        gen_sm.generate_all(outfolder=MOCK_HH_DIR)
+        gen_sm.generate_all(outfolder=mock_hh_dir)
 
         print(f"\nStep 3: Generating daily smart meter data "
               f"({cfg.get('start_year')}–{cfg.get('end_year')}, "
@@ -149,19 +172,21 @@ def run_all(skip_weather: bool = False, survey_only: bool = False):
         gen_daily = DailySmartMeterGenerator(
             config_path=str(cfg_path),
             puprn_list_path=str(puprn_csv),
+            traits_path=str(traits_csv),
         )
-        gen_daily.generate_all(outfolder=MOCK_DAILY_DIR)
+        gen_daily.generate_all(outfolder=mock_daily_dir)
 
         print(f"\nStep 3b: Generating read-type data quality summary "
               f"(edition {cfg.get('edition', '08')})")
         gen_rt = ReadTypeDataQualitySummaryGenerator(
             config_path=str(cfg_path),
             puprn_list_path=str(puprn_csv),
+            traits_path=str(traits_csv),
         )
         gen_rt.generate_and_write(
-            hh_folder=MOCK_HH_DIR,
-            daily_folder=MOCK_DAILY_DIR,
-            outfolder=MOCK_DIR,
+            hh_folder=mock_hh_dir,
+            daily_folder=mock_daily_dir,
+            outfolder=mock_dir,
         )
 
     print("\nStep 4: Downloading ERA5 weather data and converting to CSV")
@@ -169,12 +194,12 @@ def run_all(skip_weather: bool = False, survey_only: bool = False):
         print("  Skipped.")
     else:
         try:
-            dl = WeatherDownloader(config_path=str(cfg_path))
+            dl = WeatherDownloader(config_path=str(cfg_path), output_dir=str(mock_climate_dir))
             dl._get_client()  # fail fast: surface credential / connectivity errors now
         except Exception as exc:
             print(f"  WARNING: CDS API unavailable — {exc}")
-            print(f"  Skipping weather download; placeholder folder created at {MOCK_CLIMATE_DIR}")
-            MOCK_CLIMATE_DIR.mkdir(parents=True, exist_ok=True)
+            print(f"  Skipping weather download; placeholder folder created at {mock_climate_dir}")
+            mock_climate_dir.mkdir(parents=True, exist_ok=True)
         else:
             nc_count = 0
             csv_count = 0
@@ -194,8 +219,10 @@ def run_all(skip_weather: bool = False, survey_only: bool = False):
     gen_ctx = SERLContextualVariablesGenerator(
         config_path=str(cfg_path),
         puprn_list_path=str(puprn_csv),
+        traits_path=str(traits_csv),
+        climate_dir=str(mock_climate_dir),
     )
-    gen_ctx.write_all(outfolder=MOCK_DIR, mock_only_outfolder=MOCK_INTERNAL_DIR)
+    gen_ctx.write_all(outfolder=mock_dir, mock_only_outfolder=mock_internal_dir)
 
     print("\nDone.")
 
