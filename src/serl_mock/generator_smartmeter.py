@@ -39,7 +39,11 @@ import pandas as pd
 
 from .ids import make_alphanumeric_ids_ordered, load_puprn_list_csv
 from .generator_household_traits import load_household_traits
-from .utils import read_config, seed_random, ensure_output_dir, with_edition_suffix, write_csv
+from .utils import (
+    read_config, seed_random, ensure_output_dir, with_edition_suffix,
+    write_table, read_table, table_exists,
+)
+from .layout import get_layout
 from .profiles import generate_profiles
 from .patterns import (
     elec_seasonal_mult, elec_daily_mult,
@@ -84,6 +88,8 @@ class HHSmartMeterGenerator:
         seed_random(self.seed)
 
         self.edition = str(cfg.get("edition", "08"))
+        self.format = str(cfg.get("format", "csv"))
+        self.layout = get_layout(str(cfg.get("layout", {}).get("hh_smart_meter", "monthly")))
 
         # Household traits (PV/HP/EV) — load from pre-generated CSV
         if not traits_path:
@@ -312,17 +318,17 @@ class HHSmartMeterGenerator:
 
     # ---------- Write ----------
 
-    def write_month(self, df: pd.DataFrame, year: int, month: int, outfolder: str):
-        fname = with_edition_suffix(f"serl_half_hourly_{year}_{month:02d}", self.edition)
-        write_csv(df, str(Path(outfolder) / fname))
+    def write_chunk(self, df: pd.DataFrame, group: "list[tuple[int, int]]", outfolder: str):
+        stem = with_edition_suffix(self.layout.filename_stem("serl_half_hourly", group), self.edition)
+        write_table(df, Path(outfolder) / stem, format=self.format)
 
     def generate_all(self, outfolder: "Union[str, os.PathLike]"):
         outfolder = ensure_output_dir(outfolder)
-        for year in range(self.start_year, self.end_year + 1):
-            for month in range(1, 13):
-                print(f"  {year}-{month:02d} ...")
-                df = self.generate_month(year, month)
-                self.write_month(df, year, month, outfolder)
+        for group in self.layout.month_groups(self.start_year, self.end_year):
+            print("  " + ", ".join(f"{year}-{month:02d}" for year, month in group) + " ...")
+            dfs = [self.generate_month(year, month) for year, month in group]
+            chunk_df = dfs[0] if len(dfs) == 1 else pd.concat(dfs, ignore_index=True)
+            self.write_chunk(chunk_df, group, outfolder)
 
 
 class DailySmartMeterGenerator:
@@ -347,6 +353,7 @@ class DailySmartMeterGenerator:
         self.start_year = self._hh.start_year
         self.end_year   = self._hh.end_year
         self.edition    = self._hh.edition
+        self.format     = self._hh.format
 
     @staticmethod
     def _expected_hh(local_date) -> int:
@@ -444,8 +451,8 @@ class DailySmartMeterGenerator:
         ].reset_index(drop=True)
 
     def write_year(self, df: pd.DataFrame, year: int, outfolder: str):
-        fname = with_edition_suffix(f"serl_smart_meter_daily_{year}", self.edition)
-        write_csv(df, str(Path(outfolder) / fname))
+        stem = with_edition_suffix(f"serl_smart_meter_daily_{year}", self.edition)
+        write_table(df, Path(outfolder) / stem, format=self.format)
 
     def generate_all(self, outfolder: "Union[str, os.PathLike]"):
         outfolder = ensure_output_dir(outfolder)
@@ -475,6 +482,8 @@ class ReadTypeDataQualitySummaryGenerator:
         self.start_year = int(cfg["start_year"])
         self.end_year = int(cfg["end_year"])
         self.edition = str(cfg.get("edition", "08"))
+        self.format = str(cfg.get("format", "csv"))
+        self.hh_layout = get_layout(str(cfg.get("layout", {}).get("hh_smart_meter", "monthly")))
         self.seed = int(cfg.get("seed", 42))
 
         if not traits_path:
@@ -505,12 +514,11 @@ class ReadTypeDataQualitySummaryGenerator:
     def _load_hh(self, folder: "Union[str, os.PathLike]") -> pd.DataFrame:
         parts = []
         folder = Path(folder)
-        for year in range(self.start_year, self.end_year + 1):
-            for month in range(1, 13):
-                fname = with_edition_suffix(f"serl_half_hourly_{year}_{month:02d}", self.edition)
-                p = folder / fname
-                if p.exists():
-                    parts.append(pd.read_csv(p))
+        for group in self.hh_layout.month_groups(self.start_year, self.end_year):
+            stem_name = self.hh_layout.filename_stem("serl_half_hourly", group)
+            stem = folder / with_edition_suffix(stem_name, self.edition)
+            if table_exists(stem, format=self.format):
+                parts.append(read_table(stem, format=self.format))
         if not parts:
             raise FileNotFoundError("No half-hourly files found; cannot build rt summary.")
 
@@ -527,10 +535,9 @@ class ReadTypeDataQualitySummaryGenerator:
         parts = []
         folder = Path(folder)
         for year in range(self.start_year, self.end_year + 1):
-            fname = with_edition_suffix(f"serl_smart_meter_daily_{year}", self.edition)
-            p = folder / fname
-            if p.exists():
-                parts.append(pd.read_csv(p))
+            stem = folder / with_edition_suffix(f"serl_smart_meter_daily_{year}", self.edition)
+            if table_exists(stem, format=self.format):
+                parts.append(read_table(stem, format=self.format))
         if not parts:
             raise FileNotFoundError("No daily files found; cannot build rt summary.")
 
@@ -783,8 +790,8 @@ class ReadTypeDataQualitySummaryGenerator:
 
     def write(self, df: pd.DataFrame, outfolder: "Union[str, os.PathLike]"):
         outfolder = ensure_output_dir(outfolder)
-        fname = with_edition_suffix("serl_smart_meter_rt_summary", self.edition)
-        write_csv(df, str(Path(outfolder) / fname))
+        stem = with_edition_suffix("serl_smart_meter_rt_summary", self.edition)
+        write_table(df, Path(outfolder) / stem, format=self.format)
 
     def generate_and_write(
         self,

@@ -14,6 +14,28 @@ edition: "08"       # Appended to all output filenames as _edition<N>
 
 ---
 
+## Output format & layout
+
+```yaml
+format: "csv"   # "csv" or "parquet"
+
+layout:
+  hh_smart_meter: monthly   # "monthly" (one file per calendar month) or "single_file"
+```
+
+`format` applies to every dataset that mimics the SERL edition release (EPC, survey,
+smart-meter, rt-summary, etc.). Mock-tool-internal files — `household_traits.csv`,
+`puprn_master.csv`, and the exporter list — are always CSV regardless of this setting,
+since they aren't part of any real SERL edition.
+
+`layout` controls how a dataset is split into physical files, independently of its format.
+Currently only `hh_smart_meter` is configurable; every other dataset keeps its current fixed
+layout (one CSV/Parquet file per year for daily smart-meter data, one file overall for the
+contextual datasets). See [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md)
+for why format and layout are tracked as separate settings.
+
+---
+
 ## Time period
 
 ```yaml

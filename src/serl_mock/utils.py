@@ -51,12 +51,48 @@ def ensure_output_dir(path: PathLike) -> str:
 
 def with_edition_suffix(basename: str, edition: Optional[str]) -> str:
     """
-    Add '_edition{edition}.csv' if edition is a non-empty string; else append '.csv'.
+    Append '_edition{edition}' if edition is a non-empty string, else return basename
+    unchanged. Does not include a file extension — pass the result to write_table()/
+    read_table(), which append the extension for the active format.
     """
-    return f"{basename}_edition{edition}.csv" if edition else f"{basename}.csv"
+    return f"{basename}_edition{edition}" if edition else basename
 
-def write_csv(df: pd.DataFrame, path: PathLike, encoding: str = "utf-8") -> None:
-    df.to_csv(path, index=False, encoding=encoding)
+# ---------- Format-aware table I/O ----------
+_TABLE_WRITERS = {
+    "csv": lambda df, path, encoding: df.to_csv(path, index=False, encoding=encoding),
+    "parquet": lambda df, path, encoding: df.to_parquet(path, index=False),
+}
+_TABLE_READERS = {
+    "csv": lambda path, encoding: pd.read_csv(path, encoding=encoding),
+    "parquet": lambda path, encoding: pd.read_parquet(path),
+}
+
+
+def _table_path(path_stem: PathLike, format: str) -> Path:
+    if format not in _TABLE_WRITERS:
+        raise ValueError(f"Unsupported format {format!r}; expected one of {sorted(_TABLE_WRITERS)}")
+    return Path(path_stem).with_suffix(f".{format}")
+
+
+def write_table(df: pd.DataFrame, path_stem: PathLike, format: str = "csv", encoding: str = "utf-8") -> Path:
+    """
+    Write df to path_stem with the extension for `format` appended ('.csv' or
+    '.parquet'), replacing any extension path_stem already has. Returns the
+    path actually written.
+    """
+    path = _table_path(path_stem, format)
+    _TABLE_WRITERS[format](df, path, encoding)
+    return path
+
+
+def read_table(path_stem: PathLike, format: str = "csv", encoding: str = "utf-8") -> pd.DataFrame:
+    """Read the table written by write_table() for the same path_stem/format."""
+    path = _table_path(path_stem, format)
+    return _TABLE_READERS[format](path, encoding)
+
+
+def table_exists(path_stem: PathLike, format: str = "csv") -> bool:
+    return _table_path(path_stem, format).exists()
 
 # ---------- Survey dictionary ----------
 def read_survey_dictionary(path: str) -> List[str]:

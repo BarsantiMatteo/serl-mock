@@ -2032,6 +2032,7 @@ dependencies = [
     { name = "netcdf4" },
     { name = "numpy" },
     { name = "pandas" },
+    { name = "pyarrow" },
     { name = "pyyaml" },
     { name = "xarray" },
 ]
@@ -2042,7 +2043,6 @@ dev = [
     { name = "jupyter" },
     { name = "matplotlib" },
     { name = "nbconvert" },
-    { name = "pyarrow" },
     { name = "pytest" },
 ]
 
@@ -2052,6 +2052,7 @@ requires-dist = [
     { name = "netcdf4" },
     { name = "numpy" },
     { name = "pandas" },
+    { name = "pyarrow", specifier = ">=25.0.0" },
     { name = "pyyaml" },
     { name = "xarray" },
 ]
@@ -2062,7 +2063,6 @@ dev = [
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "matplotlib", specifier = ">=3.10.8" },
     { name = "nbconvert", specifier = ">=7.17.0" },
-    { name = "pyarrow", specifier = ">=25.0.0" },
     { name = "pytest", specifier = ">=9.1.1" },
 ]
 

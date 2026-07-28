@@ -40,7 +40,7 @@ from typing import Any, Dict, List, Optional, Union
 import cdsapi
 import pandas as pd
 
-from .utils import read_config
+from .utils import read_config, write_table
 from .paths import CONFIG_DIR, MOCK_CLIMATE_DIR
 
 logger = logging.getLogger(__name__)
@@ -268,7 +268,10 @@ class WeatherDownloader:
             "10m_v_component_of_wind",
         ]
         out_cols = [c for c in out_cols if c in df.columns]
-        df[out_cols].to_csv(csv_path, index=False)
+        # Always CSV: climate data isn't yet wired to the per-edition format
+        # setting (see docs/notes/edition_multiformat_plan.md, Phase 1) —
+        # untested territory since this path needs live CDS API credentials.
+        write_table(df[out_cols], csv_path, format="csv")
         logger.info("Saved CSV → %s", csv_path.name)
 
     # ------------------------------------------------------------------

@@ -62,6 +62,7 @@ serl-mock/
 │       ├── paths.py
 │       ├── ids.py
 │       ├── utils.py
+│       ├── layout.py
 │       ├── profiles.py
 │       ├── patterns.py
 │       ├── generator_household_traits.py
@@ -76,7 +77,10 @@ serl-mock/
 │   │   └── edition08_manifest.json
 │   ├── test_household_traits.py
 │   ├── test_pipeline_smoke.py
-│   └── test_golden_manifest.py
+│   ├── test_golden_manifest.py
+│   ├── test_manifest_helper.py
+│   ├── test_format_parquet.py
+│   └── test_layout_single_file.py
 │
 ├── pyproject.toml
 └── README.md
@@ -120,9 +124,25 @@ Utilities for PUPRN identifiers:
 Shared helpers:
 - `read_config` — loads a YAML or JSON config file
 - `seed_random` — seeds both Python `random` and NumPy RNGs
-- `write_csv` — thin wrapper around `DataFrame.to_csv`
-- `with_edition_suffix` — builds Edition-stamped filenames
+- `write_table` / `read_table` / `table_exists` — format-aware table I/O; dispatch to
+  CSV or Parquet based on a `format` argument and append the matching extension. This is
+  the single write/read path for every dataset — see
+  [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md)
+- `with_edition_suffix` — builds Edition-stamped filename stems (no extension — that's
+  `write_table`'s job)
 - `read_survey_dictionary` — loads variable names from the SERL survey data dictionary
+
+### `src/serl_mock/layout.py`
+Pluggable strategies for splitting the half-hourly smart-meter dataset into physical files,
+independent of format and schema:
+- `MonthlyLayout` (default) — one file per calendar month, today's behaviour
+- `SingleFileLayout` — one combined file for the whole `start_year`–`end_year` range
+- `get_layout(name)` — resolves a layout by its config name (`layout.hh_smart_meter` in
+  `serl_mock.yaml`)
+
+`HHSmartMeterGenerator` asks its layout for month groupings rather than hardcoding "one file
+per month"; `ReadTypeDataQualitySummaryGenerator` uses the same layout to find the HH files
+back when building the rt-summary, so the two stay in sync regardless of which layout is active.
 
 ### `src/serl_mock/profiles.py`
 Defines **per-household consumption parameters**.  Each PUPRN is assigned a `HouseholdProfile` (baseline electricity Wh, baseline gas Wh, noise scale) drawn once at initialisation.  Adjusting `profiles:` in `serl_mock.yaml` shifts the population without touching any code.  See [03_generation_model.md](03_generation_model.md).
@@ -142,15 +162,16 @@ Traits assigned: `has_pv`, `has_hp`, `has_ev`, `has_solar_thermal`, `has_gas_met
 ### `src/serl_mock/generator_smartmeter.py`
 Contains three generators:
 
-- `HHSmartMeterGenerator` — produces Edition 08-aligned half-hourly CSVs; reads household traits from `mock_internal/household_traits.csv`
-- `DailySmartMeterGenerator` — aggregates HH output to daily totals
+- `HHSmartMeterGenerator` — produces Edition 08-aligned half-hourly data; reads household traits from `mock_internal/household_traits.csv`
+- `DailySmartMeterGenerator` — aggregates HH output to daily totals (always one file per year — not yet layout-configurable)
 - `ReadTypeDataQualitySummaryGenerator` — builds the read-type data quality summary
 
 `HHSmartMeterGenerator`:
 - Reads configuration and instantiates household profiles at `__init__` time
-- `generate_month(year, month)` builds the full T × H DataFrame vectorised
+- `generate_month(year, month)` builds the full T × H DataFrame vectorised — unaffected by format/layout
 - Applies Edition 08 timestamp rules (UTC cut-off, BST/GMT labels, HH index, `Valid_read_time`)
 - Computes Edition 08-style error flags with `np.where` (no Python loops)
+- `generate_all(outfolder)` asks `self.layout` (see `layout.py`) how to group months into files, then writes each group via `write_table` using `self.format`
 
 ### `src/serl_mock/generator_contextual_data.py`
 `SERLContextualVariablesGenerator` produces the contextual CSV files: EPC, SERL survey, COVID-19 survey, participant summary, follow-up survey, and the exporter PUPRN list.  It reads household traits from `mock_internal/household_traits.csv` to ensure device-ownership fields (PV, HP, EV, solar thermal) are consistent with the smart-meter outputs, and shares a single England & Wales / Scotland nation assignment between the EPC and participant-summary generators so `epcVersion` and `Region` never contradict each other.

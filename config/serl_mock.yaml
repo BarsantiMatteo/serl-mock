@@ -10,6 +10,20 @@ seed: 42  # Random seed for reproducibility of synthetic data generation
 edition: "08"
 
 # -------------------------
+# Output format & layout
+# Apply to the SERL-edition-mimicking datasets (EPC, survey, smart-meter,
+# etc.) — not to mock-tool-internal files like household_traits.csv, which
+# are always CSV. See docs/notes/edition_multiformat_plan.md.
+# -------------------------
+format: "csv"  # "csv" or "parquet"
+
+layout:
+  # How the half-hourly smart-meter dataset is split into files:
+  # "monthly" (one file per calendar month) or "single_file" (one combined
+  # file for the whole start_year–end_year range).
+  hh_smart_meter: monthly
+
+# -------------------------
 # Time period for smart-meter data
 # -------------------------
 start_year: 2024

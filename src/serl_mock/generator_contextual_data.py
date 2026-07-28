@@ -18,7 +18,7 @@ from .generator_household_traits import load_household_traits
 from .paths import MOCK_CLIMATE_DIR
 from .utils import (
     read_config, seed_random, ensure_output_dir,
-    with_edition_suffix, write_csv, read_survey_dictionary
+    with_edition_suffix, write_table, read_survey_dictionary
 )
 
 @dataclass
@@ -74,6 +74,7 @@ class SERLContextualVariablesGenerator:
             exporters_prefix=fcfg.get("exporters_prefix", "Elec"),
         )
         self.edition = str(cfg.get("edition", "")).strip() or None
+        self.format = str(cfg.get("format", "csv"))
 
         # Household traits (PV/HP/EV) — load from pre-generated CSV
         if not traits_path:
@@ -1159,25 +1160,29 @@ class SERLContextualVariablesGenerator:
 
         # EPC
         epc_df = self.generate_epc()
-        write_csv(epc_df, str(Path(outfolder) / self._fname(self.names.epc)))
+        write_table(epc_df, Path(outfolder) / self._fname(self.names.epc), format=self.format)
 
         # SERL survey
         serl_df = self.generate_serl_survey()
-        write_csv(serl_df, str(Path(outfolder) / self._fname(self.names.survey)))
+        write_table(serl_df, Path(outfolder) / self._fname(self.names.survey), format=self.format)
 
         # COVID-19 survey
         covid19_df = self.generate_covid19_survey()
-        write_csv(covid19_df, str(Path(outfolder) / self._fname(self.names.covid19_survey)))
+        write_table(covid19_df, Path(outfolder) / self._fname(self.names.covid19_survey), format=self.format)
 
         # Participant summary
         summary_df = self.generate_participant_summary()
-        write_csv(summary_df, str(Path(outfolder) / self._fname(self.names.summary)))
+        write_table(summary_df, Path(outfolder) / self._fname(self.names.summary), format=self.format)
 
-        # Follow-up survey
+        # Follow-up survey (encoding only applies when format="csv")
         followup_df = self.generate_follow_up_survey()
-        write_csv(followup_df, str(Path(outfolder) / self._fname(self.names.followup_survey)), encoding="latin-1")
+        write_table(
+            followup_df, Path(outfolder) / self._fname(self.names.followup_survey),
+            format=self.format, encoding="latin-1",
+        )
 
-        # Exporters list — mock-only file, not part of the SERL Edition release
+        # Exporters list — mock-only file, not part of the SERL Edition release,
+        # so it's always CSV regardless of the active edition's output format.
         exporters_base = f"{self.names.exporters_prefix}_{self.year}_list_of_exporter_puprns"
         exporters_df = self.generate_list_of_exporters()
-        write_csv(exporters_df, str(mock_only_dir / self._fname(exporters_base)))
+        write_table(exporters_df, mock_only_dir / self._fname(exporters_base), format="csv")

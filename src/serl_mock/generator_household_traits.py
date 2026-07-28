@@ -13,7 +13,7 @@ from typing import List, Optional, Union
 import pandas as pd
 
 from .ids import select_household_subset
-from .utils import seed_random, write_csv, with_edition_suffix
+from .utils import seed_random, write_table
 
 
 def generate_household_traits(
@@ -107,8 +107,13 @@ def write_household_traits(
     df: pd.DataFrame,
     path: Union[str, os.PathLike],
 ) -> None:
-    """Write household traits DataFrame to CSV."""
-    write_csv(df, str(path))
+    """Write household traits DataFrame to CSV.
+
+    Always CSV regardless of the active edition's output format: this is a
+    mock-tool-internal bookkeeping file, not part of the SERL-edition-mimicking
+    output, so it isn't subject to the per-edition format setting.
+    """
+    write_table(df, str(path), format="csv")
 
 
 def load_household_traits(

@@ -9,6 +9,7 @@ dependencies = [
     "netcdf4",
     "numpy",
     "pandas",
+    "pyarrow>=25.0.0",
     "pyyaml",
     "xarray",
 ]
@@ -20,5 +21,4 @@ dev = [
     "matplotlib>=3.10.8",
     "ipykernel>=7.2.0",
     "pytest>=9.1.1",
-    "pyarrow>=25.0.0",
 ]

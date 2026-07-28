@@ -44,6 +44,7 @@ serl-mock/
 │       ├── generator_household_traits.py      # Household trait assignment (PV, HP, EV…)
 │       ├── generator_smartmeter.py            # Half-hourly and daily smart-meter generators
 │       ├── ids.py                             # PUPRN generation and management
+│       ├── layout.py                          # Pluggable file-splitting strategies (monthly, single_file)
 │       ├── paths.py                           # Output path helpers
 │       ├── patterns.py                        # Seasonal and diurnal load patterns
 │       ├── profiles.py                        # Per-household consumption profiles
