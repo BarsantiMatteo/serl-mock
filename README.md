@@ -26,13 +26,18 @@ serl-mock/
 │   ├── 03_generation_model.md                 # How smart-meter values are synthesised
 │   ├── 04_metadata.md                         # SERL column reference
 │   ├── 05_epc_reference.md                    # EPC quirks and region differences (E&W vs Scotland)
-│   ├── 06_working_notes.md                    # Working notes and TODOs
+│   ├── 06_testing.md                          # Running and reading the automated test suite
+│   ├── notes/                                 # Working notes and plans — not reference docs
+│   │   ├── working_notes.md
+│   │   └── edition_multiformat_plan.md
 │   └── documentation/                         # Official SERL dataset PDFs
 ├── notebooks/
 │   └── explore_mock_data.ipynb
 ├── scripts/
 │   ├── generate_mock_data.py                  # Main entry point — runs the full pipeline
-│   └── generate_bank_holidays_csv.py
+│   ├── generate_bank_holidays_csv.py
+│   └── update_golden_manifest.py              # Regenerates tests/golden/*.json baselines
+├── tests/                                     # Automated test suite — see docs/06_testing.md
 ├── src/
 │   └── serl_mock/
 │       ├── generator_contextual_data.py       # EPC, survey, participant summary generators
@@ -197,11 +202,11 @@ uv run python scripts/generate_mock_data.py --skip-weather
 |---|---|
 | What the project does, key concepts | [docs/00_overview.md](docs/00_overview.md) |
 | Project layout and module descriptions | [docs/01_structure.md](docs/01_structure.md) |
+| Running and reading the automated test suite | [docs/06_testing.md](docs/06_testing.md) |
 | How smart-meter values are generated | [docs/03_generation_model.md](docs/03_generation_model.md) |
 | All configuration options | [docs/02_configuration.md](docs/02_configuration.md) |
 | SERL dataset column reference | [docs/04_metadata.md](docs/04_metadata.md) |
 | EPC quirks and region differences (England & Wales vs Scotland) | [docs/05_epc_reference.md](docs/05_epc_reference.md) |
-| Working notes and TODOs | [docs/06_working_notes.md](docs/06_working_notes.md) |
 
 ---
 

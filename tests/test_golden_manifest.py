@@ -1,7 +1,7 @@
 """Structural regression test: compares freshly generated edition08 output
 against the committed golden manifest (tests/golden/edition08_manifest.json).
 
-This is the tripwire for Phases 1-3 of docs/07_edition_multiformat_plan.md —
+This is the tripwire for Phases 1-3 of docs/notes/edition_multiformat_plan.md —
 it fails loudly if a change made while adding format/layout/schema support
 alters edition08's committed file list, columns, dtypes, or row counts.
 

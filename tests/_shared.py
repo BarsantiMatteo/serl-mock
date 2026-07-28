@@ -57,23 +57,40 @@ TINY_CONFIG: Dict[str, Any] = {
 GOLDEN_DIR = Path(__file__).resolve().parent / "golden"
 
 
-def build_manifest(output_dir: Path) -> Dict[str, Any]:
-    """Capture the structural shape of every CSV under output_dir.
+def _read_table(path: Path) -> pd.DataFrame:
+    """Read a CSV or Parquet file regardless of which format an edition uses."""
+    if path.suffix == ".parquet":
+        return pd.read_parquet(path)
+    try:
+        return pd.read_csv(path)
+    except UnicodeDecodeError:
+        # The follow-up survey is written with encoding="latin-1"
+        # (generator_contextual_data.py) — retry before giving up.
+        return pd.read_csv(path, encoding="latin-1")
 
-    Records relative path, columns, dtypes, and row count for each CSV file
-    — the properties a Phase 1-3 refactor must not change by accident for an
+
+def build_manifest(output_dir: Path) -> Dict[str, Any]:
+    """Capture the structural shape of every CSV/Parquet file under output_dir.
+
+    Records relative path, columns, dtypes, and row count for each file — the
+    properties a Phase 1-3 refactor must not change by accident for an
     edition that already shipped. Deliberately excludes cell values: this is
     a structure snapshot, not a data-content snapshot.
+
+    Handles both CSV and Parquet so this stays correct once an edition (e.g.
+    Edition09) switches format — a manifest built with a fixed "*.csv" glob
+    would silently see zero files for a Parquet edition instead of failing
+    loudly, which defeats the point of a regression test.
     """
     files: Dict[str, Any] = {}
-    for csv_path in sorted(output_dir.rglob("*.csv")):
-        rel = csv_path.relative_to(output_dir).as_posix()
+    table_paths = [
+        p for p in output_dir.rglob("*")
+        if p.is_file() and p.suffix in (".csv", ".parquet")
+    ]
+    for table_path in sorted(table_paths):
+        rel = table_path.relative_to(output_dir).as_posix()
         try:
-            df = pd.read_csv(csv_path)
-        except UnicodeDecodeError:
-            # The follow-up survey is written with encoding="latin-1"
-            # (generator_contextual_data.py) — retry before giving up.
-            df = pd.read_csv(csv_path, encoding="latin-1")
+            df = _read_table(table_path)
         except Exception as exc:  # placeholder files, e.g. "# placeholder\n"
             files[rel] = {"error": str(exc)}
             continue

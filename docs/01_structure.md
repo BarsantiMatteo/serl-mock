@@ -43,14 +43,18 @@ serl-mock/
 │   ├── 03_generation_model.md      # How smart-meter values are generated
 │   ├── 04_metadata.md              # SERL dataset column reference
 │   ├── 05_epc_reference.md         # EPC quirks and region differences (E&W vs Scotland)
-│   └── 06_working_notes.md         # Working notes and TODOs
+│   ├── 06_testing.md               # Running and reading the automated test suite
+│   └── notes/                      # Working notes and plans — not reference docs
+│       ├── working_notes.md        # Working notes and TODOs
+│       └── edition_multiformat_plan.md  # Plan for multi-edition & multi-format support
 │
 ├── notebooks/
 │   └── explore_mock_data.ipynb     # Example notebook for exploring generated output
 │
 ├── scripts/
 │   ├── generate_mock_data.py       # Entry point: runs the full pipeline
-│   └── generate_bank_holidays_csv.py  # One-off: fetches UK bank holidays from gov.uk
+│   ├── generate_bank_holidays_csv.py  # One-off: fetches UK bank holidays from gov.uk
+│   └── update_golden_manifest.py   # Regenerates tests/golden/*.json baselines (manual only)
 │
 ├── src/
 │   └── serl_mock/                  # Core library package
@@ -64,6 +68,15 @@ serl-mock/
 │       ├── generator_smartmeter.py
 │       ├── generator_contextual_data.py
 │       └── weather_downloader.py
+│
+├── tests/                          # Automated test suite — see docs/06_testing.md
+│   ├── conftest.py
+│   ├── _shared.py
+│   ├── golden/
+│   │   └── edition08_manifest.json
+│   ├── test_household_traits.py
+│   ├── test_pipeline_smoke.py
+│   └── test_golden_manifest.py
 │
 ├── pyproject.toml
 └── README.md

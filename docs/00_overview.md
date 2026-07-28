@@ -29,7 +29,7 @@ Running the pipeline produces the following files under `data/mock/`:
 | `serl_covid19_survey_data_edition08.csv` | COVID-19 lockdown follow-up survey responses |
 | `serl_participant_summary_edition08.csv` | Region, LSOA, ERA5 grid cell and deprivation index per household |
 | `serl_2023_follow_up_survey_data_edition08.csv` | Follow-up survey responses |
-| `serl_tariff_data_edition08.csv` | Placeholder file (not yet generated — see [06_working_notes.md](06_working_notes.md)) |
+| `serl_tariff_data_edition08.csv` | Placeholder file (not yet generated — see [notes/working_notes.md](notes/working_notes.md)) |
 | `serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv` | Placeholder file (not yet generated) |
 | `mock_internal/Elec_2023_list_of_exporter_puprns_edition08.csv` | Households with electricity export |
 
@@ -71,9 +71,8 @@ Every random draw uses a seeded RNG.  Setting the same `seed` in `serl_mock.yaml
 | Topic | Document |
 |---|---|
 | Project layout and module roles | [01_structure.md](01_structure.md) |
+| Running and reading the automated test suite | [06_testing.md](06_testing.md) |
 | How smart-meter values are generated | [03_generation_model.md](03_generation_model.md) |
 | All configuration options | [02_configuration.md](02_configuration.md) |
 | SERL dataset column reference | [04_metadata.md](04_metadata.md) |
 | EPC quirks and region differences (England & Wales vs Scotland) | [05_epc_reference.md](05_epc_reference.md) |
-| Working notes and TODOs | [06_working_notes.md](06_working_notes.md) |
-| Plan for multi-edition & multi-format (Parquet) support | [07_edition_multiformat_plan.md](07_edition_multiformat_plan.md) |

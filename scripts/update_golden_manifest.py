@@ -5,7 +5,7 @@ output is *intended* to change shape (new/renamed columns, different dtype,
 different row count for the same fixture config). It is never run
 automatically — a silent regeneration would defeat the point of the golden
 file, which is to force a human decision whenever a committed edition's
-output shape changes. See docs/07_edition_multiformat_plan.md, Phase 0.
+output shape changes. See docs/notes/edition_multiformat_plan.md, Phase 0.
 
 Usage:
     uv run python scripts/update_golden_manifest.py
