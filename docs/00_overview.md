@@ -76,3 +76,4 @@ Every random draw uses a seeded RNG.  Setting the same `seed` in `serl_mock.yaml
 | SERL dataset column reference | [04_metadata.md](04_metadata.md) |
 | EPC quirks and region differences (England & Wales vs Scotland) | [05_epc_reference.md](05_epc_reference.md) |
 | Working notes and TODOs | [06_working_notes.md](06_working_notes.md) |
+| Plan for multi-edition & multi-format (Parquet) support | [07_edition_multiformat_plan.md](07_edition_multiformat_plan.md) |
