@@ -1,29 +1,40 @@
 """
 Generate mock SERL smart-meter and contextual data.
 
-Loads settings from config/serl_mock.yaml and produces:
+Loads settings from config/serl_mock.yaml by default — pass --config to use a
+different saved config file (e.g. one for a different edition or scenario).
+Produces:
 
   1. puprn_master.csv               — shared household ID list
      household_traits.csv           — household traits (PV/HP/EV + meter types)
-  2. Monthly half-hourly CSVs       — realistic electricity and gas time series
+                                       (always CSV — mock-tool-internal, not
+                                       part of any real SERL edition)
+  2. Half-hourly smart-meter data   — realistic electricity and gas time series
                                        with seasonal and intraday patterns
-                                       (see src/serl_mock/patterns.py)
-  3. Yearly daily CSVs              — daily sums of electricity and gas,
-                                       one file per calendar year
+                                       (see src/serl_mock/patterns.py); split
+                                       into files per `layout.hh_smart_meter`
+                                       (monthly by default) and written in
+                                       `format` (csv by default, or parquet)
+  3. Daily smart-meter data         — daily sums of electricity and gas,
+                                       one file per calendar year, in `format`
   4. ERA5 weather data              — hourly NetCDF files downloaded from the
                                        Copernicus Climate Data Store (CDS API)
                                        and converted to CSV files in the SERL
-                                       climate data schema
+                                       climate data schema (always CSV — not
+                                       yet wired to `format`, see
+                                       docs/notes/edition_multiformat_plan.md)
   5. Contextual datasets            — EPC, survey, participant summary,
-                                       follow-up survey, list of exporters
-                                       (participant summary includes LSOA and
-                                       ERA5 grid_cell per household, derived
-                                       from the same grid spec used to download
-                                       the weather data)
+                                       follow-up survey, list of exporters, in
+                                       `format` (participant summary includes
+                                       LSOA and ERA5 grid_cell per household,
+                                       derived from the same grid spec used to
+                                       download the weather data)
 
-Output is saved under data/mock/.  The generated data is not real SERL data
-and is intended only for pipeline testing and local development outside the
-Trusted Research Environment.
+Output is saved under data/mock/<output_label>/, where output_label defaults
+to edition<N> (e.g. data/mock/edition08/) so different editions or scenarios
+never collide. The generated data is not real SERL data and is intended only
+for pipeline testing and local development outside the Trusted Research
+Environment.
 
 Weather download requires CDS API credentials in ~/.cdsapirc (or via the
 CDSAPI_URL / CDSAPI_KEY environment variables).  Pass --skip-weather to skip
@@ -40,7 +51,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]  # repo root
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.serl_mock.paths import CONFIG_DIR, MOCK_DIR, MOCK_HH_DIR, MOCK_DAILY_DIR, MOCK_INTERNAL_DIR, MOCK_AGGREGATED_DIR, REFERENCE_DIR, MOCK_CLIMATE_DIR
+from src.serl_mock.paths import (
+    CONFIG_DIR, MOCK_HH_DIR, MOCK_DAILY_DIR, MOCK_INTERNAL_DIR, MOCK_AGGREGATED_DIR,
+    REFERENCE_DIR, MOCK_CLIMATE_DIR, reference_dir_for, mock_dir_for, dictionary_source_edition,
+)
 from src.serl_mock.ids import make_alphanumeric_ids_ordered, write_puprn_list_csv, load_puprn_list_csv
 from src.serl_mock.generator_smartmeter import HHSmartMeterGenerator, DailySmartMeterGenerator, ReadTypeDataQualitySummaryGenerator
 from src.serl_mock.generator_contextual_data import SERLContextualVariablesGenerator
@@ -67,10 +81,13 @@ def run_all(
     cfg = read_config(cfg_path)
 
     edition = str(cfg.get("edition", "08")).zfill(2)
+    output_label = str(cfg.get("output_label") or f"edition{edition}")
 
-    # Output folders — mirror the default data/mock/ layout under an
-    # override root when one is given, otherwise use the real locations.
-    mock_dir = Path(output_dir) if output_dir is not None else MOCK_DIR
+    # Output folders — each run's output is nested under data/mock/<output_label>/
+    # (defaulting to "edition<N>") so different editions, or differently-configured
+    # runs of the same edition, don't collide. `output_dir` overrides this entirely
+    # (used by tests to redirect into a scratch location).
+    mock_dir = Path(output_dir) if output_dir is not None else mock_dir_for(output_label)
     mock_hh_dir = mock_dir / MOCK_HH_DIR.name
     mock_daily_dir = mock_dir / MOCK_DAILY_DIR.name
     mock_climate_dir = mock_dir / MOCK_CLIMATE_DIR.name
@@ -85,21 +102,25 @@ def run_all(
     mock_aggregated_dir.mkdir(parents=True, exist_ok=True)
 
     print("\nStep 0: Copying reference files to mock folder")
-    # Files copied as-is (name unchanged)
+    # Transversal files (not edition-specific) — copied as-is from the reference root.
     for fname in ["bst_dates_to_2030.csv"]:
         src = REFERENCE_DIR / fname
         if src.exists():
             shutil.copy2(src, mock_dir / fname)
             print(f"  Copied {fname}")
-    # Data dictionaries: copy from reference with edition suffix updated
+    # Data dictionaries: edition-specific, sourced from data/reference/edition<N>/,
+    # named for whichever edition their content actually matches (see
+    # dictionary_source_edition), copied with the suffix updated to the active edition.
+    edition_reference_dir = reference_dir_for(edition)
+    dict_source_edition = dictionary_source_edition(edition)
     dict_renames = {
-        "serl_survey_data_dictionary_edition07.csv":
+        f"serl_survey_data_dictionary_edition{dict_source_edition}.csv":
             f"serl_survey_data_dictionary_edition{edition}.csv",
-        "serl_covid19_survey_data_dictionary_edition07.csv":
+        f"serl_covid19_survey_data_dictionary_edition{dict_source_edition}.csv":
             f"serl_covid19_survey_data_dictionary_edition{edition}.csv",
     }
     for src_name, dst_name in dict_renames.items():
-        src = REFERENCE_DIR / src_name
+        src = edition_reference_dir / src_name
         if src.exists():
             shutil.copy2(src, mock_dir / dst_name)
             print(f"  Copied {src_name} -> {dst_name}")
@@ -239,6 +260,15 @@ if __name__ == "__main__":
         action="store_true",
         help="Regenerate only the survey/contextual data (step 5). Requires a prior full run.",
     )
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help=(
+            "Path to a config YAML to use instead of config/serl_mock.yaml — e.g. a "
+            "saved per-edition config such as config/serl_mock_edition09.yaml."
+        ),
+    )
     args = parser.parse_args()
-    run_all(skip_weather=args.skip_weather, survey_only=args.survey_only)
+    run_all(skip_weather=args.skip_weather, survey_only=args.survey_only, config_path=args.config)
 

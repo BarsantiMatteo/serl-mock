@@ -32,13 +32,10 @@ venv/
 # -----------------------------------------------------------
 # DATA 
 # -----------------------------------------------------------
-# Generated outputs — recreated by scripts/generate_mock_data.py
+# Generated outputs — recreated by scripts/generate_mock_data.py.
+# Nested under data/mock/<output_label>/ (defaults to edition<N>/); this blanket
+# rule covers that whole tree regardless of output_label.
 data/mock/
-data/mock/*.csv
-data/mock/serl_smart_meter_hh_edition08/
-data/mock/serl_smart_meter_daily_edition08/
-data/mock/serl_climate_data_edition08/
-data/mock/serl_aggregated_data/
 
 
 # -----------------------------------------------------------
@@ -102,13 +99,6 @@ htmlcov/
 # -----------------------------------------------------------
 # PROJECT-SPECIFIC IGNORE RULES
 # -----------------------------------------------------------
-
-# Automatically generated mock smart meter files
-data/mock/serl_smart_meter_hh_edition08/*
-
-# Allow placeholder
-!data/mock/serl_smart_meter_hh_edition08/.gitkeep
-
 
 # Ignore VS Code settings folder (contains user-specific settings and should not be committed)
 .vscode/

@@ -14,7 +14,9 @@ The generated data is **not real** and does not represent actual households.
 
 ## What is generated?
 
-Running the pipeline produces the following files under `data/mock/`:
+Running the pipeline produces the following files under `data/mock/<output_label>/`, where
+`output_label` defaults to `edition<N>` (e.g. `data/mock/edition08/`) — see
+[02_configuration.md](02_configuration.md#output-format--layout):
 
 | File / folder | Content |
 |---|---|
@@ -59,7 +61,7 @@ Important consistency guarantees are already implemented:
 A **PUPRN** (Pseudonymised Unique Property Reference Number) is the household identifier used across all SERL datasets.  In this project PUPRNs are randomly generated 8-character alphanumeric strings.
 
 ### Edition
-SERL releases data in numbered editions (e.g. Edition 07, Edition 08).  The `edition` setting in `serl_mock.yaml` controls the suffix appended to all output filenames.
+SERL releases data in numbered editions (e.g. Edition 07, Edition 08).  The `edition` setting in `serl_mock.yaml` controls the suffix appended to all output filenames, and (via `output_label`, which defaults to `edition<N>`) which folder under `data/mock/` the run's output lands in — so different editions never overwrite each other's output. Edition-specific reference dictionaries live under `data/reference/edition<N>/`; see [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md).
 
 ### Reproducibility
 Every random draw uses a seeded RNG.  Setting the same `seed` in `serl_mock.yaml` always produces identical output files.

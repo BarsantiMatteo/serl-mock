@@ -21,7 +21,9 @@ Instantiate :class:`WeatherDownloader` with a config path (or pass keyword
 arguments directly), then call :meth:`download_month` for a single month, or
 :meth:`download_all` to iterate over every month in the configured date range.
 The raw GRIB/NetCDF files returned by the CDS API are saved under
-``data/mock/serl_climate_data_edition08/`` by default.
+``data/mock/serl_climate_data_edition08/`` by default when used standalone; the
+full pipeline (``run_all()``) passes an explicit ``output_dir`` so climate data
+lands under ``data/mock/<output_label>/serl_climate_data_edition08/`` instead.
 
 CDS API credentials
 -------------------

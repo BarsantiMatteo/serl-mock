@@ -9,6 +9,12 @@ n_households: 1000
 seed: 42  # Random seed for reproducibility of synthetic data generation
 edition: "08"
 
+# Folder under data/mock/ this run's output lands in. Not set by default —
+# falls back to "edition<N>" (e.g. "edition08"). Set explicitly to keep an
+# overridden run (different format/layout than the edition's norm) from
+# colliding with the canonical output for that edition.
+# output_label: "edition08"
+
 # -------------------------
 # Output format & layout
 # Apply to the SERL-edition-mimicking datasets (EPC, survey, smart-meter,
@@ -114,9 +120,9 @@ weather:
   # start_year: 2019
   # end_year:   2019
 
-  # Output directory (relative to project root).
-  # Defaults to data/mock/serl_climate_data_edition08/
-  # output_dir: "data/mock/serl_climate_data_edition08"
+  # Output directory (relative to project root). Only needed to override the
+  # pipeline's own default, which is data/mock/<output_label>/serl_climate_data_edition08/.
+  # output_dir: "data/mock/edition08/serl_climate_data_edition08"
 
 
 

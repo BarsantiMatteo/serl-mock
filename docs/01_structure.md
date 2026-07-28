@@ -4,37 +4,47 @@
 serl-mock/
 │
 ├── config/
-│   └── serl_mock.yaml              # Single configuration file for the whole pipeline
+│   └── serl_mock.yaml              # Default config — copy this for other editions/scenarios
+│                                    # and select one with --config (see 02_configuration.md)
 │
 ├── data/
 │   ├── reference/                  # Tracked input files (data dictionaries, BST dates, bank holidays)
+│   │   ├── bst_dates_to_2030.csv                     # transversal — not edition-specific
+│   │   ├── uk_bank_holidays_england_wales_scotland.csv  # transversal
+│   │   ├── edition08/
+│   │   │   ├── serl_survey_data_dictionary_edition07.csv
+│   │   │   ├── serl_covid19_survey_data_dictionary_edition07.csv
+│   │   │   ├── serl_follow_up_survey_data_dictionary_edition07.csv
+│   │   │   └── serl_epc_data_dictionary_edition07.csv
+│   │   └── edition09/                                # empty until edition09's real dictionaries exist
 │   └── mock/                       # All generated output lands here (gitignored)
-│       ├── bst_dates_to_2030.csv
-│       ├── serl_survey_data_dictionary_edition08.csv
-│       ├── serl_covid19_survey_data_dictionary_edition08.csv
-│       ├── serl_tariff_data_edition08.csv                                              # placeholder
-│       ├── serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv  # placeholder
-│       ├── serl_epc_data_edition08.csv
-│       ├── serl_survey_data_edition08.csv
-│       ├── serl_covid19_survey_data_edition08.csv
-│       ├── serl_participant_summary_edition08.csv
-│       ├── serl_2023_follow_up_survey_data_edition08.csv
-│       ├── serl_smart_meter_rt_summary_edition08.csv
-│       ├── serl_smart_meter_hh_edition08/
-│       │   ├── serl_half_hourly_2019_01_edition08.csv
-│       │   └── ...
-│       ├── serl_smart_meter_daily_edition08/
-│       │   ├── serl_smart_meter_daily_2019_edition08.csv
-│       │   └── ...
-│       ├── serl_climate_data_edition08/
-│       │   ├── serl_climate_data_2019_01_edition08.nc   # raw ERA5 download
-│       │   ├── serl_climate_data_2019_01_edition08.csv  # SERL-format CSV
-│       │   └── ...
-│       ├── serl_aggregated_data/                        # placeholder folder mirroring the TRE layout
-│       └── mock_internal/
-│           ├── puprn_master.csv
-│           ├── household_traits.csv
-│           └── Elec_2023_list_of_exporter_puprns_edition08.csv
+│       └── edition08/                                # <output_label>/, defaults to edition<N>
+│           ├── bst_dates_to_2030.csv
+│           ├── serl_survey_data_dictionary_edition08.csv
+│           ├── serl_covid19_survey_data_dictionary_edition08.csv
+│           ├── serl_tariff_data_edition08.csv                                              # placeholder
+│           ├── serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv  # placeholder
+│           ├── serl_epc_data_edition08.csv
+│           ├── serl_survey_data_edition08.csv
+│           ├── serl_covid19_survey_data_edition08.csv
+│           ├── serl_participant_summary_edition08.csv
+│           ├── serl_2023_follow_up_survey_data_edition08.csv
+│           ├── serl_smart_meter_rt_summary_edition08.csv
+│           ├── serl_smart_meter_hh_edition08/
+│           │   ├── serl_half_hourly_2019_01_edition08.csv
+│           │   └── ...
+│           ├── serl_smart_meter_daily_edition08/
+│           │   ├── serl_smart_meter_daily_2019_edition08.csv
+│           │   └── ...
+│           ├── serl_climate_data_edition08/
+│           │   ├── serl_climate_data_2019_01_edition08.nc   # raw ERA5 download
+│           │   ├── serl_climate_data_2019_01_edition08.csv  # SERL-format CSV
+│           │   └── ...
+│           ├── serl_aggregated_data/                        # placeholder folder mirroring the TRE layout
+│           └── mock_internal/
+│               ├── puprn_master.csv
+│               ├── household_traits.csv
+│               └── Elec_2023_list_of_exporter_puprns_edition08.csv
 │
 ├── docs/
 │   ├── 00_overview.md              # What the project does and quick-start
@@ -113,6 +123,10 @@ A one-off utility that fetches the official UK bank holidays JSON from gov.uk an
 
 ### `src/serl_mock/paths.py`
 Defines `Path` constants for `CONFIG_DIR`, `DATA_DIR`, `MOCK_DIR`, `MOCK_HH_DIR`, `MOCK_DAILY_DIR`, `MOCK_CLIMATE_DIR`, `MOCK_INTERNAL_DIR`, `MOCK_AGGREGATED_DIR`, and `REFERENCE_DIR` relative to the project root.  Import these instead of hard-coding paths anywhere else.
+
+Also defines two helpers used to keep output/reference files organized by edition:
+- `mock_dir_for(output_label)` — `MOCK_DIR / output_label`, e.g. `data/mock/edition08/`
+- `reference_dir_for(edition)` — `REFERENCE_DIR / f"edition{edition}"`, e.g. `data/reference/edition08/`
 
 ### `src/serl_mock/ids.py`
 Utilities for PUPRN identifiers:

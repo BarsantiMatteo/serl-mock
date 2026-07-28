@@ -1,7 +1,7 @@
 # EPC reference: quirks and region differences (England & Wales vs Scotland)
 
 This reference lists every EPC variable documented in
-[`data/reference/serl_epc_data_dictionary_edition07.csv`](../data/reference/serl_epc_data_dictionary_edition07.csv)
+[`data/reference/edition08/serl_epc_data_dictionary_edition07.csv`](../data/reference/edition08/serl_epc_data_dictionary_edition07.csv)
 (the real SERL edition07 schema, 103 variables) and states whether it is available for
 England & Wales, for Scotland, or both — plus whether the mock pipeline currently
 generates it (`src/serl_mock/generator_contextual_data.py`, `_epc_fields()` /
@@ -170,6 +170,6 @@ Scotland-only columns are documented in the dictionary but not yet produced by
 - `docs/documentation/EPC/EPC_data_dictionary_Scotland.pdf` — official Scottish EPC
   register data dictionary (Scotland field definitions, including the numeric
   `glazedArea` codes and Scotland's `constructionAgeBand` boundaries).
-- `data/reference/serl_epc_data_dictionary_edition07.csv` — this repo's per-value
+- `data/reference/edition08/serl_epc_data_dictionary_edition07.csv` — this repo's per-value
   dictionary, the source of truth cross-checked against the mock generator's output
   (see `src/serl_mock/generator_contextual_data.py::generate_epc`).

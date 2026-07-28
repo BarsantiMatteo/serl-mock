@@ -15,7 +15,7 @@ from .ids import (
     load_puprn_list_csv,
 )
 from .generator_household_traits import load_household_traits
-from .paths import MOCK_CLIMATE_DIR
+from .paths import MOCK_CLIMATE_DIR, reference_dir_for, dictionary_source_edition
 from .utils import (
     read_config, seed_random, ensure_output_dir,
     with_edition_suffix, write_table, read_survey_dictionary
@@ -88,18 +88,24 @@ class SERLContextualVariablesGenerator:
         # Household-trait fractions are used during household traits generation,
         # not directly in this contextual generator.
 
-        # Survey dictionary paths
+        # Survey dictionary paths — default to the reference dictionaries filed
+        # under this edition's reference folder (data/reference/edition<N>/),
+        # named for whichever edition their content actually matches (see
+        # dictionary_source_edition — edition08 still uses edition07-named
+        # files; a future edition with its own accurate dictionary won't).
+        ref_dir = reference_dir_for(self.edition or "08")
+        dict_edition = dictionary_source_edition(self.edition or "08")
         self.survey_dictionary_path = cfg.get(
             "survey_dictionary_path",
-            "data/reference/serl_survey_data_dictionary_edition07.csv",
+            str(ref_dir / f"serl_survey_data_dictionary_edition{dict_edition}.csv"),
         )
         self.followup_survey_dictionary_path = cfg.get(
             "followup_survey_dictionary_path",
-            "data/reference/serl_follow_up_survey_data_dictionary_edition07.csv",
+            str(ref_dir / f"serl_follow_up_survey_data_dictionary_edition{dict_edition}.csv"),
         )
         self.covid19_survey_dictionary_path = cfg.get(
             "covid19_survey_dictionary_path",
-            "data/reference/serl_covid19_survey_data_dictionary_edition07.csv",
+            str(ref_dir / f"serl_covid19_survey_data_dictionary_edition{dict_edition}.csv"),
         )
 
         # PUPRN: load from master list or generate deterministically

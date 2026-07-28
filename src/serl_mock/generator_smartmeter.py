@@ -57,7 +57,9 @@ class HHSmartMeterGenerator:
 
     Profiles (per-household baselines) and patterns (seasonal/daily
     multipliers) are decoupled so either can be swapped independently.
-    All generation parameters are configurable via serl_mock.yaml.
+    All generation parameters are configurable via the config file
+    (config/serl_mock.yaml by default, or whichever file is passed to
+    --config / config_path).
     """
 
     CALORIFIC_VALUE_MJ_PER_M3 = 39.5
@@ -336,8 +338,9 @@ class DailySmartMeterGenerator:
     Daily smart meter data generator.
 
     Wraps HHSmartMeterGenerator: generates half-hourly data month by month,
-    aggregates to daily level by summing valid HH reads, and writes one CSV
-    per calendar year.
+    aggregates to daily level by summing valid HH reads, and writes one file
+    per calendar year (CSV or Parquet, per `format` — always one-per-year;
+    not yet layout-configurable like HHSmartMeterGenerator).
     """
 
     DAILY_ELEC_VERY_HIGH_WH = 100_000  # ~4× HH threshold × 48 HH
@@ -464,7 +467,9 @@ class DailySmartMeterGenerator:
 
 class ReadTypeDataQualitySummaryGenerator:
     """
-    Build `serl_smart_meter_rt_summary_editionXX.csv` from generated HH and daily files.
+    Build `serl_smart_meter_rt_summary_editionXX` (CSV or Parquet, per `format`)
+    from generated HH and daily files, read back via the same `format` and
+    `layout.hh_smart_meter` the HH generator wrote them with.
 
     Output schema follows Table 7 in the SERL smart meter documentation.
     One row is produced per (PUPRN, deviceType, readType).

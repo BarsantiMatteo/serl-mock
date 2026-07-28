@@ -13,7 +13,10 @@ Use it to build and test analysis pipelines locally, without needing access to t
 
 ## What is generated
 
-Running the pipeline writes outputs under `data/mock/`. The full repository layout is:
+Running the pipeline writes outputs under `data/mock/<output_label>/`, where `output_label`
+defaults to `edition<N>` (e.g. `data/mock/edition08/`) so different editions — or differently
+configured runs of the same edition — never overwrite each other. The full repository layout
+is:
 
 ```text
 serl-mock/
@@ -51,39 +54,47 @@ serl-mock/
 │       ├── utils.py                           # Shared utilities
 │       └── weather_downloader.py              # ERA5/CDS download and conversion
 │
-├── data/mock/                                 # Generated output (created at runtime)
-│   ├── bst_dates_to_2030.csv
-│   ├── serl_survey_data_dictionary_edition08.csv
-│   ├── serl_covid19_survey_data_dictionary_edition08.csv
-│   ├── serl_tariff_data_edition08.csv
-│   ├── serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv
-│   ├── serl_epc_data_edition08.csv
-│   ├── serl_survey_data_edition08.csv
-│   ├── serl_covid19_survey_data_edition08.csv
-│   ├── serl_participant_summary_edition08.csv
-│   ├── serl_2023_follow_up_survey_data_edition08.csv
-│   ├── serl_smart_meter_rt_summary_edition08.csv
-│   ├── serl_smart_meter_hh_edition08/
-│   │   └── serl_half_hourly_<YYYY>_<MM>_edition08.csv
-│   ├── serl_smart_meter_daily_edition08/
-│   │   └── serl_smart_meter_daily_<YYYY>_edition08.csv
-│   ├── serl_climate_data_edition08/           # Populated only when weather download is enabled
-│   │   ├── serl_climate_data_<YYYY>_<MM>_edition08.nc
-│   │   └── serl_climate_data_<YYYY>_<MM>_edition08.csv
-│   ├── serl_aggregated_data/                  # placeholder
-│   └── mock_internal/
-│       ├── puprn_master.csv
-│       ├── household_traits.csv
-│       └── Elec_2023_list_of_exporter_puprns_edition08.csv
+├── data/
+│   ├── reference/                             # Tracked input files
+│   │   ├── bst_dates_to_2030.csv                        # transversal — not edition-specific
+│   │   ├── uk_bank_holidays_england_wales_scotland.csv  # transversal
+│   │   ├── edition08/                                   # edition-specific reference dictionaries
+│   │   └── edition09/
+│   └── mock/                                  # Generated output (created at runtime)
+│       └── edition08/                         # <output_label>/, defaults to edition<N>
+│           ├── bst_dates_to_2030.csv
+│           ├── serl_survey_data_dictionary_edition08.csv
+│           ├── serl_covid19_survey_data_dictionary_edition08.csv
+│           ├── serl_tariff_data_edition08.csv
+│           ├── serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv
+│           ├── serl_epc_data_edition08.csv
+│           ├── serl_survey_data_edition08.csv
+│           ├── serl_covid19_survey_data_edition08.csv
+│           ├── serl_participant_summary_edition08.csv
+│           ├── serl_2023_follow_up_survey_data_edition08.csv
+│           ├── serl_smart_meter_rt_summary_edition08.csv
+│           ├── serl_smart_meter_hh_edition08/
+│           │   └── serl_half_hourly_<YYYY>_<MM>_edition08.csv
+│           ├── serl_smart_meter_daily_edition08/
+│           │   └── serl_smart_meter_daily_<YYYY>_edition08.csv
+│           ├── serl_climate_data_edition08/   # Populated only when weather download is enabled
+│           │   ├── serl_climate_data_<YYYY>_<MM>_edition08.nc
+│           │   └── serl_climate_data_<YYYY>_<MM>_edition08.csv
+│           ├── serl_aggregated_data/          # placeholder
+│           └── mock_internal/
+│               ├── puprn_master.csv
+│               ├── household_traits.csv
+│               └── Elec_2023_list_of_exporter_puprns_edition08.csv
 └── pyproject.toml
 ```
 
 Notes:
 
 - `serl_smart_meter_rt_summary_edition08.csv` is the read-type data quality summary (one row per PUPRN and read type).
-- `mock_internal/` contains helper/mock-only files, including the master PUPRN list used to align all datasets.
+- `mock_internal/` contains helper/mock-only files, including the master PUPRN list used to align all datasets; these are always CSV and unaffected by the `format` setting.
 - `serl_climate_data_edition08/` is populated only when weather download is enabled and CDS access is configured.
 - Filename suffixes (`edition08`, year values) come from `config/serl_mock.yaml` and generator defaults.
+- `output_label` (also from config, defaulting to `edition<N>`) controls which folder under `data/mock/` a run's output lands in.
 
 ### Consistency caveat for dummy data
 
@@ -140,9 +151,9 @@ uv run python scripts/generate_mock_data.py --skip-weather
 This command generates all mock datasets except ERA5 weather files.
 
 All settings (number of households, time period, random seed, consumption parameters)
-are controlled by a single configuration file:
-
-**[config/serl_mock.yaml](config/serl_mock.yaml)**
+are controlled by a configuration file — **[config/serl_mock.yaml](config/serl_mock.yaml)**
+by default. Save additional copies for other editions or scenarios and select one with
+`--config path/to/file.yaml`.
 
 Key options you can adjust before running the generator:
 
@@ -150,7 +161,10 @@ Key options you can adjust before running the generator:
 |---|---|---|
 | `n_households` | Number of synthetic households to generate | `100` |
 | `seed` | Random seed for reproducible outputs | `42` |
-| `edition` | Dataset edition suffix used in output filenames | `"08"` |
+| `edition` | Dataset edition — controls output filename suffixes and which `data/reference/edition<N>/` dictionaries are used | `"08"` |
+| `output_label` | Folder under `data/mock/` this run's output lands in | `edition<N>` |
+| `format` | Output file format for edition-release datasets: `"csv"` or `"parquet"` | `"csv"` |
+| `layout.hh_smart_meter` | How half-hourly smart-meter data splits into files: `"monthly"` or `"single_file"` | `"monthly"` |
 | `start_year` / `end_year` | Time period for smart-meter data | `2019` / `2019` |
 | `household_traits.pv_fraction` | Share of households with PV | `0.15` |
 | `household_traits.hp_fraction` | Share of households with a heat pump | `0.07` |

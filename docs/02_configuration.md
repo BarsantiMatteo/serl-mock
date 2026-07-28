@@ -1,6 +1,9 @@
 # Configuration Reference
 
-All settings live in a single file: `config/serl_mock.yaml`.
+The default config is `config/serl_mock.yaml`, loaded automatically by
+`scripts/generate_mock_data.py`. You can save additional config files (e.g.
+`config/serl_mock_edition09.yaml`) for different editions or scenarios and select one with
+`--config path/to/file.yaml`, or by passing `config_path=` to `run_all()` directly.
 
 ---
 
@@ -9,8 +12,25 @@ All settings live in a single file: `config/serl_mock.yaml`.
 ```yaml
 n_households: 100   # Number of synthetic households to generate
 seed: 42            # Master random seed — same seed → identical output
-edition: "08"       # Appended to all output filenames as _edition<N>
+edition: "08"       # Appended to all output filenames as _edition<N>; also the default
+                     # source for output_label (see below) and the folder under
+                     # data/reference/ that edition-specific dictionaries are read from
 ```
+
+---
+
+## Output location
+
+```yaml
+output_label: null   # Not set by default — falls back to "edition<N>"
+```
+
+Each run's output is written to `data/mock/<output_label>/` — `output_label` defaults to
+`edition<N>` (e.g. `data/mock/edition08/`), so different editions never collide. Set it
+explicitly to disambiguate a differently-configured run of the same edition — e.g. if you
+override `format`/`layout` away from edition09's normal defaults for a one-off comparison,
+give that run its own label (`edition09_csv_test`) rather than letting it land in
+`edition09/` and overwrite the canonical output.
 
 ---
 
@@ -177,8 +197,9 @@ weather:
   # start_year: 2019
   # end_year:   2019
 
-  # Override output directory (defaults to data/mock/serl_climate_data_edition08/)
-  # output_dir: "data/mock/serl_climate_data_edition08"
+  # Override output directory. Only needed to override the pipeline's own
+  # default, which is data/mock/<output_label>/serl_climate_data_edition08/.
+  # output_dir: "data/mock/edition08/serl_climate_data_edition08"
 ```
 
 > **CDS credentials required.** Register at https://cds.climate.copernicus.eu and add `~/.cdsapirc`:

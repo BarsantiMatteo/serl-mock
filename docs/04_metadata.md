@@ -3,6 +3,12 @@
 Column-level metadata for all SERL Edition 08-style datasets produced by this project.  
 For flag value codes see the [Flag codes](#flag-codes) section at the bottom.
 
+File paths below show the `.csv` extension and `data/mock/edition08/`-relative locations
+that result from the default config (`format: csv`, `edition: "08"`). Setting `format:
+parquet` produces the same files with a `.parquet` extension instead; a different `edition`
+or `output_label` changes the folder and filename suffix — see
+[02_configuration.md](02_configuration.md).
+
 ---
 
 ## Half-Hourly Smart Meter Data
@@ -190,7 +196,7 @@ For flag value codes see the [Flag codes](#flag-codes) section at the bottom.
 
 **File:** `serl_survey_data_edition08.csv`  
 **Grain:** one row per household  
-**Source:** Household survey conducted at recruitment; the field list and value codes are read directly from `data/reference/serl_survey_data_dictionary_edition07.csv` (also copied into `data/mock/serl_survey_data_dictionary_edition08.csv` at generation time). The table below is a representative subset — the dictionary CSV is the authoritative full column list.
+**Source:** Household survey conducted at recruitment; the field list and value codes are read directly from `data/reference/edition08/serl_survey_data_dictionary_edition07.csv` (also copied into `data/mock/edition08/serl_survey_data_dictionary_edition08.csv` at generation time). The table below is a representative subset — the dictionary CSV is the authoritative full column list.
 
 | Column | Type | Description |
 |---|---|---|
@@ -242,7 +248,7 @@ For flag value codes see the [Flag codes](#flag-codes) section at the bottom.
 
 **File:** `serl_covid19_survey_data_edition08.csv`  
 **Grain:** one row per household  
-**Source:** COVID-19 lockdown follow-up survey; field list and value codes read from `data/reference/serl_covid19_survey_data_dictionary_edition07.csv` (also copied into `data/mock/serl_covid19_survey_data_dictionary_edition08.csv`).
+**Source:** COVID-19 lockdown follow-up survey; field list and value codes read from `data/reference/edition08/serl_covid19_survey_data_dictionary_edition07.csv` (also copied into `data/mock/edition08/serl_covid19_survey_data_dictionary_edition08.csv`).
 
 | Column | Type | Description |
 |---|---|---|
@@ -284,7 +290,7 @@ For flag value codes see the [Flag codes](#flag-codes) section at the bottom.
 **File:** `serl_2023_follow_up_survey_data_edition08.csv` (this exact name is the `filenames.followup_survey` default — the `2023` is a fixed part of the string, not derived from `start_year`/`end_year`)  
 **Grain:** one row per household  
 **Encoding:** latin-1  
-**Source:** field list and value codes read from `data/reference/serl_follow_up_survey_data_dictionary_edition07.csv`. The table below groups the generated fields; most sub-fields follow a `<question>_<n>_yes` / `_add_rep` / `_err` naming pattern.
+**Source:** field list and value codes read from `data/reference/edition08/serl_follow_up_survey_data_dictionary_edition07.csv`. The table below groups the generated fields; most sub-fields follow a `<question>_<n>_yes` / `_add_rep` / `_err` naming pattern.
 
 | Column | Type | Description |
 |---|---|---|
