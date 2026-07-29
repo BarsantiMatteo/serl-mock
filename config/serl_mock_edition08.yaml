@@ -19,7 +19,7 @@ edition: "08"
 
 # Folder under data/mock/ this run's output lands in. Not set by default —
 # falls back to "edition<N>" (e.g. "edition08").
-# output_label: "edition08"
+output_label: "edition08"
 
 # -------------------------
 # Time period for smart-meter data

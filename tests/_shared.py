@@ -54,6 +54,19 @@ TINY_CONFIG: Dict[str, Any] = {
     },
 }
 
+# Same fixture, edition09 instead — format/layout follow automatically from
+# the Edition registry (src/serl_mock/edition.py), not from any override here.
+TINY_CONFIG_EDITION09: Dict[str, Any] = {**TINY_CONFIG, "edition": "09"}
+
+# All tiny fixture configs, keyed by their (zero-padded) edition number — the
+# single place scripts/update_golden_manifest.py and conftest.py both read
+# from, so adding a new edition's golden-manifest coverage means adding one
+# entry here, not touching either of those files.
+TINY_CONFIGS_BY_EDITION: Dict[str, Dict[str, Any]] = {
+    "08": TINY_CONFIG,
+    "09": TINY_CONFIG_EDITION09,
+}
+
 GOLDEN_DIR = Path(__file__).resolve().parent / "golden"
 
 
