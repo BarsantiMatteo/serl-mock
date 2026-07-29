@@ -272,8 +272,7 @@ class WeatherDownloader:
         ]
         out_cols = [c for c in out_cols if c in df.columns]
         # Always CSV: climate data isn't yet wired to the per-edition format
-        # setting (see docs/notes/edition_multiformat_plan.md, Phase 1) —
-        # untested territory since this path needs live CDS API credentials.
+        # setting — untested territory since this path needs live CDS API credentials.
         write_table(df[out_cols], csv_path, format="csv")
         logger.info("Saved CSV → %s", csv_path.name)
 

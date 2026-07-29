@@ -1,10 +1,9 @@
-"""Proves the layout abstraction (Phase 1 of docs/notes/edition_multiformat_plan.md)
-works end-to-end for a non-default layout. Layout is bound to the edition (Phase
-2) the same way format is — neither edition08 nor edition09 currently uses
-"single_file", so there's no YAML config path to it. HHSmartMeterGenerator and
-ReadTypeDataQualitySummaryGenerator accept a `layout`/`hh_layout` constructor
-override for direct programmatic/test use, which is what this test exercises
-instead of going through run_all().
+"""Proves the layout abstraction works end-to-end for a non-default layout.
+Layout is bound to the edition the same way format is — neither edition08
+nor edition09 currently uses "single_file", so there's no YAML config path
+to it. HHSmartMeterGenerator and ReadTypeDataQualitySummaryGenerator accept
+a `layout`/`hh_layout` constructor override for direct programmatic/test
+use, which is what this test exercises instead of going through run_all().
 """
 from __future__ import annotations
 

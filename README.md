@@ -30,9 +30,6 @@ serl-mock/
 │   ├── 04_metadata.md                         # SERL column reference
 │   ├── 05_epc_reference.md                    # EPC quirks and region differences (E&W vs Scotland)
 │   ├── 06_testing.md                          # Running and reading the automated test suite
-│   ├── notes/                                 # Working notes and plans — not reference docs
-│   │   ├── working_notes.md
-│   │   └── edition_multiformat_plan.md
 │   └── documentation/                         # Official SERL dataset PDFs
 ├── notebooks/
 │   └── explore_mock_data.ipynb

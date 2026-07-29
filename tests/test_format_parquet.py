@@ -1,9 +1,8 @@
-"""Proves the format abstraction (Phase 1 of docs/notes/edition_multiformat_plan.md)
-actually produces valid Parquet output end-to-end for a real edition (edition09,
-whose Edition definition in src/serl_mock/edition.py sets format="parquet"), not
-just that edition08's CSV output is unchanged. Format is bound to the edition
-(Phase 2) — there is no config override, so the only way to get Parquet output
-is to configure edition="09".
+"""Proves the format abstraction actually produces valid Parquet output
+end-to-end for a real edition (edition09, whose Edition definition in
+src/serl_mock/edition.py sets format="parquet"), not just that edition08's
+CSV output is unchanged. Format is bound to the edition — there is no config
+override, so the only way to get Parquet output is to configure edition="09".
 
 Uses the shared generated_output_dir_edition09 fixture (tests/conftest.py) so
 the pipeline only runs once per test session, shared with

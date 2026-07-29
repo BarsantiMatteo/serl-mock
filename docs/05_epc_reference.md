@@ -13,8 +13,7 @@ used in this doc), while `data/reference/edition<N>/serl_epc_generated_fields.cs
 project's own record of which of those 103 fields the mock generator actually implements (81
 of them today — the "Not yet generated" rows below). Adding a field means adding it to the
 generated-fields list *and* writing its value-generation logic in `generate_epc()`; the
-dictionary alone doesn't drive value generation (see Phase 3 in
-[notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md) for why not, yet).
+dictionary alone doesn't drive value generation yet.
 
 ## Why this matters
 

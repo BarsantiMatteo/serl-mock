@@ -9,8 +9,7 @@ reference-dictionary source are resolved from the Edition registry below,
 not read as independent config keys — so there is no way for a config file
 to accidentally combine an edition with a format/layout it doesn't use.
 (n_households, seed, date range, household traits, profiles, and patterns
-remain freely configurable regardless of edition — see
-docs/notes/edition_multiformat_plan.md for the full fixed-vs-flexible split.)
+remain freely configurable regardless of edition.)
 
 Adding a new edition means adding an entry to _EDITIONS below — a
 deliberate, reviewable code change, not a config-file typo.

@@ -3,8 +3,7 @@
 This describes the automated test suite under `tests/`. The suite is a **structural safety
 net**, not a data-quality check — since `serl_mock` generates mock data, there is no
 "correct" value to assert on. What the tests protect is the *shape* of the output (files,
-columns, dtypes, row counts) staying stable unless someone deliberately changes it — see
-[notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md) for why this matters.
+columns, dtypes, row counts) staying stable unless someone deliberately changes it.
 
 ## Running the tests
 
@@ -107,5 +106,4 @@ Everything runs under a pytest `tmp_path`, so tests never read or write the real
 
 - Value-domain checks (e.g. EPC energy ratings, survey answer categories only take known values).
 - A "logical dataset" test helper that reassembles multi-file datasets before asserting — needed
-  once an edition can split smart-meter data differently (see Phase 0 in
-  [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md)).
+  once an edition can split smart-meter data differently (no edition does yet).

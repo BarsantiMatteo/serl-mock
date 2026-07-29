@@ -26,8 +26,7 @@ use. Produces:
                                        Copernicus Climate Data Store (CDS API)
                                        and converted to CSV files in the SERL
                                        climate data schema (always CSV — not
-                                       yet wired to the edition's format, see
-                                       docs/notes/edition_multiformat_plan.md)
+                                       yet wired to the edition's format)
   5. Contextual datasets            — EPC, survey, participant summary,
                                        follow-up survey, list of exporters, in
                                        the edition's format (participant

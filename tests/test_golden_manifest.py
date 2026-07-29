@@ -2,9 +2,9 @@
 edition against its own committed golden manifest
 (tests/golden/edition<N>_manifest.json).
 
-This is the tripwire for Phases 1-3 of docs/notes/edition_multiformat_plan.md —
-it fails loudly if a change made while adding format/layout/schema support
-alters a committed edition's file list, columns, dtypes, or row counts.
+This is the tripwire that fails loudly if a change made while adding
+format/layout/schema support alters a committed edition's file list,
+columns, dtypes, or row counts.
 Manifests are never diffed against each other (see build_manifest/_shared.py):
 edition09 legitimately having different files/columns/format than edition08
 is expected, not a regression.

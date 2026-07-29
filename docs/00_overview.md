@@ -33,7 +33,7 @@ for how edition09 (Parquet) differs:
 | `serl_covid19_survey_data_edition08.csv` | COVID-19 lockdown follow-up survey responses |
 | `serl_participant_summary_edition08.csv` | Region, LSOA, ERA5 grid cell and deprivation index per household |
 | `serl_2023_follow_up_survey_data_edition08.csv` | Follow-up survey responses |
-| `serl_tariff_data_edition08.csv` | Placeholder file (not yet generated — see [notes/working_notes.md](notes/working_notes.md)) |
+| `serl_tariff_data_edition08.csv` | Placeholder file (not yet generated) |
 | `serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv` | Placeholder file (not yet generated) |
 | `mock_internal/Elec_2023_list_of_exporter_puprns_edition08.csv` | Households with electricity export |
 
@@ -63,7 +63,7 @@ Important consistency guarantees are already implemented:
 A **PUPRN** (Pseudonymised Unique Property Reference Number) is the household identifier used across all SERL datasets.  In this project PUPRNs are randomly generated 8-character alphanumeric strings.
 
 ### Edition
-SERL releases data in numbered editions (e.g. Edition 07, Edition 08). The `edition` setting in `serl_mock.yaml` is the single thing that determines: the suffix appended to output filenames; (via `output_label`, defaulting to `edition<N>`) which folder under `data/mock/` a run's output lands in, so different editions never overwrite each other; the output file format and smart-meter file layout, resolved from [`src/serl_mock/edition.py`](../src/serl_mock/edition.py) rather than separate config keys, so a config can't accidentally combine an edition with a format/layout it doesn't use; and which `data/reference/edition<N>/` dictionaries are read. See [02_configuration.md](02_configuration.md#edition-bound-parameters--format-layout-reference-dictionaries) and [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md).
+SERL releases data in numbered editions (e.g. Edition 07, Edition 08). The `edition` setting in `serl_mock.yaml` is the single thing that determines: the suffix appended to output filenames; (via `output_label`, defaulting to `edition<N>`) which folder under `data/mock/` a run's output lands in, so different editions never overwrite each other; the output file format and smart-meter file layout, resolved from [`src/serl_mock/edition.py`](../src/serl_mock/edition.py) rather than separate config keys, so a config can't accidentally combine an edition with a format/layout it doesn't use; and which `data/reference/edition<N>/` dictionaries are read. See [02_configuration.md](02_configuration.md#edition-bound-parameters--format-layout-reference-dictionaries).
 
 ### Reproducibility
 Every random draw uses a seeded RNG.  Setting the same `seed` in `serl_mock.yaml` always produces identical output files.

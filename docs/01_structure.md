@@ -164,8 +164,7 @@ Shared helpers:
 - `seed_random` — seeds both Python `random` and NumPy RNGs
 - `write_table` / `read_table` / `table_exists` — format-aware table I/O; dispatch to
   CSV or Parquet based on a `format` argument and append the matching extension. This is
-  the single write/read path for every dataset — see
-  [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md)
+  the single write/read path for every dataset
 - `with_edition_suffix` — builds Edition-stamped filename stems (no extension — that's
   `write_table`'s job)
 - `read_survey_dictionary` — loads variable names from the SERL survey data dictionary

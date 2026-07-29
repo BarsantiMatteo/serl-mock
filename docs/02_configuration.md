@@ -35,8 +35,7 @@ The actual definitions live in [`src/serl_mock/edition.py`](../src/serl_mock/edi
 - **`format`** (`"csv"` or `"parquet"`) applies to every dataset that mimics the SERL edition
   release (EPC, survey, smart-meter, rt-summary, etc.). Mock-tool-internal files —
   `household_traits.csv`, `puprn_master.csv`, and the exporter list — are always CSV regardless,
-  since they aren't part of any real SERL edition. Climate data is also always CSV for now (see
-  [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md)).
+  since they aren't part of any real SERL edition. Climate data is also always CSV for now.
 - **`hh_smart_meter_layout`** (`"monthly"` or `"single_file"`) controls how the half-hourly
   smart-meter dataset splits into physical files, independently of format. Every other dataset
   keeps its current fixed layout (one file per year for daily smart-meter data, one file overall

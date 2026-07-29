@@ -3,10 +3,9 @@
 
 A layout decides how the (year, month) periods covered by a generation run
 are grouped into output files — independent of both the data's schema and
-its on-disk format (see docs/notes/edition_multiformat_plan.md). The
-generator stays layout-agnostic: it asks the active layout for the month
-groups, generates and concatenates each group's data, and writes one file
-per group.
+its on-disk format. The generator stays layout-agnostic: it asks the active
+layout for the month groups, generates and concatenates each group's data,
+and writes one file per group.
 """
 from __future__ import annotations
 

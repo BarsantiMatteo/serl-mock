@@ -1,9 +1,8 @@
-"""Proves the core guarantee behind the Edition object (Phase 2 of
-docs/notes/edition_multiformat_plan.md): there is no way for a config file to
-set format/layout in conflict with its edition, because format/layout are
-resolved from the Edition registry, not read as independent config keys —
-a stray `format:`/`layout:` key in a config file is simply ignored, not a
-silent source of inconsistency.
+"""Proves the core guarantee behind the Edition object: there is no way for a
+config file to set format/layout in conflict with its edition, because
+format/layout are resolved from the Edition registry, not read as
+independent config keys — a stray `format:`/`layout:` key in a config file
+is simply ignored, not a silent source of inconsistency.
 """
 from __future__ import annotations
 

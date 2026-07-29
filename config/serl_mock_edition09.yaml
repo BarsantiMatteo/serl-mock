@@ -65,8 +65,7 @@ patterns:
 # -------------------------
 # Weather data (CDS / ERA5)
 # Requires CDS credentials in ~/.cdsapirc — pass --skip-weather to omit.
-# Climate data is always CSV regardless of edition — see
-# docs/notes/edition_multiformat_plan.md.
+# Climate data is always CSV regardless of edition.
 # -------------------------
 weather:
   dataset: "reanalysis-era5-single-levels"
