@@ -117,7 +117,11 @@ and aligned PV/meter trait usage in the relevant generators.
 
 ---
 
-## Edition 07/08 timestamp rules
+## Smart-meter timestamp rules
+
+These rules originate from Edition 07/08 and are edition-invariant: confirmed unchanged across
+editions so far (only output format/container varies by edition). Update this table if a
+future edition ever changes them.
 
 | Rule | Implementation |
 |---|---|
