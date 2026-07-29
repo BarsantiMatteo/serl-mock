@@ -112,3 +112,14 @@ def read_survey_dictionary(path: str) -> List[str]:
             "PUPRN", "Survey_version", "Recorded_date", "Collection_method",
             "Language", "A1", "A2", "B1", "B4", "B5", "B5_err", "C1", "C1_new", "D1", "D2", "D4"
         ]
+
+# ---------- EPC generated-fields list ----------
+def read_epc_generated_fields(path: str) -> List[str]:
+    """
+    Read the list of EPC fields this edition's mock generator produces, from
+    a one-column 'Variable' CSV (data/reference/edition<N>/serl_epc_generated_fields.csv).
+    Order is preserved — it determines the output column order. Unlike
+    read_survey_dictionary, there's no fallback: the field list is required,
+    not an optional convenience.
+    """
+    return pd.read_csv(path)["Variable"].tolist()

@@ -39,6 +39,11 @@ def test_generator_uses_editions_own_correctly_named_dictionary(tmp_path, monkey
         "FreeText": [False, False],
         "Type": ["", ""],
     }).to_csv(edition09_dir / "serl_survey_data_dictionary_edition09.csv", index=False)
+    # write_all() always generates EPC too, which needs a generated-fields
+    # list — unrelated to what this test is checking, so keep it minimal.
+    pd.DataFrame({"Variable": ["PUPRN", "builtForm"]}).to_csv(
+        edition09_dir / "serl_epc_generated_fields.csv", index=False,
+    )
 
     monkeypatch.setattr(paths_module, "REFERENCE_DIR", fake_reference_root)
 

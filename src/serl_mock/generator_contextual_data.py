@@ -19,7 +19,7 @@ from .paths import MOCK_DIR, reference_dir_for, mock_climate_dirname
 from .edition import get_edition
 from .utils import (
     read_config, seed_random, ensure_output_dir,
-    with_edition_suffix, write_table, read_survey_dictionary
+    with_edition_suffix, write_table, read_survey_dictionary, read_epc_generated_fields
 )
 
 @dataclass
@@ -112,6 +112,19 @@ class SERLContextualVariablesGenerator:
         self.covid19_survey_dictionary_path = cfg.get(
             "covid19_survey_dictionary_path",
             str(ref_dir / f"serl_covid19_survey_data_dictionary_edition{dict_edition}.csv"),
+        )
+
+        # EPC generated-fields list — which of the official EPC dictionary's
+        # fields (data/reference/edition<N>/serl_epc_data_dictionary_edition07.csv,
+        # 103 variables) this edition's mock generator actually produces.
+        # Not the same file as the dictionary itself: the dictionary is
+        # SERL's real documentation (used for cross-reference in
+        # docs/05_epc_reference.md); this is our own record of what's
+        # implemented, so a future edition can add a field by adding a row
+        # here instead of editing generate_epc() to change the field list.
+        self.epc_generated_fields_path = cfg.get(
+            "epc_generated_fields_path",
+            str(ref_dir / "serl_epc_generated_fields.csv"),
         )
 
         # PUPRN: load from master list or generate deterministically
@@ -228,34 +241,8 @@ class SERLContextualVariablesGenerator:
         return with_edition_suffix(basename, self.edition)
 
     # ---------- EPC ----------
-    @staticmethod
-    def _epc_fields() -> List[str]:
-        return [
-            'PUPRN', 'builtForm', 'co2EmissCurrPerFloorArea', 'co2EmissionsCurrent',
-            'co2EmissionsPotential', 'constituency', 'constructionAgeBand',
-            'currentEnergyEfficiency', 'currentEnergyRating', 'energyConsumptionCurrent',
-            'energyConsumptionPotential', 'energyTariff', 'environmentImpactCurrent',
-            'environmentImpactPotential', 'extensionCount', 'fixedLightingOutletsCount',
-            'flatStoreyCount', 'flatTopStorey', 'floorDescription', 'floorEnergyEff',
-            'floorEnvEff', 'floorHeight', 'floorLevel', 'glazedArea', 'glazedType',
-            'heatingCostCurrent', 'heatingCostPotential', 'heatLossCorridor',
-            'hotWaterCostCurrent', 'hotWaterCostPotential', 'hotwaterDescription',
-            'hotWaterEnergyEff', 'hotWaterEnvEff', 'inspectionDate', 'lightingCostCurrent',
-            'lightingCostPotential', 'lightingDescription', 'lightingEnergyEff',
-            'lightingEnvEff', 'localAuthority', 'lodgementDate', 'lodgementDatetime',
-            'lowEnergyFixedLightCount', 'lowEnergyLighting', 'mainFuel',
-            'mainheatcEnergyEff', 'mainheatcEnvEff', 'mainheatcontDescription',
-            'mainheatDescription', 'mainheatEnergyEff', 'mainheatEnvEff',
-            'mainHeatingControls', 'mainsGasFlag', 'mechanicalVentilation',
-            'multiGlazeProportion', 'numberHabitableRooms', 'numberHeatedRooms',
-            'numberOpenFireplaces', 'photoSupply', 'potentialEnergyEfficiency',
-            'potentialEnergyRating', 'propertyType', 'roofDescription', 'roofEnergyEff',
-            'roofEnvEff', 'secondheatDescription', 'sheatingEnergyEff', 'sheatingEnvEff',
-            'solarWaterHeatingFlag', 'tenure', 'totalFloorArea', 'transactionType',
-            'unheatedCorridorLength', 'wallsDescription', 'wallsEnergyEff', 'wallsEnvEff',
-            'windowsDescription', 'windowsEnergyEff', 'windowsEnvEff', 'windTurbineCount',
-            'epcVersion',
-        ]
+    def _epc_fields(self) -> List[str]:
+        return read_epc_generated_fields(self.epc_generated_fields_path)
 
     def generate_epc(self) -> pd.DataFrame:
         fields = self._epc_fields()

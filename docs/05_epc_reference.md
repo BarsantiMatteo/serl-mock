@@ -7,6 +7,15 @@ England & Wales, for Scotland, or both — plus whether the mock pipeline curren
 generates it (`src/serl_mock/generator_contextual_data.py`, `_epc_fields()` /
 `generate_epc()`).
 
+Note there are two separate files per edition: the dictionary above is SERL's own real
+documentation (kept for cross-reference, per-value vocab, and the `CountriesAvailable` split
+used in this doc), while `data/reference/edition<N>/serl_epc_generated_fields.csv` is this
+project's own record of which of those 103 fields the mock generator actually implements (81
+of them today — the "Not yet generated" rows below). Adding a field means adding it to the
+generated-fields list *and* writing its value-generation logic in `generate_epc()`; the
+dictionary alone doesn't drive value generation (see Phase 3 in
+[notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md) for why not, yet).
+
 ## Why this matters
 
 The real SERL EPC dataset merges two different national EPC formats. Per the SERL EPC

@@ -18,12 +18,14 @@ serl-mock/
 │   │   │   ├── serl_survey_data_dictionary_edition07.csv
 │   │   │   ├── serl_covid19_survey_data_dictionary_edition07.csv
 │   │   │   ├── serl_follow_up_survey_data_dictionary_edition07.csv
-│   │   │   └── serl_epc_data_dictionary_edition07.csv
+│   │   │   ├── serl_epc_data_dictionary_edition07.csv   # real SERL doc — cross-reference only
+│   │   │   └── serl_epc_generated_fields.csv            # which of those fields we generate
 │   │   └── edition09/                                # placeholder — copies of edition08's
 │   │       ├── README.md                              # dictionaries; see this file
 │   │       ├── serl_survey_data_dictionary_edition09.csv
 │   │       ├── serl_covid19_survey_data_dictionary_edition09.csv
-│   │       └── serl_follow_up_survey_data_dictionary_edition09.csv
+│   │       ├── serl_follow_up_survey_data_dictionary_edition09.csv
+│   │       └── serl_epc_generated_fields.csv
 │   └── mock/                       # All generated output lands here (gitignored)
 │       └── edition08/                                # <output_label>/, defaults to edition<N>
 │           ├── bst_dates_to_2030.csv
@@ -212,8 +214,8 @@ Contains three generators:
 ### `src/serl_mock/generator_contextual_data.py`
 `SERLContextualVariablesGenerator` produces the contextual CSV files: EPC, SERL survey, COVID-19 survey, participant summary, follow-up survey, and the exporter PUPRN list.  It reads household traits from `mock_internal/household_traits.csv` to ensure device-ownership fields (PV, HP, EV, solar thermal) are consistent with the smart-meter outputs, and shares a single England & Wales / Scotland nation assignment between the EPC and participant-summary generators so `epcVersion` and `Region` never contradict each other.
 
-- EPC records generated field-by-field using category lists and numeric ranges, with nation-specific value vocabularies for fields that differ between England & Wales and Scotland (see [05_epc_reference.md](05_epc_reference.md))
-- SERL survey, COVID-19 survey, and follow-up survey data are all driven by their respective SERL data dictionaries in `data/reference/`
+- EPC field list comes from `data/reference/edition<N>/serl_epc_generated_fields.csv` (via `read_epc_generated_fields`); each field's values are then generated using category lists and numeric ranges hardcoded in `generate_epc()`, with nation-specific value vocabularies for fields that differ between England & Wales and Scotland (see [05_epc_reference.md](05_epc_reference.md))
+- SERL survey, COVID-19 survey, and follow-up survey data are all driven by their respective SERL data dictionaries in `data/reference/edition<N>/`
 - Participant summary `grid_cell` values are sampled from cells already present in the downloaded climate CSVs when available, falling back to a geometric assignment over the configured weather bounding box otherwise
 - `write_all(outfolder, mock_only_outfolder)` writes all contextual files in one call; the exporter list is written to `mock_only_outfolder` (`mock_internal/`)
 
