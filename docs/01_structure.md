@@ -4,8 +4,11 @@
 serl-mock/
 │
 ├── config/
-│   └── serl_mock.yaml              # Default config — copy this for other editions/scenarios
-│                                    # and select one with --config (see 02_configuration.md)
+│   ├── serl_mock.yaml               # Default config (edition08) — select a different one
+│   │                                # with --config (see 02_configuration.md)
+│   ├── serl_mock_edition08.yaml     # Example: explicit edition08 config
+│   └── serl_mock_edition09.yaml     # Example: edition09 config (format/layout differ
+│                                    # automatically — see src/serl_mock/edition.py)
 │
 ├── data/
 │   ├── reference/                  # Tracked input files (data dictionaries, BST dates, bank holidays)
@@ -16,7 +19,11 @@ serl-mock/
 │   │   │   ├── serl_covid19_survey_data_dictionary_edition07.csv
 │   │   │   ├── serl_follow_up_survey_data_dictionary_edition07.csv
 │   │   │   └── serl_epc_data_dictionary_edition07.csv
-│   │   └── edition09/                                # empty until edition09's real dictionaries exist
+│   │   └── edition09/                                # placeholder — copies of edition08's
+│   │       ├── README.md                              # dictionaries; see this file
+│   │       ├── serl_survey_data_dictionary_edition09.csv
+│   │       ├── serl_covid19_survey_data_dictionary_edition09.csv
+│   │       └── serl_follow_up_survey_data_dictionary_edition09.csv
 │   └── mock/                       # All generated output lands here (gitignored)
 │       └── edition08/                                # <output_label>/, defaults to edition<N>
 │           ├── bst_dates_to_2030.csv
@@ -70,6 +77,7 @@ serl-mock/
 │   └── serl_mock/                  # Core library package
 │       ├── __init__.py
 │       ├── paths.py
+│       ├── edition.py
 │       ├── ids.py
 │       ├── utils.py
 │       ├── layout.py
@@ -90,7 +98,9 @@ serl-mock/
 │   ├── test_golden_manifest.py
 │   ├── test_manifest_helper.py
 │   ├── test_format_parquet.py
-│   └── test_layout_single_file.py
+│   ├── test_layout_single_file.py
+│   ├── test_edition.py
+│   └── test_reference_dictionary_resolution.py
 │
 ├── pyproject.toml
 └── README.md
@@ -122,11 +132,23 @@ Skipping steps 1–4 with `--survey-only` requires `mock_internal/puprn_master.c
 A one-off utility that fetches the official UK bank holidays JSON from gov.uk and writes `data/reference/uk_bank_holidays_england_wales_scotland.csv`.  Run this locally if the reference file needs updating; the output is committed to the repo.
 
 ### `src/serl_mock/paths.py`
-Defines `Path` constants for `CONFIG_DIR`, `DATA_DIR`, `MOCK_DIR`, `MOCK_HH_DIR`, `MOCK_DAILY_DIR`, `MOCK_CLIMATE_DIR`, `MOCK_INTERNAL_DIR`, `MOCK_AGGREGATED_DIR`, and `REFERENCE_DIR` relative to the project root.  Import these instead of hard-coding paths anywhere else.
-
-Also defines two helpers used to keep output/reference files organized by edition:
+Defines `Path` constants for `CONFIG_DIR`, `DATA_DIR`, `MOCK_DIR`, `MOCK_INTERNAL_DIR`,
+`MOCK_AGGREGATED_DIR`, and `REFERENCE_DIR` relative to the project root, plus helpers for
+paths that vary by edition (so a run's subfolders actually match its own edition):
 - `mock_dir_for(output_label)` — `MOCK_DIR / output_label`, e.g. `data/mock/edition08/`
 - `reference_dir_for(edition)` — `REFERENCE_DIR / f"edition{edition}"`, e.g. `data/reference/edition08/`
+- `mock_hh_dirname(edition)` / `mock_daily_dirname(edition)` / `mock_climate_dirname(edition)` —
+  the per-edition smart-meter/climate subfolder *names* (not full paths)
+
+### `src/serl_mock/edition.py`
+The single source of truth for which parameters are bound to a SERL edition (format,
+smart-meter layout, reference-dictionary source) versus free to vary per scenario. Defines the
+`Edition` dataclass and a `_EDITIONS` registry (currently `"08"` and `"09"`); `get_edition(number)`
+resolves one, raising `ValueError` for anything not registered. See
+[02_configuration.md](02_configuration.md#edition-bound-parameters--format-layout-reference-dictionaries).
+Every generator resolves `format`/`layout`/`dictionary_source_edition` through this instead of
+reading them as independent config keys — this is what guarantees a config can't accidentally
+combine an edition with a format/layout it doesn't use.
 
 ### `src/serl_mock/ids.py`
 Utilities for PUPRN identifiers:
@@ -151,8 +173,8 @@ Pluggable strategies for splitting the half-hourly smart-meter dataset into phys
 independent of format and schema:
 - `MonthlyLayout` (default) — one file per calendar month, today's behaviour
 - `SingleFileLayout` — one combined file for the whole `start_year`–`end_year` range
-- `get_layout(name)` — resolves a layout by its config name (`layout.hh_smart_meter` in
-  `serl_mock.yaml`)
+- `get_layout(name)` — resolves a layout by name (the active edition's
+  `hh_smart_meter_layout`, from `edition.py` — not an independent config key)
 
 `HHSmartMeterGenerator` asks its layout for month groupings rather than hardcoding "one file
 per month"; `ReadTypeDataQualitySummaryGenerator` uses the same layout to find the HH files

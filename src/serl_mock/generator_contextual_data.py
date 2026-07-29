@@ -15,7 +15,8 @@ from .ids import (
     load_puprn_list_csv,
 )
 from .generator_household_traits import load_household_traits
-from .paths import MOCK_CLIMATE_DIR, reference_dir_for, dictionary_source_edition
+from .paths import MOCK_DIR, reference_dir_for, mock_climate_dirname
+from .edition import get_edition
 from .utils import (
     read_config, seed_random, ensure_output_dir,
     with_edition_suffix, write_table, read_survey_dictionary
@@ -52,6 +53,7 @@ class SERLContextualVariablesGenerator:
         write_puprn_list: bool = False,
         traits_path: Optional[str] = None,
         climate_dir: Optional[str] = None,
+        format: Optional[str] = None,
     ):
         cfg = read_config(config_path)
 
@@ -74,7 +76,11 @@ class SERLContextualVariablesGenerator:
             exporters_prefix=fcfg.get("exporters_prefix", "Elec"),
         )
         self.edition = str(cfg.get("edition", "")).strip() or None
-        self.format = str(cfg.get("format", "csv"))
+        # format is bound to the edition (see edition.py), not an independent
+        # config key; the `format` constructor parameter is a programmatic/
+        # test-only escape hatch, same as in generator_smartmeter.py.
+        edition_def = get_edition(self.edition or "08")
+        self.format = format or edition_def.format
 
         # Household traits (PV/HP/EV) — load from pre-generated CSV
         if not traits_path:
@@ -91,10 +97,10 @@ class SERLContextualVariablesGenerator:
         # Survey dictionary paths — default to the reference dictionaries filed
         # under this edition's reference folder (data/reference/edition<N>/),
         # named for whichever edition their content actually matches (see
-        # dictionary_source_edition — edition08 still uses edition07-named
-        # files; a future edition with its own accurate dictionary won't).
+        # edition_def.dictionary_source_edition — edition08 still uses
+        # edition07-named files; edition09 uses its own).
         ref_dir = reference_dir_for(self.edition or "08")
-        dict_edition = dictionary_source_edition(self.edition or "08")
+        dict_edition = edition_def.dictionary_source_edition
         self.survey_dictionary_path = cfg.get(
             "survey_dictionary_path",
             str(ref_dir / f"serl_survey_data_dictionary_edition{dict_edition}.csv"),
@@ -135,7 +141,8 @@ class SERLContextualVariablesGenerator:
         # Falls back to the geometric approach if no CSVs exist yet.
         wcfg = cfg.get("weather", {})
         if not climate_dir:
-            climate_dir = wcfg.get("output_dir", str(MOCK_CLIMATE_DIR))
+            default_climate_dir = MOCK_DIR / mock_climate_dirname(self.edition or "08")
+            climate_dir = wcfg.get("output_dir", str(default_climate_dir))
         climate_dir = Path(climate_dir)
         available_cells = self._read_climate_grid_cells(climate_dir)
         if available_cells:

@@ -1,11 +1,9 @@
 """Unit tests for tests/_shared.py::build_manifest.
 
-The real pipeline only produces CSV today (Phase 1 of
-docs/notes/edition_multiformat_plan.md hasn't landed yet), so these tests
-exercise build_manifest directly against synthetic files rather than through
-run_all(). This is what proves the golden-manifest harness will correctly
-see Edition09's output once it switches to Parquet, instead of discovering
-that gap only after Phase 1 ships.
+These exercise build_manifest directly against synthetic CSV/Parquet
+fixtures rather than through run_all(), so they don't depend on which
+editions currently produce which format. test_format_parquet.py separately
+proves the real pipeline produces valid Parquet end-to-end for edition09.
 """
 from __future__ import annotations
 

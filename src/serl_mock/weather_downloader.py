@@ -43,7 +43,7 @@ import cdsapi
 import pandas as pd
 
 from .utils import read_config, write_table
-from .paths import CONFIG_DIR, MOCK_CLIMATE_DIR
+from .paths import CONFIG_DIR, MOCK_DIR, mock_climate_dirname
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +132,8 @@ class WeatherDownloader:
         if output_dir is not None:
             self.output_dir = Path(output_dir)
         else:
-            self.output_dir = Path(wcfg.get("output_dir", str(MOCK_CLIMATE_DIR)))
+            default_dir = MOCK_DIR / mock_climate_dirname(self.edition)
+            self.output_dir = Path(wcfg.get("output_dir", str(default_dir)))
 
         self.output_dir.mkdir(parents=True, exist_ok=True)
 

@@ -25,7 +25,6 @@ def generate_household_traits(
     export_meter_fraction: float,
     solar_thermal_fraction: float,
     seed: int,
-    edition: str = "08",
 ) -> pd.DataFrame:
     """Generate household traits (PV, HP, EV, solar thermal, meter types) for all households.
 

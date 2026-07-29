@@ -98,7 +98,7 @@ Notes:
 
 ### Consistency caveat for dummy data
 
-This project generates synthetic data in multiple generator modules. As with most mock systems,
+This project generates mock data in multiple generator modules. As with most mock systems,
 some combinations of values across datasets may not be fully realistic or perfectly coherent in
 all edge cases.
 
@@ -152,8 +152,9 @@ This command generates all mock datasets except ERA5 weather files.
 
 All settings (number of households, time period, random seed, consumption parameters)
 are controlled by a configuration file — **[config/serl_mock.yaml](config/serl_mock.yaml)**
-by default. Save additional copies for other editions or scenarios and select one with
-`--config path/to/file.yaml`.
+by default. [`config/serl_mock_edition08.yaml`](config/serl_mock_edition08.yaml) and
+[`config/serl_mock_edition09.yaml`](config/serl_mock_edition09.yaml) are ready-made examples —
+select one with `--config path/to/file.yaml`.
 
 Key options you can adjust before running the generator:
 
@@ -161,10 +162,8 @@ Key options you can adjust before running the generator:
 |---|---|---|
 | `n_households` | Number of synthetic households to generate | `100` |
 | `seed` | Random seed for reproducible outputs | `42` |
-| `edition` | Dataset edition — controls output filename suffixes and which `data/reference/edition<N>/` dictionaries are used | `"08"` |
+| `edition` | Which SERL edition to generate — the *only* setting that determines output format, smart-meter file layout, and which `data/reference/edition<N>/` dictionaries are used (see [`src/serl_mock/edition.py`](src/serl_mock/edition.py); there's no separate `format`/`layout` key, so a config can't accidentally mismatch them) | `"08"` |
 | `output_label` | Folder under `data/mock/` this run's output lands in | `edition<N>` |
-| `format` | Output file format for edition-release datasets: `"csv"` or `"parquet"` | `"csv"` |
-| `layout.hh_smart_meter` | How half-hourly smart-meter data splits into files: `"monthly"` or `"single_file"` | `"monthly"` |
 | `start_year` / `end_year` | Time period for smart-meter data | `2019` / `2019` |
 | `household_traits.pv_fraction` | Share of households with PV | `0.15` |
 | `household_traits.hp_fraction` | Share of households with a heat pump | `0.07` |

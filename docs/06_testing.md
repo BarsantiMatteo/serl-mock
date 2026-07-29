@@ -1,7 +1,7 @@
 # Testing
 
 This describes the automated test suite under `tests/`. The suite is a **structural safety
-net**, not a data-quality check — since `serl_mock` generates synthetic data, there is no
+net**, not a data-quality check — since `serl_mock` generates mock data, there is no
 "correct" value to assert on. What the tests protect is the *shape* of the output (files,
 columns, dtypes, row counts) staying stable unless someone deliberately changes it — see
 [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md) for why this matters.
@@ -52,7 +52,7 @@ test in a session shares one run, so this cost is paid once) and checks:
 
 A failure here means either a file didn't get created (something crashed or a filename changed)
 or a dataset lost the shared-PUPRN guarantee documented in
-[00_overview.md](00_overview.md#consistency-caveat-for-synthetic-outputs).
+[00_overview.md](00_overview.md#consistency-caveat-for-mock-outputs).
 
 ### 3. Golden manifest regression test — `test_golden_manifest.py`
 
@@ -62,7 +62,7 @@ compares it against the committed baseline at `tests/golden/edition08_manifest.j
 `build_manifest()` (in `tests/_shared.py`) is format-agnostic by design: it discovers both
 `*.csv` and `*.parquet` files so it stays correct once an edition switches format instead of
 silently seeing zero files for a Parquet edition. `tests/test_manifest_helper.py` proves this
-directly against synthetic CSV/Parquet fixtures, since the real pipeline doesn't produce Parquet
+directly against mock CSV/Parquet fixtures, since the real pipeline doesn't produce Parquet
 yet (that's Phase 1 of the edition plan).
 
 A failure prints exactly what changed, one of three ways:

@@ -44,6 +44,7 @@ from .utils import (
     write_table, read_table, table_exists,
 )
 from .layout import get_layout
+from .edition import get_edition
 from .profiles import generate_profiles
 from .patterns import (
     elec_seasonal_mult, elec_daily_mult,
@@ -57,9 +58,11 @@ class HHSmartMeterGenerator:
 
     Profiles (per-household baselines) and patterns (seasonal/daily
     multipliers) are decoupled so either can be swapped independently.
-    All generation parameters are configurable via the config file
+    Most generation parameters are configurable via the config file
     (config/serl_mock.yaml by default, or whichever file is passed to
-    --config / config_path).
+    --config / config_path) — except format/layout, which are bound to
+    `edition` and resolved via src/serl_mock/edition.py, not read from
+    config directly.
     """
 
     CALORIFIC_VALUE_MJ_PER_M3 = 39.5
@@ -78,6 +81,8 @@ class HHSmartMeterGenerator:
         config_path: str,
         puprn_list_path: Optional[str] = None,
         traits_path: Optional[str] = None,
+        format: Optional[str] = None,
+        layout: Optional[object] = None,
     ):
         cfg = read_config(config_path)
 
@@ -90,8 +95,14 @@ class HHSmartMeterGenerator:
         seed_random(self.seed)
 
         self.edition = str(cfg.get("edition", "08"))
-        self.format = str(cfg.get("format", "csv"))
-        self.layout = get_layout(str(cfg.get("layout", {}).get("hh_smart_meter", "monthly")))
+        # format/layout are bound to the edition (see edition.py) — not
+        # independent config keys, so a config can't combine an edition
+        # with a format/layout it doesn't use. The format/layout
+        # constructor parameters are an escape hatch for direct
+        # programmatic/test use only; there is no YAML config key for them.
+        edition_def = get_edition(self.edition)
+        self.format = format or edition_def.format
+        self.layout = layout or get_layout(edition_def.hh_smart_meter_layout)
 
         # Household traits (PV/HP/EV) — load from pre-generated CSV
         if not traits_path:
@@ -351,8 +362,9 @@ class DailySmartMeterGenerator:
         config_path: str,
         puprn_list_path: Optional[str] = None,
         traits_path: Optional[str] = None,
+        format: Optional[str] = None,
     ):
-        self._hh      = HHSmartMeterGenerator(config_path, puprn_list_path, traits_path)
+        self._hh = HHSmartMeterGenerator(config_path, puprn_list_path, traits_path, format=format)
         self.start_year = self._hh.start_year
         self.end_year   = self._hh.end_year
         self.edition    = self._hh.edition
@@ -480,6 +492,8 @@ class ReadTypeDataQualitySummaryGenerator:
         config_path: str,
         puprn_list_path: Optional[str] = None,
         traits_path: Optional[str] = None,
+        format: Optional[str] = None,
+        hh_layout: Optional[object] = None,
     ):
         cfg = read_config(config_path)
 
@@ -487,8 +501,12 @@ class ReadTypeDataQualitySummaryGenerator:
         self.start_year = int(cfg["start_year"])
         self.end_year = int(cfg["end_year"])
         self.edition = str(cfg.get("edition", "08"))
-        self.format = str(cfg.get("format", "csv"))
-        self.hh_layout = get_layout(str(cfg.get("layout", {}).get("hh_smart_meter", "monthly")))
+        # See HHSmartMeterGenerator.__init__: format/hh_layout come from the
+        # edition definition, not a config key — the constructor parameters
+        # are for direct programmatic/test use only.
+        edition_def = get_edition(self.edition)
+        self.format = format or edition_def.format
+        self.hh_layout = hh_layout or get_layout(edition_def.hh_smart_meter_layout)
         self.seed = int(cfg.get("seed", 42))
 
         if not traits_path:

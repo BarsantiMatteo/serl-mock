@@ -12,10 +12,47 @@ The default config is `config/serl_mock.yaml`, loaded automatically by
 ```yaml
 n_households: 100   # Number of synthetic households to generate
 seed: 42            # Master random seed — same seed → identical output
-edition: "08"       # Appended to all output filenames as _edition<N>; also the default
-                     # source for output_label (see below) and the folder under
-                     # data/reference/ that edition-specific dictionaries are read from
+edition: "08"       # Which SERL edition to generate — see "Edition-bound parameters" below
 ```
+
+---
+
+## Edition-bound parameters — format, layout, reference dictionaries
+
+`edition` is the *only* setting that determines output format, smart-meter file layout, and
+which `data/reference/edition<N>/` dictionaries are read. These are **not** independent config
+keys — there is no `format:` or `layout:` you can set in a config file. This is deliberate: it
+makes it impossible for a config to accidentally combine an edition with a format/layout it
+doesn't use (e.g. "edition09 but in CSV" by a leftover config key from a copy-pasted file).
+
+The actual definitions live in [`src/serl_mock/edition.py`](../src/serl_mock/edition.py):
+
+```python
+"08": Edition(number="08", format="csv",     hh_smart_meter_layout="monthly", dictionary_source_edition="07"),
+"09": Edition(number="09", format="parquet", hh_smart_meter_layout="monthly", dictionary_source_edition="09"),
+```
+
+- **`format`** (`"csv"` or `"parquet"`) applies to every dataset that mimics the SERL edition
+  release (EPC, survey, smart-meter, rt-summary, etc.). Mock-tool-internal files —
+  `household_traits.csv`, `puprn_master.csv`, and the exporter list — are always CSV regardless,
+  since they aren't part of any real SERL edition. Climate data is also always CSV for now (see
+  [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md)).
+- **`hh_smart_meter_layout`** (`"monthly"` or `"single_file"`) controls how the half-hourly
+  smart-meter dataset splits into physical files, independently of format. Every other dataset
+  keeps its current fixed layout (one file per year for daily smart-meter data, one file overall
+  for the contextual datasets).
+- **`dictionary_source_edition`** is which edition's dictionary *filenames* to read from that
+  edition's reference folder — e.g. edition08 still reads `_edition07`-named files (see
+  [05_epc_reference.md](05_epc_reference.md)); edition09 reads its own `_edition09`-named ones.
+
+**To add a new edition**, add an entry to `_EDITIONS` in `edition.py` — a deliberate, reviewable
+code change, not a config-file setting. See `config/serl_mock_edition08.yaml` and
+`config/serl_mock_edition09.yaml` for example configs that pair with existing editions.
+
+(If you need a one-off combination `edition.py` doesn't define — e.g. for local testing — the
+generator classes accept `format`/`layout` as constructor keyword arguments that override the
+edition's definition. This is a deliberate escape hatch for direct Python/test use only; it has
+no config-file equivalent on purpose.)
 
 ---
 
@@ -27,32 +64,8 @@ output_label: null   # Not set by default — falls back to "edition<N>"
 
 Each run's output is written to `data/mock/<output_label>/` — `output_label` defaults to
 `edition<N>` (e.g. `data/mock/edition08/`), so different editions never collide. Set it
-explicitly to disambiguate a differently-configured run of the same edition — e.g. if you
-override `format`/`layout` away from edition09's normal defaults for a one-off comparison,
-give that run its own label (`edition09_csv_test`) rather than letting it land in
-`edition09/` and overwrite the canonical output.
-
----
-
-## Output format & layout
-
-```yaml
-format: "csv"   # "csv" or "parquet"
-
-layout:
-  hh_smart_meter: monthly   # "monthly" (one file per calendar month) or "single_file"
-```
-
-`format` applies to every dataset that mimics the SERL edition release (EPC, survey,
-smart-meter, rt-summary, etc.). Mock-tool-internal files — `household_traits.csv`,
-`puprn_master.csv`, and the exporter list — are always CSV regardless of this setting,
-since they aren't part of any real SERL edition.
-
-`layout` controls how a dataset is split into physical files, independently of its format.
-Currently only `hh_smart_meter` is configurable; every other dataset keeps its current fixed
-layout (one CSV/Parquet file per year for daily smart-meter data, one file overall for the
-contextual datasets). See [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md)
-for why format and layout are tracked as separate settings.
+explicitly if you want multiple runs of the *same* edition (e.g. different `n_households`) to
+coexist instead of overwriting each other.
 
 ---
 

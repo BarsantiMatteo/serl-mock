@@ -2,7 +2,7 @@
 
 ## What is this project?
 
-`serl-mock` generates synthetic datasets that mimic the structure and naming conventions of the **SERL (Smart Energy Research Lab) Observatory** data releases.  It is intended for:
+`serl-mock` generates mock datasets that mimic the structure and naming conventions of the **SERL (Smart Energy Research Lab) Observatory** data releases.  It is intended for:
 
 - **local development** — build and test analysis pipelines without accessing the real Trusted Research Environment (TRE)
 - **prototyping** — explore data structures and column layouts before running code on real data
@@ -15,8 +15,10 @@ The generated data is **not real** and does not represent actual households.
 ## What is generated?
 
 Running the pipeline produces the following files under `data/mock/<output_label>/`, where
-`output_label` defaults to `edition<N>` (e.g. `data/mock/edition08/`) — see
-[02_configuration.md](02_configuration.md#output-format--layout):
+`output_label` defaults to `edition<N>` (e.g. `data/mock/edition08/`). Filenames below show the
+default edition08 config (CSV, monthly smart-meter files) — see
+[02_configuration.md](02_configuration.md#edition-bound-parameters--format-layout-reference-dictionaries)
+for how edition09 (Parquet) differs:
 
 | File / folder | Content |
 |---|---|
@@ -37,10 +39,10 @@ Running the pipeline produces the following files under `data/mock/<output_label
 
 All datasets share the same PUPRN list so they can be joined reliably.
 
-## Consistency caveat for synthetic outputs
+## Consistency caveat for mock outputs
 
 The mock pipeline is built from multiple generators. While it aims to be coherent, some
-cross-dataset combinations may still be synthetic simplifications rather than fully realistic
+cross-dataset combinations may still be mock simplifications rather than fully realistic
 joint behaviour.
 
 Important consistency guarantees are already implemented:
@@ -61,7 +63,7 @@ Important consistency guarantees are already implemented:
 A **PUPRN** (Pseudonymised Unique Property Reference Number) is the household identifier used across all SERL datasets.  In this project PUPRNs are randomly generated 8-character alphanumeric strings.
 
 ### Edition
-SERL releases data in numbered editions (e.g. Edition 07, Edition 08).  The `edition` setting in `serl_mock.yaml` controls the suffix appended to all output filenames, and (via `output_label`, which defaults to `edition<N>`) which folder under `data/mock/` the run's output lands in — so different editions never overwrite each other's output. Edition-specific reference dictionaries live under `data/reference/edition<N>/`; see [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md).
+SERL releases data in numbered editions (e.g. Edition 07, Edition 08). The `edition` setting in `serl_mock.yaml` is the single thing that determines: the suffix appended to output filenames; (via `output_label`, defaulting to `edition<N>`) which folder under `data/mock/` a run's output lands in, so different editions never overwrite each other; the output file format and smart-meter file layout, resolved from [`src/serl_mock/edition.py`](../src/serl_mock/edition.py) rather than separate config keys, so a config can't accidentally combine an edition with a format/layout it doesn't use; and which `data/reference/edition<N>/` dictionaries are read. See [02_configuration.md](02_configuration.md#edition-bound-parameters--format-layout-reference-dictionaries) and [notes/edition_multiformat_plan.md](notes/edition_multiformat_plan.md).
 
 ### Reproducibility
 Every random draw uses a seeded RNG.  Setting the same `seed` in `serl_mock.yaml` always produces identical output files.

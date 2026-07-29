@@ -9,22 +9,21 @@ CONFIG_DIR = PROJECT_ROOT / "config"
 DATA_DIR = PROJECT_ROOT / "data"
 MOCK_DIR = DATA_DIR / "mock"
 
-# These four constants hardcode the literal "edition08" subfolder/file name —
-# a real run's actual output lands under mock_dir_for(output_label) (e.g.
-# data/mock/edition08/), and generate_mock_data.py only reuses these
-# constants' *names* (MOCK_HH_DIR.name, etc.), reattaching them under the
-# active run's own output folder. They do NOT yet vary if edition != "08" —
-# making them edition-aware is still open (see Phase 2 in
-# docs/notes/edition_multiformat_plan.md).
+# Subfolder *names* (not full paths) for the per-edition smart-meter/climate
+# datasets — parameterized by edition so a run's subfolders actually match
+# its own edition instead of always saying "edition08". Reattach these under
+# a run's own output folder, e.g. mock_dir_for(output_label) / mock_hh_dirname(edition).
+def mock_hh_dirname(edition: str) -> str:
+    return f"serl_smart_meter_hh_edition{edition}"
 
-# Target folder for monthly half-hourly mock files
-MOCK_HH_DIR = MOCK_DIR / "serl_smart_meter_hh_edition08"
 
-# Target folder for yearly daily mock files
-MOCK_DAILY_DIR = MOCK_DIR / "serl_smart_meter_daily_edition08"
+def mock_daily_dirname(edition: str) -> str:
+    return f"serl_smart_meter_daily_edition{edition}"
 
-# Target folder for ERA5 climate data files
-MOCK_CLIMATE_DIR = MOCK_DIR / "serl_climate_data_edition08"
+
+def mock_climate_dirname(edition: str) -> str:
+    return f"serl_climate_data_edition{edition}"
+
 
 # Target folder for mock-only files (not part of any SERL Edition release)
 MOCK_INTERNAL_DIR = MOCK_DIR / "mock_internal"
@@ -40,25 +39,12 @@ REFERENCE_DIR = DATA_DIR / "reference"
 
 
 def reference_dir_for(edition: str) -> Path:
-    """Reference files (data dictionaries) specific to a given edition."""
+    """Reference files (data dictionaries) specific to a given edition.
+
+    Note the dictionary *filenames* inside may not carry this same edition
+    number — see edition.Edition.dictionary_source_edition.
+    """
     return REFERENCE_DIR / f"edition{edition}"
-
-
-# Some editions' reference dictionaries are sourced from an earlier edition's
-# real SERL documentation rather than their own — e.g. edition08's dictionary
-# files are still the real edition07 SERL documentation, with edition08
-# deviations only noted in prose (see docs/05_epc_reference.md). Maps
-# edition -> the edition number its dictionary filenames actually carry.
-# Editions not listed here are assumed to have their own accurately-named
-# dictionaries (e.g. edition09's, once real ones are added).
-DICTIONARY_SOURCE_EDITION = {
-    "08": "07",
-}
-
-
-def dictionary_source_edition(edition: str) -> str:
-    """Which edition number a given edition's dictionary filenames use."""
-    return DICTIONARY_SOURCE_EDITION.get(edition, edition)
 
 
 def mock_dir_for(output_label: str) -> Path:

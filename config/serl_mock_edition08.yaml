@@ -1,26 +1,24 @@
 # ===================================================
-# SERL Mock Data - General Configuration
+# SERL Mock Data - Edition08 example config
 # ===================================================
+# Identical to config/serl_mock.yaml (edition08 is the default), saved under
+# its own name to demonstrate the --config pattern:
+#
+#   uv run python scripts/generate_mock_data.py --config config/serl_mock_edition08.yaml
+#
+# See src/serl_mock/edition.py for what "edition08" fixes (format: csv,
+# hh_smart_meter layout: monthly, dictionary_source_edition: 07) versus what
+# stays free to configure below.
 
 # -------------------------
 # Global
 # -------------------------
 n_households: 1000
 seed: 42  # Random seed for reproducibility of mock data generation
-
-# Which SERL edition to generate. This alone determines output format,
-# smart-meter file layout, and which data/reference/edition<N>/ dictionaries
-# are used — see src/serl_mock/edition.py for each edition's definition.
-# There is deliberately no `format:`/`layout:` config key: those are bound
-# to the edition so a config file can't accidentally combine an edition with
-# a format/layout it doesn't use. To generate a different combination,
-# add a new Edition in src/serl_mock/edition.py.
 edition: "08"
 
 # Folder under data/mock/ this run's output lands in. Not set by default —
-# falls back to "edition<N>" (e.g. "edition08"). Set explicitly if you want
-# to keep multiple runs of the same edition (e.g. different n_households)
-# side by side instead of overwriting each other.
+# falls back to "edition<N>" (e.g. "edition08").
 # output_label: "edition08"
 
 # -------------------------
@@ -57,8 +55,6 @@ profiles:
 # -------------------------
 # Generation patterns
 # Controls the shape of seasonal and intraday curves and noise behaviour.
-# To replace a curve, edit patterns.py and leave these params unchanged,
-# or adjust the amplitude/probability values here.
 # -------------------------
 patterns:
   elec_seasonal_amplitude:     0.3   # ±30% swing around annual mean electricity
@@ -70,55 +66,21 @@ patterns:
 
 # -------------------------
 # Weather data (CDS / ERA5)
-# Download real hourly ERA5 reanalysis data via the Copernicus Climate Data
-# Store API (https://cds.climate.copernicus.eu/how-to-api).
-# Credentials must be configured in ~/.cdsapirc or via environment variables
-# CDSAPI_URL and CDSAPI_KEY before running the downloader.
+# Requires CDS credentials in ~/.cdsapirc — pass --skip-weather to omit.
 # -------------------------
 weather:
-  # CDS dataset identifier
   dataset: "reanalysis-era5-single-levels"
-
-  # ERA5 product type
   product_type: "reanalysis"
-
-  # Variables to retrieve — aligned with the SERL climate data schema
   variables:
     - "2m_temperature"
     - "surface_solar_radiation_downwards"
     - "total_precipitation"
     - "10m_u_component_of_wind"
     - "10m_v_component_of_wind"
-
-  # Bounding box [north, west, south, east] in decimal degrees
-  area:
-    - 52.0   # north
-    - -4.0   # west
-    - 49.0   # south
-    -  2.0   # east
-
-  # Spatial resolution in degrees [lat_step, lon_step]
-  grid:
-    - 0.25
-    - 0.25
-
-  # Temporal resolution: download one record per hour
+  area: [52.0, -4.0, 49.0, 2.0]   # [north, west, south, east]
+  grid: [0.25, 0.25]
   time_step_hours: 1
-
-  # Output file format: "netcdf" (.nc) or "grib" (.grib)
-  output_format: "netcdf"
-
-  # Date range for downloads — defaults to top-level start_year / end_year
-  # if omitted.  Override here to download a different period than the
-  # smart-meter simulation window.
-  # start_year: 2019
-  # end_year:   2019
-
-  # Output directory (relative to project root). Only needed to override the
-  # pipeline's own default, which is data/mock/<output_label>/serl_climate_data_edition08/.
-  # output_dir: "data/mock/edition08/serl_climate_data_edition08"
-
-
+  output_format: "netcdf"   # "netcdf" (.nc) or "grib" (.grib) — raw ERA5 download only
 
 # --------------------------
 # Naming of output files

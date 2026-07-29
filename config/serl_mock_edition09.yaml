@@ -1,0 +1,96 @@
+# ===================================================
+# SERL Mock Data - Edition09 example config
+# ===================================================
+# Run with:
+#
+#   uv run python scripts/generate_mock_data.py --config config/serl_mock_edition09.yaml
+#
+# Only `edition: "09"` differs from config/serl_mock_edition08.yaml in a way
+# that matters structurally — see src/serl_mock/edition.py, which fixes
+# edition09 to format: parquet (hh_smart_meter layout is still monthly;
+# unconfirmed pending the real edition09 spec). Everything below (household
+# counts, traits, profiles, patterns) stays exactly as free to configure as
+# it is for any other edition.
+#
+# NOTE: edition09's reference dictionaries (data/reference/edition09/) are
+# currently placeholder copies of edition08's — see the README.md in that
+# folder. Replace them once the real edition09 SERL documentation exists.
+
+# -------------------------
+# Global
+# -------------------------
+n_households: 1000
+seed: 42
+edition: "09"
+
+# output_label: "edition09"
+
+# -------------------------
+# Time period for smart-meter data
+# -------------------------
+start_year: 2024
+end_year: 2024
+
+# -------------------------
+# Household traits
+# -------------------------
+household_traits:
+  pv_fraction: 0.15
+  hp_fraction: 0.07
+  ev_fraction: 0.10
+  gas_meter_fraction: 0.85
+  export_meter_fraction: 0.15
+  solar_thermal_fraction: 0.02
+
+# -------------------------
+# Household profiles
+# -------------------------
+profiles:
+  base_elec_mean_wh: 175
+  base_elec_std_wh:   50
+  base_gas_mean_wh: 1500
+  base_gas_std_wh:   300
+  gas_fraction:     0.85
+
+# -------------------------
+# Generation patterns
+# -------------------------
+patterns:
+  elec_seasonal_amplitude:     0.3
+  gas_seasonal_amplitude:      2.0
+  elec_spike_probability:     0.02
+  elec_spike_max_wh:        2000.0
+  summer_hot_water_probability: 0.15
+  gas_heating_threshold:       0.1
+
+# -------------------------
+# Weather data (CDS / ERA5)
+# Requires CDS credentials in ~/.cdsapirc — pass --skip-weather to omit.
+# Climate data is always CSV regardless of edition — see
+# docs/notes/edition_multiformat_plan.md.
+# -------------------------
+weather:
+  dataset: "reanalysis-era5-single-levels"
+  product_type: "reanalysis"
+  variables:
+    - "2m_temperature"
+    - "surface_solar_radiation_downwards"
+    - "total_precipitation"
+    - "10m_u_component_of_wind"
+    - "10m_v_component_of_wind"
+  area: [52.0, -4.0, 49.0, 2.0]
+  grid: [0.25, 0.25]
+  time_step_hours: 1
+  output_format: "netcdf"
+
+# --------------------------
+# Naming of output files
+# --------------------------
+filenames:
+  epc: "serl_epc_data"
+  covid19_survey: "serl_covid19_survey_data"
+  survey: "serl_survey_data"
+  followup_survey: "serl_2023_follow_up_survey_data"
+  summary: "serl_participant_summary"
+  followup_prefix: "serl_follow_up_survey"
+  tariff_data: "serl_tariff_data"
