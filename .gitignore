@@ -39,11 +39,14 @@ data/mock/
 
 
 # -----------------------------------------------------------
-# DOCUMENTATION FILES 
+# DOCUMENTATION FILES
 # -----------------------------------------------------------
 # Only ignore large PDFs; CSV data dictionaries are tracked inputs
 docs/documentation/*.pdf
 working_notes.md
+
+# Personal working notes and plans — kept locally, never pushed
+docs/notes/
 
 # -----------------------------------------------------------
 # DUCKDB FILES 
