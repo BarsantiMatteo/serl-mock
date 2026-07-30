@@ -24,7 +24,7 @@
 n_households: 1000
 seed: 42
 edition: "09"
-output_label: "edition09"
+output_label: "edition09_2024_N1000"
 
 # -------------------------
 # Time period for smart-meter data

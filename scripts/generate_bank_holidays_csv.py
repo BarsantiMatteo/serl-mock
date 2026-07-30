@@ -15,7 +15,7 @@ import urllib.request
 from pathlib import Path
 
 GOV_UK_URL = "https://www.gov.uk/bank-holidays.json"
-YEAR_RANGE = range(2019, 2026)
+YEAR_RANGE = range(2019, 2030)
 
 OUTPUT_PATH = (
     Path(__file__).resolve().parents[1]
