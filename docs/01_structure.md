@@ -63,9 +63,8 @@ serl-mock/
 │   ├── 04_metadata.md              # SERL dataset column reference
 │   ├── 05_epc_reference.md         # EPC quirks and region differences (E&W vs Scotland)
 │   ├── 06_testing.md               # Running and reading the automated test suite
-│   └── notes/                      # Working notes and plans — not reference docs
-│       ├── working_notes.md        # Working notes and TODOs
-│       └── edition_multiformat_plan.md  # Plan for multi-edition & multi-format support
+│   └── notes/                      # Local-only TODO list — gitignored, not reference docs
+│       └── todo.md
 │
 ├── notebooks/
 │   └── explore_mock_data.ipynb     # Example notebook for exploring generated output
@@ -94,14 +93,18 @@ serl-mock/
 │   ├── conftest.py
 │   ├── _shared.py
 │   ├── golden/
-│   │   └── edition08_manifest.json
+│   │   ├── edition08_manifest.json
+│   │   └── edition09_manifest.json
 │   ├── test_household_traits.py
 │   ├── test_pipeline_smoke.py
 │   ├── test_golden_manifest.py
 │   ├── test_manifest_helper.py
 │   ├── test_format_parquet.py
 │   ├── test_layout_single_file.py
+│   ├── test_daily_layout_edition09.py
 │   ├── test_edition.py
+│   ├── test_output_label.py
+│   ├── test_generate_flags.py
 │   └── test_reference_dictionary_resolution.py
 │
 ├── pyproject.toml

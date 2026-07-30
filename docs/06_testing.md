@@ -84,9 +84,11 @@ Then review the diff in `tests/golden/edition08_manifest.json` before committing
 existing means someone has consciously confirmed the new shape is correct, not that it
 regenerates itself silently. Never edit the JSON by hand.
 
-Note this manifest is scoped to **edition08 only**. When edition09 exists it will get its own
-`tests/golden/edition09_manifest.json`, compared independently — edition09 having different
-columns or a different file layout is expected and will not fail edition08's test.
+Each edition has its own golden manifest, compared independently — `tests/golden/edition08_manifest.json`
+and `tests/golden/edition09_manifest.json` today. Edition09 having different columns or a
+different file layout than edition08 is expected and will not fail edition08's test. Adding a
+new edition to `tests/_shared.py::TINY_CONFIGS_BY_EDITION` and running
+`scripts/update_golden_manifest.py --edition <N>` gives it the same coverage.
 
 ## Fixture config
 

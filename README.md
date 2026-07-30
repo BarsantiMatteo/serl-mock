@@ -38,6 +38,7 @@ serl-mock/
 │   ├── generate_bank_holidays_csv.py
 │   └── update_golden_manifest.py              # Regenerates tests/golden/*.json baselines
 ├── tests/                                     # Automated test suite — see docs/06_testing.md
+│   └── golden/                                #   one manifest per edition (edition08, edition09…)
 ├── src/
 │   └── serl_mock/
 │       ├── generator_contextual_data.py       # EPC, survey, participant summary generators
@@ -154,6 +155,11 @@ by default. [`config/serl_mock_edition08.yaml`](config/serl_mock_edition08.yaml)
 [`config/serl_mock_edition09.yaml`](config/serl_mock_edition09.yaml) are ready-made examples —
 select one with `--config path/to/file.yaml`.
 
+Want to skip individual outputs (e.g. just EPC, or just the survey datasets) instead of
+everything-but-weather? Set the config's `generate:` block — see
+[docs/02_configuration.md](docs/02_configuration.md). `--survey-only` re-runs just the
+contextual/survey step against a previous full run's PUPRNs/traits.
+
 Key options you can adjust before running the generator:
 
 | Setting | Description | Default |
@@ -162,6 +168,8 @@ Key options you can adjust before running the generator:
 | `seed` | Random seed for reproducible outputs | `42` |
 | `edition` | Which SERL edition to generate — the *only* setting that determines output format, smart-meter file layout, and which `data/reference/edition<N>/` dictionaries are used (see [`src/serl_mock/edition.py`](src/serl_mock/edition.py); there's no separate `format`/`layout` key, so a config can't accidentally mismatch them) | `"08"` |
 | `output_label` | Folder under `data/mock/` this run's output lands in | `edition<N>` |
+| `generate.*` | Per-dataset on/off toggles (hh_smart_meter, daily_smart_meter, rt_summary, weather, epc, survey, covid19_survey, follow_up_survey, participant_summary, exporters_list) | all `true` |
+| `survey_only` | Skip steps 1-4, regenerate only contextual/survey data from a prior run | `false` |
 | `start_year` / `end_year` | Time period for smart-meter data | `2019` / `2019` |
 | `household_traits.pv_fraction` | Share of households with PV | `0.15` |
 | `household_traits.hp_fraction` | Share of households with a heat pump | `0.07` |
