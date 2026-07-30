@@ -5,6 +5,11 @@ The default config is `config/serl_mock.yaml`, loaded automatically by
 `config/serl_mock_edition09.yaml`) for different editions or scenarios and select one with
 `--config path/to/file.yaml`, or by passing `config_path=` to `run_all()` directly.
 
+If you run the script from an IDE "Run" button rather than a terminal (so passing `--config`
+each time isn't convenient), set `DEFAULT_CONFIG_PATH` near the top of
+`scripts/generate_mock_data.py` instead — `--config` still overrides it when passed on the
+command line.
+
 ---
 
 ## Global settings

@@ -73,6 +73,14 @@ from src.serl_mock.generator_household_traits import generate_household_traits, 
 from src.serl_mock.weather_downloader import WeatherDownloader
 from src.serl_mock.utils import read_config
 
+# Set this to run the script directly (e.g. an IDE "Run" button) against a
+# specific config without typing --config every time. Leave as None to use
+# config/serl_mock.yaml. `--config` on the command line always overrides
+# this — this is only consulted when --config isn't passed. Does not affect
+# programmatic callers of run_all(), which defaults to config/serl_mock.yaml
+# on its own.
+# DEFAULT_CONFIG_PATH: Optional[Path] = None
+DEFAULT_CONFIG_PATH = CONFIG_DIR / "serl_mock_edition08.yaml"
 
 
 def run_all(
@@ -282,9 +290,11 @@ if __name__ == "__main__":
         default=None,
         help=(
             "Path to a config YAML to use instead of config/serl_mock.yaml — e.g. a "
-            "saved per-edition config such as config/serl_mock_edition09.yaml."
+            "saved per-edition config such as config/serl_mock_edition09.yaml. "
+            "Overrides DEFAULT_CONFIG_PATH set at the top of this file, if any."
         ),
     )
     args = parser.parse_args()
-    run_all(skip_weather=args.skip_weather, survey_only=args.survey_only, config_path=args.config)
+    config_path = args.config or DEFAULT_CONFIG_PATH
+    run_all(skip_weather=args.skip_weather, survey_only=args.survey_only, config_path=config_path)
 
