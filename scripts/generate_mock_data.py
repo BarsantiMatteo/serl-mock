@@ -11,8 +11,9 @@ use. Produces:
 
   1. puprn_master.csv               — shared household ID list
      household_traits.csv           — household traits (PV/HP/EV + meter types)
-                                       (always CSV — mock-tool-internal, not
-                                       part of any real SERL edition)
+     serl_mock_config.yaml          — copy of the config used for this run
+                                       (always CSV/YAML — mock-tool-internal,
+                                       not part of any real SERL edition)
   2. Half-hourly smart-meter data   — realistic electricity and gas time series
                                        with seasonal and intraday patterns
                                        (see src/serl_mock/patterns.py); split
@@ -80,7 +81,7 @@ from src.serl_mock.utils import read_config
 # programmatic callers of run_all(), which defaults to config/serl_mock.yaml
 # on its own.
 # DEFAULT_CONFIG_PATH: Optional[Path] = None
-DEFAULT_CONFIG_PATH = CONFIG_DIR / "serl_mock_edition08.yaml"
+DEFAULT_CONFIG_PATH = CONFIG_DIR / "serl_mock_edition09.yaml"
 
 
 def run_all(
@@ -160,6 +161,16 @@ def run_all(
         if not p.exists():
             p.write_text("# placeholder\n", encoding="utf-8")
             print(f"  Created {fname}")
+
+    print("\nStep 0c: Recording the config used for this run")
+    # Fixed filename (not the source config's own name) so any tooling looking
+    # for "what config produced this output" always knows what to look for,
+    # regardless of whether the source was serl_mock.yaml, a per-edition
+    # config, or something else. Mock-tool-internal bookkeeping, not part of
+    # any real SERL edition — lives in mock_internal/ alongside the other
+    # such files.
+    shutil.copy2(cfg_path, mock_internal_dir / "serl_mock_config.yaml")
+    print(f"  Copied {cfg_path.name} -> mock_internal/serl_mock_config.yaml")
 
     puprn_csv = mock_internal_dir / "puprn_master.csv"
     traits_csv = mock_internal_dir / "household_traits.csv"
