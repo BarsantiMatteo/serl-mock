@@ -29,6 +29,11 @@ class Edition:
     dictionary_source_edition: str  # which edition's dictionary filenames to read;
                                      # equal to `number` unless this edition still
                                      # borrows an earlier edition's dictionaries
+    smart_meter_schema: str = "legacy"  # "legacy" or "harmonised" — see the
+                                         # _SCHEMA_COLUMNS mapping and the
+                                         # *_harmonised_* methods in
+                                         # generator_smartmeter.py for what each
+                                         # variant actually produces
 
 
 _EDITIONS: Dict[str, Edition] = {
@@ -39,6 +44,7 @@ _EDITIONS: Dict[str, Edition] = {
         daily_smart_meter_layout="yearly",
         dictionary_source_edition="07",  # still uses the real edition07 SERL
                                           # dictionaries; see docs/05_epc_reference.md
+        smart_meter_schema="legacy",
     ),
     "09": Edition(
         number="09",
@@ -49,6 +55,8 @@ _EDITIONS: Dict[str, Edition] = {
                                                   # level of the run's output,
                                                   # not in a per-year subfolder
         dictionary_source_edition="09",
+        smart_meter_schema="harmonised",  # real edition09 HH/daily column
+                                           # layout — see docs/04_metadata.md
     ),
 }
 

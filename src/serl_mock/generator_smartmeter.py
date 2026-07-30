@@ -51,6 +51,27 @@ from .patterns import (
     gas_seasonal_mult,  gas_daily_mult,
 )
 
+# Logical column roles that ReadTypeDataQualitySummaryGenerator reads back
+# from written HH/daily files by name — the one place documenting exactly
+# which columns differ between edition.smart_meter_schema variants. A future
+# third schema slots in here without touching the summary generator's logic.
+_SCHEMA_COLUMNS = {
+    "legacy": {
+        "gas_hh_value_col": "Gas_hh_m3",
+        "gas_daily_value_col": "Gas_d_m3",
+        "elec_react_imp_flag_col": "Elect_react_imp_flag",
+        "elec_react_exp_flag_col": "Elect_react_exp_flag",
+        "daily_valid_read_time_col": "Valid_read_time",
+    },
+    "harmonised": {
+        "gas_hh_value_col": "Gas_hh_Wh",
+        "gas_daily_value_col": "Gas_d_Wh",
+        "elec_react_imp_flag_col": "Elec_react_imp_flag",
+        "elec_react_exp_flag_col": "Elec_react_exp_flag",
+        "daily_valid_read_time_col": "Valid_read_time_gas",
+    },
+}
+
 
 class HHSmartMeterGenerator:
     """
@@ -103,6 +124,7 @@ class HHSmartMeterGenerator:
         edition_def = get_edition(self.edition)
         self.format = format or edition_def.format
         self.layout = layout or get_layout(edition_def.hh_smart_meter_layout)
+        self.schema = edition_def.smart_meter_schema
 
         # Household traits (PV/HP/EV) — load from pre-generated CSV
         if not traits_path:
@@ -327,12 +349,50 @@ class HHSmartMeterGenerator:
         df["Elect_react_exp_flag"] = np.where(invalid, -5, 1)
         df["Gas_flag"]             = _flag_gas(gas_m3)
 
-        return df.drop(columns=["timestamp_utc"])
+        df = df.drop(columns=["timestamp_utc"])
+        if self.schema == "harmonised":
+            df = self._to_harmonised_hh(df)
+        return df
+
+    @staticmethod
+    def _to_harmonised_hh(df: pd.DataFrame) -> pd.DataFrame:
+        """Reshape the legacy HH frame into edition09's real column layout.
+
+        Real edition09 columns: gas is Wh-only (no Gas_hh_m3), the reactive
+        flag columns drop the "Elect" typo, and flags are grouped ahead of
+        the value columns. `filename` is added later, in write_chunk(), once
+        the actual output filename is known.
+        """
+        df = df.rename(columns={
+            "Elect_react_imp_flag": "Elec_react_imp_flag",
+            "Elect_react_exp_flag": "Elec_react_exp_flag",
+        })
+        return df[[
+            "PUPRN",
+            "Read_date_effective_local",
+            "Read_date_time_local",
+            "Read_date_time_UTC",
+            "HH",
+            "Valid_read_time",
+            "Elec_act_imp_flag",
+            "Elec_react_imp_flag",
+            "Elec_act_exp_flag",
+            "Elec_react_exp_flag",
+            "Gas_flag",
+            "Elec_act_imp_hh_Wh",
+            "Elec_react_imp_hh_varh",
+            "Elec_act_exp_hh_Wh",
+            "Elec_react_exp_hh_varh",
+            "Gas_hh_Wh",
+        ]]
 
     # ---------- Write ----------
 
     def write_chunk(self, df: pd.DataFrame, group: "list[tuple[int, int]]", outfolder: str):
         stem = with_edition_suffix(self.layout.filename_stem("serl_half_hourly", group), self.edition)
+        if self.schema == "harmonised":
+            df = df.copy()
+            df["filename"] = f"{stem}.{self.format}"
         write_table(df, Path(outfolder) / stem, format=self.format)
 
     def generate_all(self, outfolder: "Union[str, os.PathLike]"):
@@ -372,6 +432,7 @@ class DailySmartMeterGenerator:
         self.end_year   = self._hh.end_year
         self.edition    = self._hh.edition
         self.format     = self._hh.format
+        self.schema     = self._hh.schema
         # daily_layout is bound to the edition (see HHSmartMeterGenerator's
         # equivalent note) — the constructor parameter is a programmatic/
         # test-only escape hatch, not a config key.
@@ -392,15 +453,23 @@ class DailySmartMeterGenerator:
         df["_date"]  = pd.to_datetime(df["Read_date_effective_local"], format="%d/%m/%Y").dt.date
         df["_valid"] = df["Valid_read_time"].astype(bool)
 
-        # Energy from valid reads only (invalid skewed timestamps contribute 0)
+        # Energy from valid reads only (invalid skewed timestamps contribute 0).
+        # Gas is summed from whichever HH column this schema actually writes —
+        # m3 for legacy, Wh for harmonised (edition09 has no Gas_hh_m3 column).
+        # Export is only consumed by the harmonised schema's "net" field below;
+        # computing it unconditionally here is cheap and keeps the legacy
+        # branch's own column selection (and therefore its output) untouched.
         df["_e_wh"] = np.where(df["_valid"], df["Elec_act_imp_hh_Wh"].astype(float), 0.0)
-        df["_g_m3"] = np.where(df["_valid"], df["Gas_hh_m3"].astype(float), 0.0)
+        df["_exp_wh"] = np.where(df["_valid"], df["Elec_act_exp_hh_Wh"].astype(float), 0.0)
+        gas_hh_col = _SCHEMA_COLUMNS[self.schema]["gas_hh_value_col"]
+        df["_g_val"] = np.where(df["_valid"], df[gas_hh_col].astype(float), 0.0)
 
         grp = df.groupby(["PUPRN", "_date"])
         agg = grp.agg(
             _valid_n=("_valid", "sum"),
             _e_sum=("_e_wh",  "sum"),
-            _g_sum=("_g_m3",  "sum"),
+            _exp_sum=("_exp_wh", "sum"),
+            _g_sum=("_g_val", "sum"),
         ).reset_index()
 
         # DST-aware expected HH count (46 / 48 / 50)
@@ -412,14 +481,8 @@ class DailySmartMeterGenerator:
         agg["Elec_act_imp_hh_sum_Wh"] = (
             agg["_e_sum"].round().astype("Int64").where(agg["_full"])
         )
-        agg["Gas_hh_sum_m3"] = agg["_g_sum"].round(4).where(agg["_full"])
 
-        # Primary daily reads equal HH sums in mock data
-        agg["Elec_act_imp_d_Wh"]              = agg["Elec_act_imp_hh_sum_Wh"]
-        agg["Unit_correct_elec_act_imp_d_Wh"] = agg["Elec_act_imp_d_Wh"]
-        agg["Gas_d_m3"]                        = agg["Gas_hh_sum_m3"]
-
-        # Validity and match codes
+        # Validity and match codes (shared by both schemas)
         agg["Valid_hh_sum_or_daily_elec"] = agg["_full"]
         agg["Valid_hh_sum_or_daily_gas"]  = agg["_full"]
         agg["Elec_sum_match"] = np.where(agg["_full"], 1, 0)
@@ -428,12 +491,15 @@ class DailySmartMeterGenerator:
         # Date columns — daily read is assumed at UTC midnight → UTC date = eff_date + 1
         eff = pd.to_datetime(agg["_date"])
         agg["Read_date_effective_local"] = eff.dt.strftime("%Y-%m-%d")
-        agg["Read_date_time_UTC"]        = (eff + pd.Timedelta(days=1)).dt.strftime("%Y-%m-%d")
-        agg["Valid_read_time"]           = True
+        utc_rollover = eff + pd.Timedelta(days=1)
+        agg["Read_date_time_UTC"] = utc_rollover.dt.strftime("%Y-%m-%d")
+        agg["Valid_read_time"]    = True
 
-        # Energy flags on daily values
+        # Primary daily read equals the HH sum in mock data
+        agg["Elec_act_imp_d_Wh"]              = agg["Elec_act_imp_hh_sum_Wh"]
+        agg["Unit_correct_elec_act_imp_d_Wh"] = agg["Elec_act_imp_d_Wh"]
+
         e_d = agg["Elec_act_imp_d_Wh"].fillna(0).astype(float).to_numpy()
-        g_d = agg["Gas_d_m3"].fillna(0.0).to_numpy(dtype=float)
         v   = HHSmartMeterGenerator.FLAG_THRESHOLDS
 
         e_flag = np.ones(len(agg), dtype=int)
@@ -441,6 +507,14 @@ class DailySmartMeterGenerator:
         e_flag = np.where(e_d >= v["elec_meter_max_Wh"],         -1, e_flag)
         agg["Elec_act_imp_flag"] = e_flag
 
+        if self.schema == "harmonised":
+            return self._to_harmonised_daily(agg, utc_rollover)
+
+        # ---- legacy schema (edition08) — unchanged shape ----
+        agg["Gas_hh_sum_m3"] = agg["_g_sum"].round(4).where(agg["_full"])
+        agg["Gas_d_m3"] = agg["Gas_hh_sum_m3"]
+
+        g_d = agg["Gas_d_m3"].fillna(0.0).to_numpy(dtype=float)
         g_flag = np.ones(len(agg), dtype=int)
         g_flag = np.where(g_d >  self.DAILY_GAS_VERY_HIGH_M3,   -2, g_flag)
         g_flag = np.where(g_d >= v["gas_meter_max_m3"],          -1, g_flag)
@@ -464,6 +538,79 @@ class DailySmartMeterGenerator:
             "Gas_hh_sum_m3",
         ]]
 
+    def _to_harmonised_daily(self, agg: pd.DataFrame, utc_rollover: pd.Series) -> pd.DataFrame:
+        """Reshape into edition09's real daily column layout.
+
+        Real edition09 splits electricity/gas timing into separate columns
+        and reports gas in Wh only (no Gas_d_m3 / Gas_hh_sum_m3).
+
+        `Elec_net_act_imp_d_Wh_recommended` is the net (import minus export)
+        daily figure, using the gated (full-day) sums when available and
+        falling back to the raw ungated sums for an incomplete day — the
+        best-available net reading. `Gas_d_Wh_recommended` uses the same
+        gated-else-raw fallback (gas has no export leg to net against).
+
+        `Read_date_time_UTC_elec` / `_gas` and `Read_date_time_elec` are
+        timezone-aware timestamps (UTC and Europe/London respectively) at
+        the modelled rollover instant — the model only tracks a day
+        boundary, not a finer time-of-day, so these are always midnight in
+        their respective timezone. `Read_date_time_UTC_gas` /
+        `Valid_read_time_gas` mirror the electricity columns exactly (no
+        independent gas timing model yet) — provisional pending the real
+        edition09 documentation, see docs/04_metadata.md. `filename` is
+        added later, in write_chunk().
+        """
+        v = HHSmartMeterGenerator.FLAG_THRESHOLDS
+
+        # Raw (ungated) sums — always present, used as the "_recommended"
+        # fields' fallback for an incomplete day.
+        e_sum_raw   = agg["_e_sum"].round().astype("Int64")
+        exp_sum_raw = agg["_exp_sum"].round().astype("Int64")
+        g_sum_raw   = agg["_g_sum"].round().astype("Int64")
+
+        agg["Gas_d_Wh"] = g_sum_raw.where(agg["_full"])
+        agg["Gas_d_Wh_recommended"] = agg["Gas_d_Wh"].where(agg["Gas_d_Wh"].notna(), g_sum_raw)
+
+        exp_sum_gated = exp_sum_raw.where(agg["_full"])
+        net_gated = agg["Elec_act_imp_hh_sum_Wh"] - exp_sum_gated
+        net_raw   = e_sum_raw - exp_sum_raw
+        agg["Elec_net_act_imp_d_Wh_recommended"] = net_gated.where(net_gated.notna(), net_raw)
+
+        # Gas flag thresholds are defined in m3 regardless of schema — convert
+        # the Wh reading back to m3 just for the threshold check.
+        g_d_m3 = agg["Gas_d_Wh"].fillna(0).astype(float).to_numpy() / HHSmartMeterGenerator.GAS_WH_PER_M3
+        g_flag = np.ones(len(agg), dtype=int)
+        g_flag = np.where(g_d_m3 >  self.DAILY_GAS_VERY_HIGH_M3, -2, g_flag)
+        g_flag = np.where(g_d_m3 >= v["gas_meter_max_m3"],       -1, g_flag)
+        agg["Gas_flag"] = g_flag
+
+        utc_ts = utc_rollover.dt.tz_localize("UTC")
+        agg["Read_date_time_UTC_elec"] = utc_ts
+        agg["Read_date_time_UTC_gas"]  = utc_ts
+        agg["Read_date_time_elec"]     = utc_ts.dt.tz_convert("Europe/London")
+        agg["Valid_read_time_gas"]     = agg["Valid_read_time"]
+
+        return agg[[
+            "PUPRN",
+            "Read_date_effective_local",
+            "Read_date_time_UTC_elec",
+            "Read_date_time_elec",
+            "Elec_act_imp_flag",
+            "Elec_act_imp_d_Wh",
+            "Unit_correct_elec_act_imp_d_Wh",
+            "Elec_act_imp_hh_sum_Wh",
+            "Elec_sum_match",
+            "Valid_hh_sum_or_daily_elec",
+            "Elec_net_act_imp_d_Wh_recommended",
+            "Read_date_time_UTC_gas",
+            "Valid_read_time_gas",
+            "Gas_flag",
+            "Gas_d_Wh",
+            "Valid_hh_sum_or_daily_gas",
+            "Gas_sum_match",
+            "Gas_d_Wh_recommended",
+        ]]
+
     def generate_year(self, year: int) -> pd.DataFrame:
         """Generate and aggregate all 12 months of HH data for one calendar year."""
         chunks = [self._hh.generate_month(year, m) for m in range(1, 13)]
@@ -475,6 +622,9 @@ class DailySmartMeterGenerator:
 
     def write_chunk(self, df: pd.DataFrame, group: "list[int]", outfolder: str):
         stem = with_edition_suffix(self.daily_layout.filename_stem("serl_smart_meter_daily", group), self.edition)
+        if self.schema == "harmonised":
+            df = df.copy()
+            df["filename"] = f"{stem}.{self.format}"
         write_table(df, Path(outfolder) / stem, format=self.format)
 
     def generate_all(self, outfolder: "Union[str, os.PathLike]"):
@@ -518,6 +668,8 @@ class ReadTypeDataQualitySummaryGenerator:
         self.format = format or edition_def.format
         self.hh_layout = hh_layout or get_layout(edition_def.hh_smart_meter_layout)
         self.daily_layout = daily_layout or get_daily_layout(edition_def.daily_smart_meter_layout)
+        self.schema = edition_def.smart_meter_schema
+        self.cols = _SCHEMA_COLUMNS[self.schema]
         self.seed = int(cfg.get("seed", 42))
 
         if not traits_path:
@@ -578,7 +730,7 @@ class ReadTypeDataQualitySummaryGenerator:
 
         daily = pd.concat(parts, ignore_index=True)
         daily["_date"] = pd.to_datetime(daily["Read_date_effective_local"], errors="coerce")
-        daily["_valid_time"] = daily["Valid_read_time"].astype(bool)
+        daily["_valid_time"] = daily[self.cols["daily_valid_read_time_col"]].astype(bool)
         return daily
 
     @staticmethod
@@ -737,7 +889,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 device_type="ESME",
                 read_type="RI",
                 value_col="Elec_react_imp_hh_varh",
-                flag_col="Elect_react_imp_flag",
+                flag_col=self.cols["elec_react_imp_flag_col"],
                 max_poss_reads=max_hh,
             ),
             self._summarise_read_type(
@@ -754,7 +906,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 device_type="ESME",
                 read_type="RE",
                 value_col="Elec_react_exp_hh_varh",
-                flag_col="Elect_react_exp_flag",
+                flag_col=self.cols["elec_react_exp_flag_col"],
                 max_poss_reads=max_hh,
                 household_max_reads=hh_max_export,
             ),
@@ -762,7 +914,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 hh,
                 device_type="GPF",
                 read_type="AI",
-                value_col="Gas_hh_m3",
+                value_col=self.cols["gas_hh_value_col"],
                 flag_col="Gas_flag",
                 max_poss_reads=max_hh,
                 household_max_reads=hh_max_gas,
@@ -781,7 +933,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 daily,
                 device_type="GPF",
                 read_type="DL",
-                value_col="Gas_d_m3",
+                value_col=self.cols["gas_daily_value_col"],
                 flag_col="Gas_flag",
                 max_poss_reads=max_daily,
                 household_max_reads=daily_max_gas,

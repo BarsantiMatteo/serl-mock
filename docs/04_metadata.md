@@ -37,6 +37,35 @@ or `output_label` changes the folder and filename suffix — see
 | Elect_react_exp_flag | int | Data quality flag for `Elec_react_exp_hh_varh` — see [Flag codes](#flag-codes) |
 | Gas_flag | int | Data quality flag for `Gas_hh_m3` — see [Flag codes](#flag-codes) |
 
+### Edition09 (harmonised schema)
+
+Edition09's real HH column layout (`src/serl_mock/edition.py`'s `smart_meter_schema:
+"harmonised"`) differs from the edition08 table above: no `Gas_hh_m3` (gas is Wh-only), the
+`Elect_react_*_flag` typo is fixed to `Elec_react_*_flag`, flags are grouped ahead of the value
+columns, and a trailing `filename` column is added.
+
+**File pattern:** `serl_smart_meter_hh_edition09/serl_half_hourly_<year>_<MM>_edition09.parquet`
+
+| Column | Type | Description |
+|---|---|---|
+| PUPRN | text | Pseudonymised household identifier |
+| Read_date_effective_local | text | Local calendar date the reading belongs to (format `DD/MM/YYYY`) |
+| Read_date_time_local | text | Timestamp in Europe/London local time with timezone label |
+| Read_date_time_UTC | text | Timestamp of the reading in UTC |
+| HH | int (nullable) | Half-hour interval index within the local day; `NA` if not on a 30-minute boundary |
+| Valid_read_time | boolean | `True` if HH is not NA |
+| Elec_act_imp_flag | int | Data quality flag for `Elec_act_imp_hh_Wh` — see [Flag codes](#flag-codes) |
+| Elec_react_imp_flag | int | Data quality flag for `Elec_react_imp_hh_varh` — see [Flag codes](#flag-codes) |
+| Elec_act_exp_flag | int | Data quality flag for `Elec_act_exp_hh_Wh` — see [Flag codes](#flag-codes) |
+| Elec_react_exp_flag | int | Data quality flag for `Elec_react_exp_hh_varh` — see [Flag codes](#flag-codes) |
+| Gas_flag | int | Data quality flag for `Gas_hh_Wh` — see [Flag codes](#flag-codes) |
+| Elec_act_imp_hh_Wh | int | Electricity active import for the half-hour period (Wh) |
+| Elec_react_imp_hh_varh | int | Electricity reactive import for the half-hour period (varh) |
+| Elec_act_exp_hh_Wh | int | Electricity active export for the half-hour period (Wh) |
+| Elec_react_exp_hh_varh | int | Electricity reactive export for the half-hour period (varh) |
+| Gas_hh_Wh | int | Gas consumption for the half-hour period (Wh) — the only gas unit reported; there is no `Gas_hh_m3` |
+| filename | text | Name of the file this row was written into |
+
 ---
 
 ## Daily Smart Meter Data
@@ -65,6 +94,41 @@ subfolder; edition09 uses `single_file` instead: a single combined
 | Elec_act_imp_hh_sum_Wh | float | Sum of valid half-hourly electricity active import readings for the day (Wh) |
 | Gas_d_m3 | float | Gas consumption as reported by the daily meter read (m³) |
 | Gas_hh_sum_m3 | float | Sum of valid half-hourly gas readings for the day (m³) |
+
+### Edition09 (harmonised schema)
+
+Edition09's real daily column layout is a bigger restructure than the HH change above: it splits
+electricity/gas timing into separate timezone-aware timestamp columns, drops the m³-based gas
+fields in favour of a single Wh-based one, and adds two `_recommended` "best-available" fields.
+
+**Provisional, pending the real edition09 documentation:** `Read_date_time_UTC_gas` and
+`Valid_read_time_gas` currently mirror the electricity columns exactly — the mock does not model
+gas and electricity smart meters reporting on independently timed schedules.
+
+**File pattern:** `serl_smart_meter_daily_edition09.parquet` (single combined file at the top
+level of the run's output — edition09's `daily_smart_meter_layout: single_file`, no subfolder)
+
+| Column | Type | Description |
+|---|---|---|
+| PUPRN | text | Pseudonymised household identifier |
+| Read_date_effective_local | date | Local calendar date the reading belongs to |
+| Read_date_time_UTC_elec | timestamp (UTC) | UTC rollover instant for the effective date, electricity side — always midnight UTC, since the model tracks a day boundary, not a finer time-of-day |
+| Read_date_time_elec | timestamp (Europe/London) | The same rollover instant, converted to Europe/London local time |
+| Elec_act_imp_flag | int | Data quality flag for daily electricity active import — see [Flag codes](#flag-codes) |
+| Elec_act_imp_d_Wh | int (nullable) | Electricity active import as reported by the daily meter read (Wh); `NA` if the day is incomplete |
+| Unit_correct_elec_act_imp_d_Wh | int (nullable) | Unit-corrected electricity active import daily read (Wh) |
+| Elec_act_imp_hh_sum_Wh | int (nullable) | Sum of valid half-hourly electricity active import readings for the day (Wh) |
+| Elec_sum_match | int | `1` if the daily electricity meter read matches the sum of valid HH readings; `0` otherwise |
+| Valid_hh_sum_or_daily_elec | boolean | `True` if either the daily electricity reading or the HH sum is valid and usable |
+| Elec_net_act_imp_d_Wh_recommended | int | Best-available **net** electricity daily read (Wh) — daily import minus daily export, using the gated (full-day) sums when available and falling back to the raw ungated sums for an incomplete day; never `NA` |
+| Read_date_time_UTC_gas | timestamp (UTC) | UTC rollover instant, gas side *(provisional — mirrors electricity)* |
+| Valid_read_time_gas | boolean | `True` if the gas daily timestamp is valid *(provisional — mirrors electricity, currently always `True`)* |
+| Gas_flag | int | Data quality flag for daily gas — see [Flag codes](#flag-codes) |
+| Gas_d_Wh | int (nullable) | Gas consumption as reported by the daily meter read (Wh) — the only gas unit reported; `NA` if the day is incomplete |
+| Valid_hh_sum_or_daily_gas | boolean | `True` if either the daily gas reading or the HH sum is valid and usable |
+| Gas_sum_match | int | `1` if the daily gas meter read matches the sum of valid HH readings; `0` otherwise |
+| Gas_d_Wh_recommended | int | Best-available gas daily read (Wh): the gated value if present, else the raw (ungated) day sum — never `NA` (gas has no export leg to net against) |
+| filename | text | Name of the file this row was written into |
 
 ---
 

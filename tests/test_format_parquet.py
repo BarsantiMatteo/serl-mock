@@ -60,10 +60,13 @@ def test_edition09_output_has_same_structure_as_edition08(
     # inherent difference between the formats, not a regression, and is
     # exactly why per-edition golden manifests are never diffed against each other.
     #
-    # Daily smart-meter files are excluded: edition09 deliberately uses a
-    # different daily-smart-meter layout ("single_file", no subfolder) than
-    # edition08 ("yearly", in its own subfolder) — see
-    # tests/test_daily_layout_edition09.py for that comparison instead.
+    # Daily and HH smart-meter files are excluded: edition09 deliberately
+    # uses a real, different column schema for both ("harmonised" — see
+    # src/serl_mock/edition.py's smart_meter_schema and
+    # tests/test_edition09_smart_meter_schema.py for that comparison
+    # instead), and a different daily-smart-meter layout ("single_file", no
+    # subfolder) than edition08 ("yearly", in its own subfolder) — see
+    # tests/test_daily_layout_edition09.py for that comparison.
     edition09_manifest = build_manifest(generated_output_dir_edition09)
     edition08_manifest = build_manifest(generated_output_dir)
 
@@ -71,7 +74,7 @@ def test_edition09_output_has_same_structure_as_edition08(
     def normalize(files):
         result = {}
         for rel, shape in files.items():
-            if "smart_meter_daily" in rel:
+            if "smart_meter_daily" in rel or "smart_meter_hh" in rel:
                 continue
             key = Path(rel).with_suffix("").as_posix().replace("edition09", "editionNN").replace("edition08", "editionNN")
             result[key] = {"columns": shape.get("columns"), "rows": shape.get("rows")}
