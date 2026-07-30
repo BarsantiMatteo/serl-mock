@@ -21,6 +21,17 @@ edition: "08"
 # falls back to "edition<N>" (e.g. "edition08").
 output_label: "edition08_2024_N1000"
 
+# Regenerate only the survey/contextual data (step 5), reusing the PUPRNs/
+# traits from a previous full run. Mirrors --survey-only. Not set by default;
+# a CLI flag always overrides this when passed.
+# survey_only: true
+
+# Skip any of the pipeline's outputs individually — all true by default.
+# See config/serl_mock.yaml for the full list of generate.<name> keys.
+# generate:
+#   weather: false
+#   epc: false
+
 # -------------------------
 # Time period for smart-meter data
 # -------------------------
@@ -91,5 +102,4 @@ filenames:
   survey: "serl_survey_data"
   followup_survey: "serl_2023_follow_up_survey_data"
   summary: "serl_participant_summary"
-  followup_prefix: "serl_follow_up_survey"
   tariff_data: "serl_tariff_data"

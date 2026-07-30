@@ -12,6 +12,42 @@ command line.
 
 ---
 
+## Run behaviour: `survey_only`, `generate`
+
+```yaml
+survey_only: false   # Not set by default — same as not passing --survey-only
+```
+
+`survey_only` mirrors the `--survey-only` CLI flag: it skips steps 1-4 entirely and regenerates
+only the contextual/survey data (step 5), reusing the PUPRNs/traits written by a previous full
+run. A saved config can set its own default (e.g. an edition config used only for quick local
+iteration might set `survey_only: true`). The CLI flag always wins when passed — it can only
+*force* survey-only on, not force it off if the config already turned it on; edit the config or
+call `run_all(survey_only=False, ...)` directly for that.
+
+```yaml
+generate:
+  hh_smart_meter: true       # half-hourly smart-meter data (step 2)
+  daily_smart_meter: true    # daily smart-meter data (step 3)
+  rt_summary: true           # read-type data quality summary (step 3b)
+  weather: true              # ERA5 weather data (step 4)
+  epc: true
+  survey: true
+  covid19_survey: true
+  follow_up_survey: true
+  participant_summary: true
+  exporters_list: true
+```
+
+`generate` lets you skip any single output independently of the others — every key defaults to
+`true` (today's behaviour) if the `generate:` section, or the key itself, is omitted. An unknown
+key under `generate:` raises an error at startup rather than being silently ignored, to catch
+typos. `--skip-weather` on the CLI always forces `generate.weather` off, regardless of what the
+config says. `survey_only: true` forces `hh_smart_meter`, `daily_smart_meter`, `rt_summary`, and
+`weather` all off (steps 1-4 are skipped outright), independently of `generate:`.
+
+---
+
 ## Global settings
 
 ```yaml
@@ -167,7 +203,7 @@ filenames:
   exporters_prefix: Elec
 ```
 
-Any other keys under `filenames:` (e.g. `followup_prefix`, `tariff_data`) are currently ignored — the tariff-data placeholder name is fixed to `serl_tariff_data_edition<edition>.csv` in `scripts/generate_mock_data.py`.
+Any other keys under `filenames:` (e.g. `tariff_data`) are currently ignored — the tariff-data placeholder name is fixed to `serl_tariff_data_edition<edition>.csv` in `scripts/generate_mock_data.py`.
 
 ## Year for the exporter list
 

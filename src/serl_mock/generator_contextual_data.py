@@ -1154,35 +1154,52 @@ class SERLContextualVariablesGenerator:
         return pd.DataFrame(exporters, columns=['PUPRN'])
 
     # ---------- Write all ----------
-    def write_all(self, outfolder: "Union[str, os.PathLike]", mock_only_outfolder: "Optional[Union[str, os.PathLike]]" = None):
-
+    def write_all(
+        self,
+        outfolder: "Union[str, os.PathLike]",
+        mock_only_outfolder: "Optional[Union[str, os.PathLike]]" = None,
+        *,
+        epc: bool = True,
+        survey: bool = True,
+        covid19_survey: bool = True,
+        follow_up_survey: bool = True,
+        participant_summary: bool = True,
+        exporters_list: bool = True,
+    ):
+        """Write the contextual datasets. Each keyword defaults to True (write
+        everything, today's behaviour) — set any to False to skip that specific
+        dataset, e.g. to regenerate just one contextual dataset without
+        touching the others.
+        """
         mock_only_dir = Path(mock_only_outfolder) if mock_only_outfolder is not None else Path(outfolder)
 
-        # EPC
-        epc_df = self.generate_epc()
-        write_table(epc_df, Path(outfolder) / self._fname(self.names.epc), format=self.format)
+        if epc:
+            epc_df = self.generate_epc()
+            write_table(epc_df, Path(outfolder) / self._fname(self.names.epc), format=self.format)
 
-        # SERL survey
-        serl_df = self.generate_serl_survey()
-        write_table(serl_df, Path(outfolder) / self._fname(self.names.survey), format=self.format)
+        if survey:
+            serl_df = self.generate_serl_survey()
+            write_table(serl_df, Path(outfolder) / self._fname(self.names.survey), format=self.format)
 
-        # COVID-19 survey
-        covid19_df = self.generate_covid19_survey()
-        write_table(covid19_df, Path(outfolder) / self._fname(self.names.covid19_survey), format=self.format)
+        if covid19_survey:
+            covid19_df = self.generate_covid19_survey()
+            write_table(covid19_df, Path(outfolder) / self._fname(self.names.covid19_survey), format=self.format)
 
-        # Participant summary
-        summary_df = self.generate_participant_summary()
-        write_table(summary_df, Path(outfolder) / self._fname(self.names.summary), format=self.format)
+        if participant_summary:
+            summary_df = self.generate_participant_summary()
+            write_table(summary_df, Path(outfolder) / self._fname(self.names.summary), format=self.format)
 
-        # Follow-up survey (encoding only applies when format="csv")
-        followup_df = self.generate_follow_up_survey()
-        write_table(
-            followup_df, Path(outfolder) / self._fname(self.names.followup_survey),
-            format=self.format, encoding="latin-1",
-        )
+        if follow_up_survey:
+            # encoding only applies when format="csv"
+            followup_df = self.generate_follow_up_survey()
+            write_table(
+                followup_df, Path(outfolder) / self._fname(self.names.followup_survey),
+                format=self.format, encoding="latin-1",
+            )
 
-        # Exporters list — mock-only file, not part of the SERL Edition release,
-        # so it's always CSV regardless of the active edition's output format.
-        exporters_base = f"{self.names.exporters_prefix}_{self.year}_list_of_exporter_puprns"
-        exporters_df = self.generate_list_of_exporters()
-        write_table(exporters_df, mock_only_dir / self._fname(exporters_base), format="csv")
+        if exporters_list:
+            # Mock-only file, not part of the SERL Edition release, so it's
+            # always CSV regardless of the active edition's output format.
+            exporters_base = f"{self.names.exporters_prefix}_{self.year}_list_of_exporter_puprns"
+            exporters_df = self.generate_list_of_exporters()
+            write_table(exporters_df, mock_only_dir / self._fname(exporters_base), format="csv")

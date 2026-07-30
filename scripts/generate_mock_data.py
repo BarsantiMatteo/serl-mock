@@ -49,6 +49,11 @@ Environment.
 Weather download requires CDS API credentials in ~/.cdsapirc (or via the
 CDSAPI_URL / CDSAPI_KEY environment variables).  Pass --skip-weather to skip
 the download step if credentials are not available.
+
+Any of the outputs above (1-5, individually) can be skipped via the config
+file's `generate:` section — e.g. `generate: {weather: false, epc: false}` —
+see DEFAULT_GENERATE_FLAGS below and docs/02_configuration.md for the full
+list of keys.
 """
 
 # --- src-layout shim ---
@@ -83,10 +88,44 @@ from src.serl_mock.utils import read_config
 # DEFAULT_CONFIG_PATH: Optional[Path] = None
 DEFAULT_CONFIG_PATH = CONFIG_DIR / "serl_mock_edition09.yaml"
 
+# Which datasets a run produces. All True by default (today's behaviour) —
+# set any to False via the config file's `generate:` section to skip that
+# specific dataset without touching the others. See docs/02_configuration.md.
+DEFAULT_GENERATE_FLAGS = {
+    "hh_smart_meter": True,
+    "daily_smart_meter": True,
+    "rt_summary": True,
+    "weather": True,
+    "epc": True,
+    "survey": True,
+    "covid19_survey": True,
+    "follow_up_survey": True,
+    "participant_summary": True,
+    "exporters_list": True,
+}
+
+
+def _resolve_generate_flags(cfg: dict) -> dict:
+    """Read the config's `generate:` section, defaulting every key to True.
+
+    An unknown key under `generate:` (typo, or a name that predates a
+    rename) is a silent no-op if we just did `.get(key, default)` per
+    known key — so instead flag anything in the config that isn't a
+    recognised dataset name, to catch that early.
+    """
+    generate_cfg = cfg.get("generate", {}) or {}
+    unknown = set(generate_cfg) - set(DEFAULT_GENERATE_FLAGS)
+    if unknown:
+        raise ValueError(
+            f"Unknown key(s) under `generate:` in config: {sorted(unknown)}. "
+            f"Valid keys: {sorted(DEFAULT_GENERATE_FLAGS)}."
+        )
+    return {key: bool(generate_cfg.get(key, default)) for key, default in DEFAULT_GENERATE_FLAGS.items()}
+
 
 def run_all(
-    skip_weather: bool = False,
-    survey_only: bool = False,
+    skip_weather: Optional[bool] = None,
+    survey_only: Optional[bool] = None,
     config_path: Optional[Path] = None,
     output_dir: Optional[Path] = None,
 ):
@@ -96,9 +135,35 @@ def run_all(
     against a scratch location, etc.) redirect the pipeline away from the
     real config/serl_mock.yaml and data/mock/ tree. Both default to the
     real locations so normal CLI usage is unaffected.
+
+    survey_only defaults to None, meaning "use the config file's own
+    `survey_only:` key (False if absent)" — an explicit True/False passed
+    here (e.g. via --survey-only on the CLI) always overrides the config.
+    survey_only skips steps 1-4 entirely and reuses the base data
+    (PUPRNs/traits) from a previous full run.
+
+    skip_weather, if explicitly True (e.g. via --skip-weather on the CLI),
+    forces the `weather` dataset off regardless of what the config's
+    `generate:` section says — see _resolve_generate_flags() below for the
+    full per-dataset generate.<name> controls (hh_smart_meter,
+    daily_smart_meter, rt_summary, weather, epc, survey, covid19_survey,
+    follow_up_survey, participant_summary, exporters_list), each
+    independently skippable and all True by default.
     """
     cfg_path = Path(config_path) if config_path is not None else (CONFIG_DIR / "serl_mock.yaml")
     cfg = read_config(cfg_path)
+
+    survey_only = survey_only if survey_only is not None else bool(cfg.get("survey_only", False))
+    generate_flags = _resolve_generate_flags(cfg)
+    if survey_only:
+        # survey_only's own contract: only step 5 runs, reusing existing
+        # base data — these four are moot regardless of `generate:`.
+        generate_flags["hh_smart_meter"] = False
+        generate_flags["daily_smart_meter"] = False
+        generate_flags["rt_summary"] = False
+        generate_flags["weather"] = False
+    if skip_weather:
+        generate_flags["weather"] = False
 
     edition = str(cfg.get("edition", "08")).zfill(2)
     edition_def = get_edition(edition)  # raises if `edition` has no Edition definition
@@ -212,41 +277,50 @@ def run_all(
         print(f"    Gas meter households: {(traits_df['has_gas_meter'] == 1).sum()}")
         print(f"    Export meter households: {(traits_df['has_export_meter'] == 1).sum()}")
 
-        print(f"\nStep 2: Generating half-hourly smart meter data "
-              f"({cfg.get('start_year')}–{cfg.get('end_year')}, "
-              f"edition {cfg.get('edition', '08')})")
-        gen_sm = HHSmartMeterGenerator(
-            config_path=str(cfg_path),
-            puprn_list_path=str(puprn_csv),
-            traits_path=str(traits_csv),
-        )
-        gen_sm.generate_all(outfolder=mock_hh_dir)
+        if generate_flags["hh_smart_meter"]:
+            print(f"\nStep 2: Generating half-hourly smart meter data "
+                  f"({cfg.get('start_year')}–{cfg.get('end_year')}, "
+                  f"edition {cfg.get('edition', '08')})")
+            gen_sm = HHSmartMeterGenerator(
+                config_path=str(cfg_path),
+                puprn_list_path=str(puprn_csv),
+                traits_path=str(traits_csv),
+            )
+            gen_sm.generate_all(outfolder=mock_hh_dir)
+        else:
+            print("\nStep 2: Skipped (generate.hh_smart_meter: false).")
 
-        print(f"\nStep 3: Generating daily smart meter data "
-              f"({cfg.get('start_year')}–{cfg.get('end_year')}, "
-              f"edition {cfg.get('edition', '08')})")
-        gen_daily = DailySmartMeterGenerator(
-            config_path=str(cfg_path),
-            puprn_list_path=str(puprn_csv),
-            traits_path=str(traits_csv),
-        )
-        gen_daily.generate_all(outfolder=mock_daily_dir)
+        if generate_flags["daily_smart_meter"]:
+            print(f"\nStep 3: Generating daily smart meter data "
+                  f"({cfg.get('start_year')}–{cfg.get('end_year')}, "
+                  f"edition {cfg.get('edition', '08')})")
+            gen_daily = DailySmartMeterGenerator(
+                config_path=str(cfg_path),
+                puprn_list_path=str(puprn_csv),
+                traits_path=str(traits_csv),
+            )
+            gen_daily.generate_all(outfolder=mock_daily_dir)
+        else:
+            print("\nStep 3: Skipped (generate.daily_smart_meter: false).")
 
-        print(f"\nStep 3b: Generating read-type data quality summary "
-              f"(edition {cfg.get('edition', '08')})")
-        gen_rt = ReadTypeDataQualitySummaryGenerator(
-            config_path=str(cfg_path),
-            puprn_list_path=str(puprn_csv),
-            traits_path=str(traits_csv),
-        )
-        gen_rt.generate_and_write(
-            hh_folder=mock_hh_dir,
-            daily_folder=mock_daily_dir,
-            outfolder=mock_dir,
-        )
+        if generate_flags["rt_summary"]:
+            print(f"\nStep 3b: Generating read-type data quality summary "
+                  f"(edition {cfg.get('edition', '08')})")
+            gen_rt = ReadTypeDataQualitySummaryGenerator(
+                config_path=str(cfg_path),
+                puprn_list_path=str(puprn_csv),
+                traits_path=str(traits_csv),
+            )
+            gen_rt.generate_and_write(
+                hh_folder=mock_hh_dir,
+                daily_folder=mock_daily_dir,
+                outfolder=mock_dir,
+            )
+        else:
+            print("\nStep 3b: Skipped (generate.rt_summary: false).")
 
     print("\nStep 4: Downloading ERA5 weather data and converting to CSV")
-    if survey_only or skip_weather:
+    if not generate_flags["weather"]:
         print("  Skipped.")
     else:
         try:
@@ -278,7 +352,16 @@ def run_all(
         traits_path=str(traits_csv),
         climate_dir=str(mock_climate_dir),
     )
-    gen_ctx.write_all(outfolder=mock_dir, mock_only_outfolder=mock_internal_dir)
+    gen_ctx.write_all(
+        outfolder=mock_dir,
+        mock_only_outfolder=mock_internal_dir,
+        epc=generate_flags["epc"],
+        survey=generate_flags["survey"],
+        covid19_survey=generate_flags["covid19_survey"],
+        follow_up_survey=generate_flags["follow_up_survey"],
+        participant_summary=generate_flags["participant_summary"],
+        exporters_list=generate_flags["exporters_list"],
+    )
 
     print("\nDone.")
 
@@ -288,12 +371,22 @@ if __name__ == "__main__":
     parser.add_argument(
         "--skip-weather",
         action="store_true",
-        help="Skip the ERA5 weather data download step (step 4).",
+        default=None,
+        help=(
+            "Skip the ERA5 weather data download step (step 4). Equivalent to "
+            "setting `generate: {weather: false}` in the config file, but always "
+            "wins if passed."
+        ),
     )
     parser.add_argument(
         "--survey-only",
         action="store_true",
-        help="Regenerate only the survey/contextual data (step 5). Requires a prior full run.",
+        default=None,
+        help=(
+            "Regenerate only the survey/contextual data (step 5). Requires a prior "
+            "full run. If not passed, falls back to the config file's own "
+            "`survey_only:` key (default False)."
+        ),
     )
     parser.add_argument(
         "--config",

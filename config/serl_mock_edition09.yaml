@@ -26,6 +26,25 @@ seed: 42
 edition: "09"
 output_label: "edition09_2024_N1000"
 
+# Regenerate only the survey/contextual data (step 5), reusing the PUPRNs/
+# traits from a previous full run. Mirrors --survey-only. Not set by default;
+# a CLI flag always overrides this when passed.
+# survey_only: true
+
+# Skip any of the pipeline's outputs individually — all true by default.
+# See config/serl_mock.yaml for the full list of generate.<name> keys.
+generate:
+   hh_smart_meter: true       # half-hourly smart-meter data (step 2)
+   daily_smart_meter: true    # daily smart-meter data (step 3)
+   rt_summary: false           # read-type data quality summary (step 3b)
+   weather: false              # ERA5 weather data (step 4)
+   epc: false
+   survey: false
+   covid19_survey: false
+   follow_up_survey: false
+   participant_summary: false
+   exporters_list: false
+
 # -------------------------
 # Time period for smart-meter data
 # -------------------------
@@ -92,5 +111,4 @@ filenames:
   survey: "serl_survey_data"
   followup_survey: "serl_2023_follow_up_survey_data"
   summary: "serl_participant_summary"
-  followup_prefix: "serl_follow_up_survey"
   tariff_data: "serl_tariff_data"

@@ -23,6 +23,26 @@ edition: "08"
 # side by side instead of overwriting each other.
 # output_label: "edition08"
 
+# Regenerate only the survey/contextual data (step 5), reusing the PUPRNs/
+# traits from a previous full run. Mirrors --survey-only. Not set by default;
+# a CLI flag always overrides this when passed.
+# survey_only: true
+
+# Skip any of the pipeline's outputs individually, without touching the
+# others. All True (generated) by default — set any to false to omit it.
+# --skip-weather on the CLI always forces weather off, regardless of this.
+# generate:
+#   hh_smart_meter: true       # half-hourly smart-meter data (step 2)
+#   daily_smart_meter: true    # daily smart-meter data (step 3)
+#   rt_summary: true           # read-type data quality summary (step 3b)
+#   weather: true              # ERA5 weather data (step 4)
+#   epc: true
+#   survey: true
+#   covid19_survey: true
+#   follow_up_survey: true
+#   participant_summary: true
+#   exporters_list: true
+
 # -------------------------
 # Time period for smart-meter data
 # -------------------------
@@ -129,5 +149,4 @@ filenames:
   survey: "serl_survey_data"
   followup_survey: "serl_2023_follow_up_survey_data"
   summary: "serl_participant_summary"
-  followup_prefix: "serl_follow_up_survey"
   tariff_data: "serl_tariff_data"
