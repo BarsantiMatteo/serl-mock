@@ -7,10 +7,12 @@
 #
 # Only `edition: "09"` differs from config/serl_mock_edition08.yaml in a way
 # that matters structurally — see src/serl_mock/edition.py, which fixes
-# edition09 to format: parquet (hh_smart_meter layout is still monthly;
-# unconfirmed pending the real edition09 spec). Everything below (household
-# counts, traits, profiles, patterns) stays exactly as free to configure as
-# it is for any other edition.
+# edition09 to format: parquet, hh_smart_meter layout: monthly (unconfirmed
+# pending the real edition09 spec), and daily_smart_meter layout: single_file
+# (one combined serl_smart_meter_daily_edition09.parquet at the top level of
+# the output, not a per-year file in its own subfolder like edition08).
+# Everything below (household counts, traits, profiles, patterns) stays
+# exactly as free to configure as it is for any other edition.
 #
 # NOTE: edition09's reference dictionaries (data/reference/edition09/) are
 # currently placeholder copies of edition08's — see the README.md in that

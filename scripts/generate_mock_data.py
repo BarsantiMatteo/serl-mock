@@ -20,8 +20,12 @@ use. Produces:
                                        layout (monthly by default) and written
                                        in the edition's format (csv or parquet)
   3. Daily smart-meter data         — daily sums of electricity and gas,
-                                       one file per calendar year, in the
-                                       edition's format
+                                       split into files per the edition's
+                                       daily-smart-meter layout (yearly by
+                                       default, in its own subfolder; or a
+                                       single combined file at the top level
+                                       of the run's output) and written in
+                                       the edition's format
   4. ERA5 weather data              — hourly NetCDF files downloaded from the
                                        Copernicus Climate Data Store (CDS API)
                                        and converted to CSV files in the SERL
@@ -61,6 +65,7 @@ from src.serl_mock.paths import (
     reference_dir_for, mock_dir_for, mock_hh_dirname, mock_daily_dirname, mock_climate_dirname,
 )
 from src.serl_mock.edition import get_edition
+from src.serl_mock.layout import get_daily_layout
 from src.serl_mock.ids import make_alphanumeric_ids_ordered, write_puprn_list_csv, load_puprn_list_csv
 from src.serl_mock.generator_smartmeter import HHSmartMeterGenerator, DailySmartMeterGenerator, ReadTypeDataQualitySummaryGenerator
 from src.serl_mock.generator_contextual_data import SERLContextualVariablesGenerator
@@ -96,7 +101,11 @@ def run_all(
     # (used by tests to redirect into a scratch location).
     mock_dir = Path(output_dir) if output_dir is not None else mock_dir_for(output_label)
     mock_hh_dir = mock_dir / mock_hh_dirname(edition)
-    mock_daily_dir = mock_dir / mock_daily_dirname(edition)
+    # Daily smart-meter data only gets its own subfolder if its layout uses
+    # one (e.g. "yearly") — a "single_file" layout writes directly into
+    # mock_dir, since one file doesn't need a folder to itself.
+    daily_layout = get_daily_layout(edition_def.daily_smart_meter_layout)
+    mock_daily_dir = mock_dir / mock_daily_dirname(edition) if daily_layout.uses_subfolder else mock_dir
     mock_climate_dir = mock_dir / mock_climate_dirname(edition)
     mock_internal_dir = mock_dir / MOCK_INTERNAL_DIR.name
     mock_aggregated_dir = mock_dir / MOCK_AGGREGATED_DIR.name

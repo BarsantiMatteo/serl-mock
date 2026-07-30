@@ -43,7 +43,7 @@ from .utils import (
     read_config, seed_random, ensure_output_dir, with_edition_suffix,
     write_table, read_table, table_exists,
 )
-from .layout import get_layout
+from .layout import get_layout, get_daily_layout
 from .edition import get_edition
 from .profiles import generate_profiles
 from .patterns import (
@@ -350,8 +350,10 @@ class DailySmartMeterGenerator:
 
     Wraps HHSmartMeterGenerator: generates half-hourly data month by month,
     aggregates to daily level by summing valid HH reads, and writes one file
-    per calendar year (CSV or Parquet, per `format` — always one-per-year;
-    not yet layout-configurable like HHSmartMeterGenerator).
+    per group of years as decided by `self.daily_layout` (CSV or Parquet,
+    per `format`) — "yearly" (one file per calendar year, in its own
+    subfolder) by default, or "single_file" (one combined file, written
+    directly into the run's main output folder) for editions that use it.
     """
 
     DAILY_ELEC_VERY_HIGH_WH = 100_000  # ~4× HH threshold × 48 HH
@@ -363,12 +365,18 @@ class DailySmartMeterGenerator:
         puprn_list_path: Optional[str] = None,
         traits_path: Optional[str] = None,
         format: Optional[str] = None,
+        daily_layout: Optional[object] = None,
     ):
         self._hh = HHSmartMeterGenerator(config_path, puprn_list_path, traits_path, format=format)
         self.start_year = self._hh.start_year
         self.end_year   = self._hh.end_year
         self.edition    = self._hh.edition
         self.format     = self._hh.format
+        # daily_layout is bound to the edition (see HHSmartMeterGenerator's
+        # equivalent note) — the constructor parameter is a programmatic/
+        # test-only escape hatch, not a config key.
+        edition_def = get_edition(self.edition)
+        self.daily_layout = daily_layout or get_daily_layout(edition_def.daily_smart_meter_layout)
 
     @staticmethod
     def _expected_hh(local_date) -> int:
@@ -465,16 +473,17 @@ class DailySmartMeterGenerator:
             daily["Read_date_effective_local"].str.startswith(str(year))
         ].reset_index(drop=True)
 
-    def write_year(self, df: pd.DataFrame, year: int, outfolder: str):
-        stem = with_edition_suffix(f"serl_smart_meter_daily_{year}", self.edition)
+    def write_chunk(self, df: pd.DataFrame, group: "list[int]", outfolder: str):
+        stem = with_edition_suffix(self.daily_layout.filename_stem("serl_smart_meter_daily", group), self.edition)
         write_table(df, Path(outfolder) / stem, format=self.format)
 
     def generate_all(self, outfolder: "Union[str, os.PathLike]"):
         outfolder = ensure_output_dir(outfolder)
-        for year in range(self.start_year, self.end_year + 1):
-            print(f"  {year} (daily) ...")
-            df = self.generate_year(year)
-            self.write_year(df, year, outfolder)
+        for group in self.daily_layout.year_groups(self.start_year, self.end_year):
+            print("  " + ", ".join(f"{year}" for year in group) + " (daily) ...")
+            dfs = [self.generate_year(year) for year in group]
+            chunk_df = dfs[0] if len(dfs) == 1 else pd.concat(dfs, ignore_index=True)
+            self.write_chunk(chunk_df, group, outfolder)
 
 
 class ReadTypeDataQualitySummaryGenerator:
@@ -494,6 +503,7 @@ class ReadTypeDataQualitySummaryGenerator:
         traits_path: Optional[str] = None,
         format: Optional[str] = None,
         hh_layout: Optional[object] = None,
+        daily_layout: Optional[object] = None,
     ):
         cfg = read_config(config_path)
 
@@ -501,12 +511,13 @@ class ReadTypeDataQualitySummaryGenerator:
         self.start_year = int(cfg["start_year"])
         self.end_year = int(cfg["end_year"])
         self.edition = str(cfg.get("edition", "08"))
-        # See HHSmartMeterGenerator.__init__: format/hh_layout come from the
-        # edition definition, not a config key — the constructor parameters
-        # are for direct programmatic/test use only.
+        # See HHSmartMeterGenerator.__init__: format/hh_layout/daily_layout
+        # come from the edition definition, not a config key — the
+        # constructor parameters are for direct programmatic/test use only.
         edition_def = get_edition(self.edition)
         self.format = format or edition_def.format
         self.hh_layout = hh_layout or get_layout(edition_def.hh_smart_meter_layout)
+        self.daily_layout = daily_layout or get_daily_layout(edition_def.daily_smart_meter_layout)
         self.seed = int(cfg.get("seed", 42))
 
         if not traits_path:
@@ -557,8 +568,9 @@ class ReadTypeDataQualitySummaryGenerator:
     def _load_daily(self, folder: "Union[str, os.PathLike]") -> pd.DataFrame:
         parts = []
         folder = Path(folder)
-        for year in range(self.start_year, self.end_year + 1):
-            stem = folder / with_edition_suffix(f"serl_smart_meter_daily_{year}", self.edition)
+        for group in self.daily_layout.year_groups(self.start_year, self.end_year):
+            stem_name = self.daily_layout.filename_stem("serl_smart_meter_daily", group)
+            stem = folder / with_edition_suffix(stem_name, self.edition)
             if table_exists(stem, format=self.format):
                 parts.append(read_table(stem, format=self.format))
         if not parts:

@@ -170,16 +170,22 @@ Shared helpers:
 - `read_survey_dictionary` — loads variable names from the SERL survey data dictionary
 
 ### `src/serl_mock/layout.py`
-Pluggable strategies for splitting the half-hourly smart-meter dataset into physical files,
-independent of format and schema:
-- `MonthlyLayout` (default) — one file per calendar month, today's behaviour
-- `SingleFileLayout` — one combined file for the whole `start_year`–`end_year` range
-- `get_layout(name)` — resolves a layout by name (the active edition's
-  `hh_smart_meter_layout`, from `edition.py` — not an independent config key)
+Pluggable strategies for splitting smart-meter datasets into physical files, independent of
+format and schema. Two separate small hierarchies, since HH and daily data group at different
+granularities ((year, month) vs year):
+- `MonthlyLayout` (default) / `SingleFileLayout` — for HH data: one file per calendar month, or
+  one combined file for the whole `start_year`–`end_year` range. `get_layout(name)` resolves one
+  by name (the active edition's `hh_smart_meter_layout`, from `edition.py`).
+- `DailyYearlyLayout` (default) / `DailySingleFileLayout` — for daily data: one file per calendar
+  year in its own subfolder, or one combined file written directly into the run's main output
+  folder (`uses_subfolder = False` — a single file doesn't need a folder to itself).
+  `get_daily_layout(name)` resolves one by name (`daily_smart_meter_layout`).
 
-`HHSmartMeterGenerator` asks its layout for month groupings rather than hardcoding "one file
-per month"; `ReadTypeDataQualitySummaryGenerator` uses the same layout to find the HH files
-back when building the rt-summary, so the two stay in sync regardless of which layout is active.
+Neither is an independent config key — both come from `edition.py`. `HHSmartMeterGenerator` /
+`DailySmartMeterGenerator` ask their layout for month/year groupings rather than hardcoding "one
+file per month/year"; `ReadTypeDataQualitySummaryGenerator` uses the same layouts to find the HH
+and daily files back when building the rt-summary, so they all stay in sync regardless of which
+layout is active.
 
 ### `src/serl_mock/profiles.py`
 Defines **per-household consumption parameters**.  Each PUPRN is assigned a `HouseholdProfile` (baseline electricity Wh, baseline gas Wh, noise scale) drawn once at initialisation.  Adjusting `profiles:` in `serl_mock.yaml` shifts the population without touching any code.  See [03_generation_model.md](03_generation_model.md).
@@ -200,7 +206,7 @@ Traits assigned: `has_pv`, `has_hp`, `has_ev`, `has_solar_thermal`, `has_gas_met
 Contains three generators:
 
 - `HHSmartMeterGenerator` — produces Edition 08-aligned half-hourly data; reads household traits from `mock_internal/household_traits.csv`
-- `DailySmartMeterGenerator` — aggregates HH output to daily totals (always one file per year — not yet layout-configurable)
+- `DailySmartMeterGenerator` — aggregates HH output to daily totals, split into files per `daily_smart_meter_layout` (yearly by default, or a single combined file)
 - `ReadTypeDataQualitySummaryGenerator` — builds the read-type data quality summary
 
 `HHSmartMeterGenerator`:

@@ -1026,7 +1026,7 @@
       },
       "rows": 5
     },
-    "serl_smart_meter_daily_edition09/serl_smart_meter_daily_2021_edition09.parquet": {
+    "serl_smart_meter_daily_edition09.parquet": {
       "columns": [
         "PUPRN",
         "Read_date_effective_local",

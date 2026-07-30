@@ -28,8 +28,8 @@ doesn't use (e.g. "edition09 but in CSV" by a leftover config key from a copy-pa
 The actual definitions live in [`src/serl_mock/edition.py`](../src/serl_mock/edition.py):
 
 ```python
-"08": Edition(number="08", format="csv",     hh_smart_meter_layout="monthly", dictionary_source_edition="07"),
-"09": Edition(number="09", format="parquet", hh_smart_meter_layout="monthly", dictionary_source_edition="09"),
+"08": Edition(number="08", format="csv",     hh_smart_meter_layout="monthly", daily_smart_meter_layout="yearly",      dictionary_source_edition="07"),
+"09": Edition(number="09", format="parquet", hh_smart_meter_layout="monthly", daily_smart_meter_layout="single_file", dictionary_source_edition="09"),
 ```
 
 - **`format`** (`"csv"` or `"parquet"`) applies to every dataset that mimics the SERL edition
@@ -37,9 +37,13 @@ The actual definitions live in [`src/serl_mock/edition.py`](../src/serl_mock/edi
   `household_traits.csv`, `puprn_master.csv`, and the exporter list — are always CSV regardless,
   since they aren't part of any real SERL edition. Climate data is also always CSV for now.
 - **`hh_smart_meter_layout`** (`"monthly"` or `"single_file"`) controls how the half-hourly
-  smart-meter dataset splits into physical files, independently of format. Every other dataset
-  keeps its current fixed layout (one file per year for daily smart-meter data, one file overall
-  for the contextual datasets).
+  smart-meter dataset splits into physical files, independently of format.
+- **`daily_smart_meter_layout`** (`"yearly"` or `"single_file"`) controls the daily smart-meter
+  dataset the same way. `"yearly"` writes one file per calendar year into its own
+  `serl_smart_meter_daily_edition<N>/` subfolder (edition08's behaviour); `"single_file"` writes
+  one combined file directly into the run's main output folder instead — a single file doesn't
+  need a subfolder to itself. Every other dataset keeps its current fixed layout (one file
+  overall for the contextual datasets).
 - **`dictionary_source_edition`** is which edition's dictionary *filenames* to read from that
   edition's reference folder — e.g. edition08 still reads `_edition07`-named files (see
   [05_epc_reference.md](05_epc_reference.md)); edition09 reads its own `_edition09`-named ones.

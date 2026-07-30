@@ -22,9 +22,10 @@ from typing import Dict
 
 @dataclass(frozen=True)
 class Edition:
-    number: str                 # zero-padded edition number, e.g. "08"
-    format: str                 # "csv" or "parquet" — see utils.write_table
-    hh_smart_meter_layout: str  # "monthly" or "single_file" — see layout.py
+    number: str                    # zero-padded edition number, e.g. "08"
+    format: str                    # "csv" or "parquet" — see utils.write_table
+    hh_smart_meter_layout: str     # "monthly" or "single_file" — see layout.py
+    daily_smart_meter_layout: str  # "yearly" or "single_file" — see layout.py
     dictionary_source_edition: str  # which edition's dictionary filenames to read;
                                      # equal to `number` unless this edition still
                                      # borrows an earlier edition's dictionaries
@@ -35,6 +36,7 @@ _EDITIONS: Dict[str, Edition] = {
         number="08",
         format="csv",
         hh_smart_meter_layout="monthly",
+        daily_smart_meter_layout="yearly",
         dictionary_source_edition="07",  # still uses the real edition07 SERL
                                           # dictionaries; see docs/05_epc_reference.md
     ),
@@ -43,6 +45,9 @@ _EDITIONS: Dict[str, Edition] = {
         format="parquet",
         hh_smart_meter_layout="monthly",  # unconfirmed — update once the real
                                            # edition09 layout spec is known
+        daily_smart_meter_layout="single_file",  # one combined file at the top
+                                                  # level of the run's output,
+                                                  # not in a per-year subfolder
         dictionary_source_edition="09",
     ),
 }
