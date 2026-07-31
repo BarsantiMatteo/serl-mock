@@ -438,6 +438,7 @@ class DailySmartMeterGenerator:
         # test-only escape hatch, not a config key.
         edition_def = get_edition(self.edition)
         self.daily_layout = daily_layout or get_daily_layout(edition_def.daily_smart_meter_layout)
+        self.daily_basename = edition_def.daily_smart_meter_basename
 
     @staticmethod
     def _expected_hh(local_date) -> int:
@@ -621,7 +622,7 @@ class DailySmartMeterGenerator:
         ].reset_index(drop=True)
 
     def write_chunk(self, df: pd.DataFrame, group: "list[int]", outfolder: str):
-        stem = with_edition_suffix(self.daily_layout.filename_stem("serl_smart_meter_daily", group), self.edition)
+        stem = with_edition_suffix(self.daily_layout.filename_stem(self.daily_basename, group), self.edition)
         if self.schema == "harmonised":
             df = df.copy()
             df["filename"] = f"{stem}.{self.format}"
@@ -668,6 +669,7 @@ class ReadTypeDataQualitySummaryGenerator:
         self.format = format or edition_def.format
         self.hh_layout = hh_layout or get_layout(edition_def.hh_smart_meter_layout)
         self.daily_layout = daily_layout or get_daily_layout(edition_def.daily_smart_meter_layout)
+        self.daily_basename = edition_def.daily_smart_meter_basename
         self.schema = edition_def.smart_meter_schema
         self.cols = _SCHEMA_COLUMNS[self.schema]
         self.seed = int(cfg.get("seed", 42))
@@ -721,7 +723,7 @@ class ReadTypeDataQualitySummaryGenerator:
         parts = []
         folder = Path(folder)
         for group in self.daily_layout.year_groups(self.start_year, self.end_year):
-            stem_name = self.daily_layout.filename_stem("serl_smart_meter_daily", group)
+            stem_name = self.daily_layout.filename_stem(self.daily_basename, group)
             stem = folder / with_edition_suffix(stem_name, self.edition)
             if table_exists(stem, format=self.format):
                 parts.append(read_table(stem, format=self.format))

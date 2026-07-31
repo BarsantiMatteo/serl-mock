@@ -23,7 +23,7 @@ def _hh_columns(output_dir: Path, edition: str) -> Tuple[list, Path]:
 
 def _daily_columns(output_dir: Path, edition: str) -> Tuple[list, Path]:
     if edition == "09":
-        daily_file = output_dir / "serl_smart_meter_daily_edition09.parquet"
+        daily_file = output_dir / "smart_meter_daily_edition09.parquet"
         df = pd.read_parquet(daily_file)
     else:
         daily_dir = output_dir / f"serl_smart_meter_daily_edition{edition}"

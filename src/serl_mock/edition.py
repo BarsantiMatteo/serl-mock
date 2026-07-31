@@ -34,6 +34,10 @@ class Edition:
                                          # *_harmonised_* methods in
                                          # generator_smartmeter.py for what each
                                          # variant actually produces
+    daily_smart_meter_basename: str = "serl_smart_meter_daily"  # base filename
+        # (before the "_<year>"/edition suffix) for the daily smart-meter
+        # dataset. Edition09 drops the "serl_" prefix for the moment — see
+        # generator_smartmeter.py's write_chunk()/_load_daily().
 
 
 _EDITIONS: Dict[str, Edition] = {
@@ -57,6 +61,8 @@ _EDITIONS: Dict[str, Edition] = {
         dictionary_source_edition="09",
         smart_meter_schema="harmonised",  # real edition09 HH/daily column
                                            # layout — see docs/04_metadata.md
+        daily_smart_meter_basename="smart_meter_daily",  # no "serl_" prefix
+            # for the moment — see the field's own comment above.
     ),
 }
 

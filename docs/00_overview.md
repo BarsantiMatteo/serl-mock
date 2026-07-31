@@ -25,7 +25,7 @@ for how edition09 (Parquet) differs:
 | `mock_internal/puprn_master.csv` | Master list of synthetic household IDs (PUPRNs) |
 | `mock_internal/household_traits.csv` | Per-household device/meter traits (PV, HP, EV, solar thermal, gas meter, export meter) |
 | `serl_smart_meter_hh_edition08/` | One CSV per calendar month with half-hourly electricity and gas readings |
-| `serl_smart_meter_daily_edition08/` | One CSV per calendar year with daily electricity and gas readings (edition09: a single combined `serl_smart_meter_daily_edition09.parquet` file at the top level instead — no subfolder) |
+| `serl_smart_meter_daily_edition08/` | One CSV per calendar year with daily electricity and gas readings (edition09: a single combined `smart_meter_daily_edition09.parquet` file at the top level instead — no subfolder, and no `serl_` prefix for the moment) |
 | `serl_smart_meter_rt_summary_edition08.csv` | Read-type data quality summary (one row per PUPRN/read type) |
 | `serl_climate_data_edition08/` | One CSV per calendar month with hourly ERA5 weather data (only when weather download is enabled) |
 | `serl_epc_data_edition08.csv` | EPC (Energy Performance Certificate) records |

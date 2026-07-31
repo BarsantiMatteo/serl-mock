@@ -91,7 +91,7 @@ Notes:
 - `serl_smart_meter_rt_summary_edition08.csv` is the read-type data quality summary (one row per PUPRN and read type).
 - `mock_internal/` contains helper/mock-only files, including the master PUPRN list used to align all datasets; these are always CSV and unaffected by the `format` setting.
 - `serl_climate_data_edition08/` is populated only when weather download is enabled and CDS access is configured.
-- The `serl_smart_meter_daily_edition08/` subfolder reflects edition08's `daily_smart_meter_layout: yearly`. Edition09 uses `single_file` instead — one combined `serl_smart_meter_daily_edition09.parquet` directly under `data/mock/edition09/`, no subfolder — see [docs/02_configuration.md](docs/02_configuration.md).
+- The `serl_smart_meter_daily_edition08/` subfolder reflects edition08's `daily_smart_meter_layout: yearly`. Edition09 uses `single_file` instead — one combined `smart_meter_daily_edition09.parquet` directly under `data/mock/edition09/`, no subfolder, and no `serl_` prefix for the moment — see [docs/02_configuration.md](docs/02_configuration.md).
 - Filename suffixes (`edition08`, year values) come from `config/serl_mock.yaml` and generator defaults.
 - `output_label` (also from config, defaulting to `edition<N>`) controls which folder under `data/mock/` a run's output lands in.
 

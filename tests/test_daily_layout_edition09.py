@@ -16,14 +16,14 @@ from tests._shared import TINY_CONFIG_EDITION09
 
 
 def test_single_combined_daily_file_at_top_level(generated_output_dir_edition09: Path):
-    daily_file = generated_output_dir_edition09 / "serl_smart_meter_daily_edition09.parquet"
+    daily_file = generated_output_dir_edition09 / "smart_meter_daily_edition09.parquet"
     assert daily_file.exists()
     # Not nested in its own subfolder, unlike edition08's serl_smart_meter_daily_edition08/
-    assert not (generated_output_dir_edition09 / "serl_smart_meter_daily_edition09").exists()
+    assert not (generated_output_dir_edition09 / "smart_meter_daily_edition09").exists()
 
 
 def test_daily_file_covers_the_whole_configured_range(generated_output_dir_edition09: Path):
-    df = pd.read_parquet(generated_output_dir_edition09 / "serl_smart_meter_daily_edition09.parquet")
+    df = pd.read_parquet(generated_output_dir_edition09 / "smart_meter_daily_edition09.parquet")
     n_households = TINY_CONFIG_EDITION09["n_households"]
     start_year = TINY_CONFIG_EDITION09["start_year"]
     end_year = TINY_CONFIG_EDITION09["end_year"]
