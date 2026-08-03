@@ -348,7 +348,7 @@ no `serl_` prefix for the moment)
 |---|---|---|
 | PUPRN | text | Pseudonymised household identifier |
 | Region | text | Government Office Region (e.g. LONDON, NORTH WEST, WALES) or `SCOTLAND`; consistent with the household's EPC `epcVersion` (a Scotland EPC always pairs with `Region = SCOTLAND`, and vice versa) |
-| LSOA | text | LSOA code; prefixed `W01` for Wales, `S01` for Scotland, `E01` for all other regions |
+| LSOA | text | Real ONS LSOA / NRS Data Zone code, sampled from `data/reference/lsoa_codes_england_wales_scotland.csv` by nation prefix (`W01` Wales, `S01` Scotland, `E01` elsewhere); the code is genuine but not tied to the household's actual location. England/Wales vintage (2011 or 2021) set via `lsoa_vintage` — see [02_configuration.md](02_configuration.md) |
 | grid_cell | text | ERA5 grid-cell identifier assigned to the household; sampled from cells present in the downloaded climate CSVs when available, otherwise assigned geometrically over the configured weather bounding box |
 | IMD_quintile | int | Index of Multiple Deprivation quintile (1 = most deprived, 5 = least deprived) |
 

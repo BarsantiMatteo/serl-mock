@@ -123,3 +123,26 @@ def read_epc_generated_fields(path: str) -> List[str]:
     not an optional convenience.
     """
     return pd.read_csv(path)["Variable"].tolist()
+
+# ---------- LSOA / Data Zone codes ----------
+def read_lsoa_codes(path: str, vintage: str = "2021") -> Dict[str, List[str]]:
+    """
+    Read real ONS LSOA (England/Wales) and NRS Data Zone (Scotland) codes from
+    data/reference/lsoa_codes_england_wales_scotland.csv, grouped by their
+    3-character nation prefix ('E01', 'W01', 'S01'). Returns {} if the
+    reference file is missing, so callers can fall back to synthesizing a
+    plausible-looking code instead.
+
+    `vintage` ('2011' or '2021') selects which England/Wales LSOA boundary
+    set to draw from. Scotland's Data Zones only have a 2011 vintage in
+    current use, so S01 codes are included regardless of `vintage`.
+    """
+    try:
+        df = pd.read_csv(path, dtype={"year": str})
+    except Exception:
+        return {}
+    df = df[(df["year"] == str(vintage)) | df["code"].str.startswith("S01")]
+    by_prefix: Dict[str, List[str]] = {}
+    for code in df["code"]:
+        by_prefix.setdefault(code[:3], []).append(code)
+    return by_prefix

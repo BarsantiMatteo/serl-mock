@@ -37,6 +37,11 @@ MOCK_AGGREGATED_DIR = MOCK_DIR / "serl_aggregated_data"
 # specific reference files (data dictionaries) live under reference_dir_for(edition).
 REFERENCE_DIR = DATA_DIR / "reference"
 
+# Real ONS LSOA (England/Wales) and NRS Data Zone (Scotland) codes, used as a
+# sampling pool for the participant summary's LSOA field — see
+# scripts/generate_lsoa_codes_csv.py.
+LSOA_CODES_PATH = REFERENCE_DIR / "lsoa_codes_england_wales_scotland.csv"
+
 
 def reference_dir_for(edition: str) -> Path:
     """Reference files (data dictionaries) specific to a given edition.

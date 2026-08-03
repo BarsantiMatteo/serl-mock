@@ -205,6 +205,14 @@ filenames:
 
 Any other keys under `filenames:` (e.g. `tariff_data`) are currently ignored — the tariff-data placeholder name is fixed to `serl_tariff_data_edition<edition>.csv` in `scripts/generate_mock_data.py`.
 
+## LSOA vintage
+
+```yaml
+lsoa_vintage: "2021"   # Not set by default — "2021" (2011 also supported)
+```
+
+The participant summary's `LSOA` field is sampled from real ONS LSOA codes for England/Wales and real NRS Data Zone codes for Scotland (`data/reference/lsoa_codes_england_wales_scotland.csv`; see `scripts/generate_lsoa_codes_csv.py`). Set `lsoa_vintage: "2011"` to sample from the 2011 LSOA boundary set instead of the 2021 one. Scotland's Data Zones only have a 2011 vintage in current use, so this setting doesn't affect Scottish households. As with the default vintage, sampled codes are real but not tied to a household's actual location.
+
 ## Year for the exporter list
 
 ```yaml

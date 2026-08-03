@@ -15,11 +15,12 @@ from .ids import (
     load_puprn_list_csv,
 )
 from .generator_household_traits import load_household_traits
-from .paths import MOCK_DIR, reference_dir_for, mock_climate_dirname
+from .paths import MOCK_DIR, reference_dir_for, mock_climate_dirname, LSOA_CODES_PATH
 from .edition import get_edition
 from .utils import (
     read_config, seed_random, ensure_output_dir,
-    with_edition_suffix, write_table, read_survey_dictionary, read_epc_generated_fields
+    with_edition_suffix, write_table, read_survey_dictionary, read_epc_generated_fields,
+    read_lsoa_codes,
 )
 
 @dataclass
@@ -126,6 +127,11 @@ class SERLContextualVariablesGenerator:
             "epc_generated_fields_path",
             str(ref_dir / "serl_epc_generated_fields.csv"),
         )
+
+        # Which England/Wales LSOA boundary vintage to sample the participant
+        # summary's LSOA field from ('2011' or '2021'); Scotland's Data Zones
+        # are unaffected — see read_lsoa_codes() in utils.py.
+        self.lsoa_vintage = str(cfg.get("lsoa_vintage", "2021"))
 
         # PUPRN: load from master list or generate deterministically
         self.puprn_list_path = puprn_list_path or cfg.get("puprn_list_path")
@@ -793,12 +799,18 @@ class SERLContextualVariablesGenerator:
         ]
         # LSOA prefix by nation; all other regions are in England (E01)
         _lsoa_prefix = {'WALES': 'W01', 'SCOTLAND': 'S01'}
+        # Real ONS LSOA / NRS Data Zone codes, grouped by prefix. Sampled
+        # codes are genuine but not tied to the household's actual location —
+        # falls back to a synthetic-but-correctly-prefixed code if the
+        # reference file is missing.
+        lsoa_codes_by_prefix = read_lsoa_codes(LSOA_CODES_PATH, vintage=self.lsoa_vintage)
         data = []
         rnd = random.Random(self.seed + 300)
         for puprn in self.puprns:
             region = 'SCOTLAND' if self._nation[puprn] == 'Scotland' else rnd.choice(regions_ew)
             prefix = _lsoa_prefix.get(region, 'E01')
-            lsoa = f"{prefix}{rnd.randint(0, 999999):06d}"
+            codes_for_prefix = lsoa_codes_by_prefix.get(prefix)
+            lsoa = rnd.choice(codes_for_prefix) if codes_for_prefix else f"{prefix}{rnd.randint(0, 999999):06d}"
             data.append({
                 'PUPRN': puprn,
                 'Region': region,
