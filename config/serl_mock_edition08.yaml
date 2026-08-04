@@ -21,6 +21,8 @@ edition: "08"
 # falls back to "edition<N>" (e.g. "edition08").
 output_label: "edition08_2024_N1000"
 
+lsoa_vintage: "2011"
+
 # Regenerate only the survey/contextual data (step 5), reusing the PUPRNs/
 # traits from a previous full run. Mirrors --survey-only. Not set by default;
 # a CLI flag always overrides this when passed.

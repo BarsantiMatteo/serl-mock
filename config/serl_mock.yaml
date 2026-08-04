@@ -29,9 +29,9 @@ edition: "08"
 # survey_only: true
 
 # Which England/Wales LSOA boundary vintage to sample the participant
-# summary's LSOA field from. Not set by default (falls back to "2021").
-# Scotland's Data Zones are unaffected — see docs/02_configuration.md.
-# lsoa_vintage: "2011"
+# summary's LSOA field from. Scotland's Data Zones are unaffected — see
+# docs/02_configuration.md.
+lsoa_vintage: "2011"
 
 # Skip any of the pipeline's outputs individually, without touching the
 # others. All True (generated) by default — set any to false to omit it.
