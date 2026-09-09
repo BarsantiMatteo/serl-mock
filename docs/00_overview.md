@@ -33,6 +33,8 @@ for how edition09 (Parquet) differs:
 | `serl_covid19_survey_data_edition08.csv` | COVID-19 lockdown follow-up survey responses |
 | `serl_participant_summary_edition08.csv` | Region, LSOA, ERA5 grid cell and deprivation index per household |
 | `serl_2023_follow_up_survey_data_edition08.csv` | Follow-up survey responses |
+| `masterserl_surveys_edition08.csv` | MasterSERL harmonised survey — merges Sign Up/2023/2025 surveys (opt-in, off by default — see [02_configuration.md](02_configuration.md)) |
+| `serl_2025_follow_up_survey_data_edition08.csv` | Raw 2025 survey responses (opt-in, off by default — see [02_configuration.md](02_configuration.md)) |
 | `serl_tariff_data_edition08.csv` | Placeholder file (not yet generated) |
 | `serl_energy_use_in_GB_domestic_buildings_2021_aggregated_statistics_edition07.csv` | Placeholder file (not yet generated) |
 | `mock_internal/Elec_2023_list_of_exporter_puprns_edition08.csv` | Households with electricity export |
@@ -54,6 +56,7 @@ Important consistency guarantees are already implemented:
 - Solar-thermal trait alignment between `household_traits.csv` and the EPC / survey solar-water-heating fields.
 - Nation assignment (England & Wales vs Scotland) shared between EPC records and participant summary `Region`, so a household's `epcVersion` and `Region` never contradict each other.
 - ERA5 `grid_cell` values in the participant summary are sampled from cells that actually exist in the downloaded climate CSVs when available, so they are always joinable.
+- The MasterSERL harmonised survey (opt-in) derives each cell from that same run's raw Sign Up / 2023 / 2025 survey rows wherever a raw value can be reused as a valid harmonised code, rather than sampling independently — see [02_configuration.md](02_configuration.md).
 
 ---
 

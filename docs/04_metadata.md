@@ -386,6 +386,41 @@ no `serl_` prefix for the moment)
 
 ---
 
+## MasterSERL Harmonised Survey Data
+
+**File:** `masterserl_surveys_edition08.csv`  
+**Grain:** one row per PUPRN per survey occurrence it participated in (`Sign Up`, `2023`, `2025w_1`, `2025w_2_3` — a PUPRN can have 1-4 rows)  
+**Opt-in:** off by default — enable with `generate.harmonised_survey: true` (needs `data/reference/edition<N>/serl_master_mapping_edition<N>.csv`, which today only exists for edition09, plus a placeholder for edition08)  
+**Source:** the harmonised dataframe described in `docs/documentation/SERL/edition09/serl_survey_harmonisation_documentation.pdf`, merging the Sign Up, 2023, and 2025 SERL Observatory surveys. Column list (~385 variables) and per-survey presence come from `data/reference/edition09/serl_master_mapping_edition09.csv`; see [02_configuration.md](02_configuration.md) ("MasterSERL harmonised survey" section) for exactly how a cell is populated.
+
+| Column | Type | Description |
+|---|---|---|
+| PUPRN | text | Pseudonymised household identifier |
+| survey | text | Which occurrence this row is (`Sign Up`, `2023`, `2025w_1`, `2025w_2_3`) |
+| wave | text | Survey wave code (e.g. `su_Wave2`, `23_Wave1`, `25_Wave1`) |
+| completed_survey | boolean | Always `True` in the mock (non-response isn't modelled at the row level) |
+| date_completed / date_completed_string | text | Completion date, in ISO and human-readable form |
+| *(~385 harmonised variables)* | int/float | One column per harmonised variable (e.g. `heating_gas`, `no_occupants`, `ethnic_group`); `999999` means that occurrence's survey never asked this question; otherwise derived from the matching raw survey cell (see `_recode_raw_value()` in `generator_contextual_data.py`) or sampled from the variable's coding template — full column list and codes are in `data/reference/edition09/serl_master_mapping_edition09.csv` |
+
+---
+
+## Raw 2025 Survey Data
+
+**File:** `serl_2025_follow_up_survey_data_edition08.csv`  
+**Grain:** one row per PUPRN (every input PUPRN gets a row — no non-response modelling)  
+**Opt-in:** off by default — enable with `generate.survey_2025: true` (same reference-data caveat as the harmonised survey above)  
+**Source:** field list, question text, and value codes come from the real paper questionnaire (`docs/documentation/SERL/edition09/serl_2025_survey_PaperSurveyFinalCopy.pdf`) via `data/reference/edition08/serl_2025_follow_up_survey_data_dictionary_edition07.csv` (real content, despite the edition07 suffix — see that folder's `README.md`).
+
+| Column | Type | Description |
+|---|---|---|
+| PUPRN | text | Pseudonymised household identifier |
+| Survey_wave | text | `Wave1` / `Wave2` / `Wave3` |
+| Recorded_date | text | Date the survey was recorded (`YYYY-MM-DD`) |
+| Collection_method | text | `Online` or `Postal` |
+| Q1, Q2, ... Q48 (and sub-items, e.g. `Q15_2`, `Q1R1C1`) | int/float | One column per real question code from the paper survey — full list, question text, and value meanings are in `serl_2025_follow_up_survey_data_dictionary_edition08.csv`. Cells left blank (`NaN`) reflect the questionnaire's own skip logic (e.g. `Q34` = 0 vehicles blanks `Q35`/`Q36`) |
+
+---
+
 ## List of Exporter PUPRNs
 
 **File:** `mock_internal/Elec_<year>_list_of_exporter_puprns_edition08.csv` (`<year>` from the top-level `year` config key, default `2023` — see [02_configuration.md](02_configuration.md))  

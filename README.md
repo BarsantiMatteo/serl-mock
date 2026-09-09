@@ -41,7 +41,7 @@ serl-mock/
 │   └── golden/                                #   one manifest per edition (edition08, edition09…)
 ├── src/
 │   └── serl_mock/
-│       ├── generator_contextual_data.py       # EPC, survey, participant summary generators
+│       ├── generator_contextual_data.py       # EPC, survey, participant summary, harmonised/2025-survey generators
 │       ├── generator_household_traits.py      # Household trait assignment (PV, HP, EV…)
 │       ├── generator_smartmeter.py            # Half-hourly and daily smart-meter generators
 │       ├── ids.py                             # PUPRN generation and management
@@ -70,6 +70,8 @@ serl-mock/
 │           ├── serl_covid19_survey_data_edition08.csv
 │           ├── serl_participant_summary_edition08.csv
 │           ├── serl_2023_follow_up_survey_data_edition08.csv
+│           ├── masterserl_surveys_edition08.csv                       # opt-in, off by default
+│           ├── serl_2025_follow_up_survey_data_edition08.csv          # opt-in, off by default
 │           ├── serl_smart_meter_rt_summary_edition08.csv
 │           ├── serl_smart_meter_hh_edition08/
 │           │   └── serl_half_hourly_<YYYY>_<MM>_edition08.csv
@@ -109,6 +111,7 @@ The code does enforce consistency for key links used in downstream testing, incl
 - Meter-trait consistency for gas/export availability in smart-meter and read-type summary outputs.
 - Solar-thermal trait consistency between `household_traits.csv` and the EPC / survey solar-water-heating fields.
 - Nation assignment (England & Wales vs Scotland) shared between EPC records and the participant summary's `Region`.
+- The MasterSERL harmonised survey (opt-in) derives each cell from that same run's raw Sign Up / 2023 / 2025 survey rows wherever a raw value can be reused as a valid harmonised code.
 
 ---
 
@@ -168,7 +171,7 @@ Key options you can adjust before running the generator:
 | `seed` | Random seed for reproducible outputs | `42` |
 | `edition` | Which SERL edition to generate — the *only* setting that determines output format, smart-meter file layout, and which `data/reference/edition<N>/` dictionaries are used (see [`src/serl_mock/edition.py`](src/serl_mock/edition.py); there's no separate `format`/`layout` key, so a config can't accidentally mismatch them) | `"08"` |
 | `output_label` | Folder under `data/mock/` this run's output lands in | `edition<N>` |
-| `generate.*` | Per-dataset on/off toggles (hh_smart_meter, daily_smart_meter, rt_summary, weather, epc, survey, covid19_survey, follow_up_survey, participant_summary, exporters_list) | all `true` |
+| `generate.*` | Per-dataset on/off toggles (hh_smart_meter, daily_smart_meter, rt_summary, weather, epc, survey, covid19_survey, follow_up_survey, harmonised_survey, survey_2025, participant_summary, exporters_list) | all `true` except `harmonised_survey`/`survey_2025` (`false`) |
 | `survey_only` | Skip steps 1-4, regenerate only contextual/survey data from a prior run | `false` |
 | `start_year` / `end_year` | Time period for smart-meter data | `2019` / `2019` |
 | `household_traits.pv_fraction` | Share of households with PV | `0.15` |

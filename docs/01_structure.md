@@ -15,17 +15,22 @@ serl-mock/
 │   │   ├── bst_dates_to_2030.csv                     # transversal — not edition-specific
 │   │   ├── uk_bank_holidays_england_wales_scotland.csv  # transversal
 │   │   ├── edition08/
+│   │   │   ├── README.md                              # explains the two placeholders below
 │   │   │   ├── serl_survey_data_dictionary_edition07.csv
 │   │   │   ├── serl_covid19_survey_data_dictionary_edition07.csv
 │   │   │   ├── serl_follow_up_survey_data_dictionary_edition07.csv
 │   │   │   ├── serl_epc_data_dictionary_edition07.csv   # real SERL doc — cross-reference only
-│   │   │   └── serl_epc_generated_fields.csv            # which of those fields we generate
-│   │   └── edition09/                                # placeholder — copies of edition08's
-│   │       ├── README.md                              # dictionaries; see this file
-│   │       ├── serl_survey_data_dictionary_edition09.csv
+│   │   │   ├── serl_epc_generated_fields.csv            # which of those fields we generate
+│   │   │   ├── serl_master_mapping_edition07.csv        # placeholder — copy of edition09's (see README.md)
+│   │   │   └── serl_2025_follow_up_survey_data_dictionary_edition07.csv  # placeholder — ditto
+│   │   └── edition09/                                # dictionaries below are placeholder copies of
+│   │       ├── README.md                              # edition08's; master mapping + 2025 survey
+│   │       ├── serl_survey_data_dictionary_edition09.csv        # dictionary are real content — see README.md
 │   │       ├── serl_covid19_survey_data_dictionary_edition09.csv
 │   │       ├── serl_follow_up_survey_data_dictionary_edition09.csv
-│   │       └── serl_epc_generated_fields.csv
+│   │       ├── serl_epc_generated_fields.csv
+│   │       ├── serl_master_mapping_edition09.csv        # real — exported from SERL's harmonisation workbook
+│   │       └── serl_2025_follow_up_survey_data_dictionary_edition09.csv  # real — see README.md
 │   └── mock/                       # All generated output lands here (gitignored)
 │       └── edition08/                                # <output_label>/, defaults to edition<N>
 │           ├── bst_dates_to_2030.csv
@@ -38,6 +43,9 @@ serl-mock/
 │           ├── serl_covid19_survey_data_edition08.csv
 │           ├── serl_participant_summary_edition08.csv
 │           ├── serl_2023_follow_up_survey_data_edition08.csv
+│           ├── masterserl_surveys_edition08.csv                                          # opt-in, off by default
+│           ├── serl_2025_follow_up_survey_data_edition08.csv                              # opt-in, off by default
+│           ├── serl_2025_follow_up_survey_data_dictionary_edition08.csv
 │           ├── serl_smart_meter_rt_summary_edition08.csv
 │           ├── serl_smart_meter_hh_edition08/
 │           │   ├── serl_half_hourly_2019_01_edition08.csv
@@ -105,7 +113,9 @@ serl-mock/
 │   ├── test_edition.py
 │   ├── test_output_label.py
 │   ├── test_generate_flags.py
-│   └── test_reference_dictionary_resolution.py
+│   ├── test_reference_dictionary_resolution.py
+│   ├── test_harmonised_survey.py
+│   └── test_2025_survey.py
 │
 ├── pyproject.toml
 └── README.md
@@ -122,14 +132,14 @@ The pipeline runs these steps in order:
 
 | Step | What it does |
 |---|---|
-| 0 | Copies `bst_dates_to_2030.csv` as-is, and copies the survey and COVID-19 survey data dictionaries into `data/mock/` with the edition suffix applied |
+| 0 | Copies `bst_dates_to_2030.csv` as-is, and copies the survey, COVID-19 survey, and 2025 survey data dictionaries into `data/mock/` with the edition suffix applied |
 | 0b | Creates empty placeholder files for datasets not yet generated (`serl_tariff_data_editionXX.csv`, the aggregated-statistics CSV) |
 | 1 | Generates PUPRNs → `mock_internal/puprn_master.csv`; assigns household traits (PV, HP, EV, solar thermal, gas meter, export meter) → `mock_internal/household_traits.csv` |
 | 2 | Generates monthly half-hourly smart-meter CSVs → `serl_smart_meter_hh_edition08/` |
 | 3 | Generates yearly daily smart-meter CSVs → `serl_smart_meter_daily_edition08/` |
 | 3b | Generates read-type data quality summary → `serl_smart_meter_rt_summary_edition08.csv` |
 | 4 | Downloads ERA5 weather data via CDS API and converts to CSV → `serl_climate_data_edition08/` (skipped with `--skip-weather`; falls back to a warning and an empty output folder if CDS credentials are unavailable) |
-| 5 | Generates contextual datasets (EPC, SERL survey, COVID-19 survey, participant summary, follow-up survey, exporter list) |
+| 5 | Generates contextual datasets (EPC, SERL survey, COVID-19 survey, participant summary, follow-up survey, exporter list, and — opt-in, off by default — the MasterSERL harmonised survey and the raw 2025 survey) |
 
 Skipping steps 1–4 with `--survey-only` requires `mock_internal/puprn_master.csv` and `mock_internal/household_traits.csv` to already exist from a prior full run.
 
@@ -171,6 +181,9 @@ Shared helpers:
 - `with_edition_suffix` — builds Edition-stamped filename stems (no extension — that's
   `write_table`'s job)
 - `read_survey_dictionary` — loads variable names from the SERL survey data dictionary
+- `read_master_mapping` — loads the MasterSERL harmonised-survey mapping CSV (which raw
+  survey column feeds which harmonised variable — see `generator_contextual_data.py`'s
+  "MasterSERL harmonised survey" section)
 
 ### `src/serl_mock/layout.py`
 Pluggable strategies for splitting smart-meter datasets into physical files, independent of
@@ -220,12 +233,35 @@ Contains three generators:
 - `generate_all(outfolder)` asks `self.layout` (see `layout.py`) how to group months into files, then writes each group via `write_table` using `self.format`
 
 ### `src/serl_mock/generator_contextual_data.py`
-`SERLContextualVariablesGenerator` produces the contextual CSV files: EPC, SERL survey, COVID-19 survey, participant summary, follow-up survey, and the exporter PUPRN list.  It reads household traits from `mock_internal/household_traits.csv` to ensure device-ownership fields (PV, HP, EV, solar thermal) are consistent with the smart-meter outputs, and shares a single England & Wales / Scotland nation assignment between the EPC and participant-summary generators so `epcVersion` and `Region` never contradict each other.
+`SERLContextualVariablesGenerator` produces the contextual CSV files: EPC, SERL survey, COVID-19 survey, participant summary, follow-up survey, the MasterSERL harmonised survey, the raw 2025 survey, and the exporter PUPRN list.  It reads household traits from `mock_internal/household_traits.csv` to ensure device-ownership fields (PV, HP, EV, solar thermal) are consistent with the smart-meter outputs, and shares a single England & Wales / Scotland nation assignment between the EPC and participant-summary generators so `epcVersion` and `Region` never contradict each other.
 
 - EPC field list comes from `data/reference/edition<N>/serl_epc_generated_fields.csv` (via `read_epc_generated_fields`); each field's values are then generated using category lists and numeric ranges hardcoded in `generate_epc()`, with nation-specific value vocabularies for fields that differ between England & Wales and Scotland (see [05_epc_reference.md](05_epc_reference.md))
 - SERL survey, COVID-19 survey, and follow-up survey data are all driven by their respective SERL data dictionaries in `data/reference/edition<N>/`
 - Participant summary `grid_cell` values are sampled from cells already present in the downloaded climate CSVs when available, falling back to a geometric assignment over the configured weather bounding box otherwise
 - `write_all(outfolder, mock_only_outfolder)` writes all contextual files in one call; the exporter list is written to `mock_only_outfolder` (`mock_internal/`)
+
+Ahead of the class, this module also holds two self-contained sections of module-level
+constants/functions (coding templates, skip logic, and the builder functions
+`build_harmonised_survey_dataframe()` / `build_2025_survey_dataframe()`) — opt-in via
+`generate.harmonised_survey` / `generate.survey_2025` (default `False`, since both need
+`data/reference/edition<N>/serl_master_mapping_edition<N>.csv`, which today only exists for
+edition09 and a placeholder copy for edition08):
+
+- **MasterSERL harmonised survey** (`masterserl_surveys_edition<N>.csv`) — the harmonised
+  dataframe from `docs/documentation/SERL/edition09/serl_survey_harmonisation_documentation.pdf`,
+  merging the Sign Up / 2023 / 2025 surveys into one longitudinal table. Driven by
+  `serl_master_mapping_edition<N>.csv`; derives each cell from that same run's raw Sign Up / 2023
+  / 2025 survey dataframes where a raw value can be reused as a valid harmonised code (see
+  `_recode_raw_value()`), falling back to independent template sampling otherwise.
+- **Raw 2025 survey** (`serl_2025_follow_up_survey_data_edition<N>.csv`) — a *raw* per-respondent
+  extract (columns named after the real question codes, e.g. `Q15_2`, not harmonised variable
+  names), built from the real paper questionnaire
+  (`docs/documentation/SERL/edition09/serl_2025_survey_PaperSurveyFinalCopy.pdf`) plus the master
+  mapping, with that questionnaire's own skip logic enforced (`_SKIP_GROUPS`).
+
+See [02_configuration.md](02_configuration.md) for the full config reference and each
+generator's documented scope/limitations (both sample every field independently beyond what a
+reused raw cell or skip rule gives for free — no cross-field *value*-consistency pass yet).
 
 ### `src/serl_mock/weather_downloader.py`
 `WeatherDownloader` retrieves and converts ERA5 reanalysis data:

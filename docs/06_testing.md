@@ -90,6 +90,18 @@ different file layout than edition08 is expected and will not fail edition08's t
 new edition to `tests/_shared.py::TINY_CONFIGS_BY_EDITION` and running
 `scripts/update_golden_manifest.py --edition <N>` gives it the same coverage.
 
+### 4. MasterSERL harmonised survey / raw 2025 survey — `test_harmonised_survey.py`, `test_2025_survey.py`
+
+Both mix direct unit tests (calling `build_harmonised_survey_dataframe()` / `build_2025_survey_dataframe()`
+from `generator_contextual_data.py` directly, with a tiny synthetic mapping or the real
+`serl_master_mapping_edition09.csv`, no full pipeline run) and pipeline-level tests (via `run_all()`,
+checking `generate.harmonised_survey` / `generate.survey_2025` are off by default and produce the
+expected file when turned on). Coverage includes: the `999999` "not asked" sentinel, the raw
+2025 survey's documented skip logic actually blanking dependent columns, participation coverage
+(not every PUPRN gets every survey occurrence), and determinism (same seed → identical output).
+A failure here usually means either the coding templates in `generator_contextual_data.py`
+changed shape, or the skip-logic/presence rules stopped matching the master mapping.
+
 ## Fixture config
 
 All tests run against one small, deterministic config (`tests/_shared.py::TINY_CONFIG`), not the
