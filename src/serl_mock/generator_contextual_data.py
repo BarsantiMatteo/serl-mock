@@ -1,6 +1,7 @@
 # src/serl_mock/generator_contextual_data.py
 from __future__ import annotations
 import math
+import numbers
 import os
 import random
 import re
@@ -211,7 +212,24 @@ TEMPLATE_OVERRIDES: Dict[str, List] = {
     "avoid_cooker_oven": FREQ5_FULL,
     "dishwasher_use_freq": COMPARE9,
     "dishwasher_use": COMPARE9,
-    "compare_30C": COMPARE9,  # doesn't end in "_compare" but is the same 9-point scale
+    # The "compare to last winter" 9-point scale — every _compare variable in the
+    # master mapping, plus compare_30C (doesn't end in "_compare" but is the same scale).
+    "compare_30C": COMPARE9,
+    "lights_off_compare": COMPARE9,
+    "clothes_on_compare": COMPARE9,
+    "heat_off_compare": COMPARE9,
+    "standalone_compare": COMPARE9,
+    "el_blanket_compare": COMPARE9,
+    "vacant_heatoff_compare": COMPARE9,
+    "occupied_heatoff_compare": COMPARE9,
+    "full_load_compare": COMPARE9,
+    "no_dryer_compare": COMPARE9,
+    "standby_off_compare": COMPARE9,
+    "curtains_blinds_compare": COMPARE9,
+    "shower_no_bath_compare": COMPARE9,
+    "short_showers_compare": COMPARE9,
+    "dishwasher_use_compare": COMPARE9,
+    "avoid_cooker_oven_compare": COMPARE9,
     "heat_off_unoccupied": [-9, -3, -2, -1, 1, 2, 3, 4, 5, 6],
     "summer_windows": SUMMER3,
     "summer_fans": SUMMER3,
@@ -301,15 +319,18 @@ NUMERIC_COUNT_VARS: Dict[str, Tuple[List[int], int, int]] = {
     "no_cars_vans_prefernosay": ([-9, -3, -2, -1], 0, 3),
     "heating_hours": ([-9, -3, -2, -1], 0, 24),
     "dk_heating_hours": ([-9, -3, -2, -1], 0, 0),
-    "age_group_0_5": ([], 0, 5),
-    "age_group_6_15": ([], 0, 5),
-    "age_group_0_15": ([], 0, 5),
-    "age_group_16_24": ([], 0, 4),
-    "age_group_25_44": ([], 0, 4),
-    "age_group_45_64": ([], 0, 4),
-    "age_group_65_74": ([], 0, 3),
-    "age_group_75_84": ([], 0, 2),
-    "age_group_85plus": ([], 0, 2),
+    # These age_group_* fields' raw 2023 cells do carry a "No response" text
+    # sentinel (unlike the other empty-missing-codes fields above), so -2 is
+    # a real, observed state here, not a guess.
+    "age_group_0_5": ([-2], 0, 5),
+    "age_group_6_15": ([-2], 0, 5),
+    "age_group_0_15": ([-2], 0, 5),
+    "age_group_16_24": ([-2], 0, 4),
+    "age_group_25_44": ([-2], 0, 4),
+    "age_group_45_64": ([-2], 0, 4),
+    "age_group_65_74": ([-2], 0, 3),
+    "age_group_75_84": ([-2], 0, 2),
+    "age_group_85plus": ([-2], 0, 2),
     **{
         name: ([-9, -3, -2, -1], 0, 3)
         for name in (
@@ -439,6 +460,343 @@ def sample_field_independent(rnd: random.Random, master_var_name: str) -> object
     return _sample_value(rnd, codes)
 
 
+# ---------- Value meanings (for recoding the 2023 survey's text answers) ----------
+# generate_follow_up_survey() (the 2023 survey) stores real answer TEXT, not numeric
+# codes (matching the real 2023 survey's own format — see the harmonisation doc's
+# "Numeric Coding of Text Responses" step) — e.g. "Yes"/"No", "Very often", "Living
+# comfortably". _recode_raw_value() needs the *text* a code means, not just the code,
+# to recognise that text and reuse the matching harmonised code instead of falling
+# back to independent sampling. This mirrors the harmonisation doc's real "Step 2"
+# text-to-number mapping, at the level of the small number of shared/canonical
+# answer-text patterns actually used across the two generators, not a
+# variable-by-variable transcription of every real SERL text label.
+MISSING_MEANINGS: Dict[object, str] = {
+    -9: "Not applicable",
+    -3: "Prefer not to say",
+    -2: "No answer",
+    -1: "Don't know",
+}
+
+_SHARED_TEMPLATE_MEANINGS = [
+    (BINARY_FULL, {0: "No", 1: "Yes"}),
+    (BINARY_SIMPLE, {0: "No", 1: "Yes"}),
+    (COMPARE9, {
+        1: "A lot more", 2: "A little more", 3: "About the same", 4: "A little less",
+        5: "A lot less", 6: "Not applicable", 7: "cannot do this", 8: "No response",
+        9: "Not applicable, cannot do this",
+    }),
+    (ADD_REP_2, {1: "Has been added or replaced in the last 12 months", 2: "No"}),
+    (TAP_SHOWER, {1: "Yes, own source power", 2: "No, all are powered by mains gas and el."}),
+    (MOULD, {1: "None", 2: "Minor", 3: "Substantial"}),
+    (SUMMER3, {1: "Yes", 2: "No", 3: "Not applicable, cannot do this"}),
+    (WORKSTATUS, {0: "0 people", 1: "1 person", 2: "2 people", 3: "3 people", 4: "4 or more people"}),
+    (COMFORT_BRANCH, {0: "No", 1: "Yes", 2: "None of the above", 3: "Other reason"}),
+]
+# FREQ5_FULL is deliberately not in the identity-matched list above: most of its ~15
+# reusing variables share its plain Always/Very often/... wording, but a couple
+# (open_window_cold, summer_night_windows) use fuller real phrasing for the same
+# codes — so FREQ5_FULL gets a *value*-matched default below and the two exceptions
+# get their own VAR_MEANING_OVERRIDES entry.
+_FREQ5_DEFAULT_MEANINGS = {
+    1: "Always", 2: "Very often", 3: "Quite often", 4: "Not very often", 5: "Never",
+}
+
+# Per-variable overrides: real codes reused across variables with different
+# real-world meanings, and every genuinely unique code list. Transcribed from
+# serl_2025_survey_PaperSurveyFinalCopy.pdf and cross-checked against the
+# harmonisation doc — same source as generator_2025_survey's coding, so also used
+# for its dictionary export (see data/reference/edition09/
+# serl_2025_follow_up_survey_data_dictionary_edition09.csv).
+VAR_MEANING_OVERRIDES: Dict[str, Dict[object, str]] = {
+    **{name: {0: "No", 1: "Yes"} for name in (
+        "heating_timer", "heating_temp_set", "heating_smart_dev",
+        "heating_manually", "heating_no_controls", "heating_control_?",
+    )},
+    "EV_present": {1: "Yes", 2: "No"},
+    "EV_point": {1: "Yes", 0: "No", -1: "Not applicable", -2: "No response", -3: "Don't know"},
+    "EV_charge_location": {
+        1: "At home, using a three-pin plug (trickle charge)",
+        2: "At home, using a dedicated EV charger",
+        3: "Near home, using an EV charger provided by third party for residents",
+        4: "At work, at a charging station provided by my workplace",
+        5: "At public charging stations (e.g. at supermarkets, service stations, public car parks)",
+        6: "Somewhere else",
+        7: "Don't know",
+    },
+    "EV_charge_time": {
+        -9: "Not applicable, charging is not done at home (e.g. at work)",
+        1: "Mostly overnight (8pm to 7am)",
+        2: "Mostly during the day (7am to 4pm)",
+        3: "Mostly in the evening (4pm to 8pm)",
+        4: "Varies - whenever it's needed",
+    },
+    "no_EVs": {0: "0", 1: "1", 2: "2", 3: "3 or more"},
+    "no_EVs_12m": {0: "0", 1: "1", 2: "2", 3: "3 or more", 4: "Don't know", 5: "No response"},
+    "smart_meter_own": {1: "Yes", 2: "No"},
+    "smart_meter_use": {
+        1: "More often", 2: "Less often", 3: "About the same", 4: "I don't have this",
+        5: "It is not working", 6: "Don't know", 7: "No response",
+    },
+    "smart_display_use_freq": {
+        1: "Most days", 2: "About once or twice per week", 3: "About once or twice per month",
+        4: "Less often than once per month", 5: "Never", 6: "I don't have this",
+        7: "It is not working", 8: "Don't know",
+    },
+    "stand_heater_own_power": {1: "Yes, own source power", 2: "No, all are powered by mains gas and el."},
+    "stand_heater_use": {
+        1: "Daily", 2: "Most days", 3: "Rarely - only if I really have to", 4: "Never",
+        5: "Varies, depends on temp or other reasons",
+    },
+    "el_gas_use_beh": {1: "A lot", 2: "Some", 3: "A little", 4: "Not at all"},
+    **{name: {0: "No", 1: "Yes"} for name in (
+        "heat_adjust_cold", "heat_adjust_baby", "heat_adjust_visitors", "heat_adjust_pets",
+        "heat_adjust_stress", "heat_adjust_WFH", "heat_adjust_none",
+    )},
+    "heat_adjust_unocc": {
+        1: "Always", 2: "Very often", 3: "Quite often", 4: "Not very often", 5: "Never",
+        6: "Not applicable / Cannot do this",
+    },
+    "energy_save_effort": {1: "A great deal of effort", 2: "Some effort", 3: "A little effort", 4: "No effort at all"},
+    "open_window_cold": {
+        1: "Open them all the time",
+        2: "Open them a few times a day (e.g. an hour in the morning and an hour in the evening)",
+        3: "Open them once a day for a limited period (e.g. first thing in the morning)",
+        4: "Open them a few times a week (e.g. if it gets hot /stuffy)",
+        5: "Never open them",
+    },
+    "open_window_warm": {1: "Always", 2: "Very often", 3: "Quite often", 4: "Not very often", 5: "Never"},
+    **{name: {1: "Yes", 0: "No", -1: "Not applicable", -2: "No response", -3: "Don't know"}
+       for name in ("boiler_flow_temp", "heat_less_hours")},
+    "dishwasher_use_freq": {
+        1: "Always", 2: "Very often", 3: "Quite often", 4: "Not very often", 5: "Never",
+        6: "Not applicable", 7: "cannot do this", 8: "Not applicable, cannot do this", 9: "No response",
+    },
+    "dishwasher_use": {
+        1: "Always", 2: "Very often", 3: "Quite often", 4: "Not very often", 5: "Never",
+        6: "Not applicable", 7: "cannot do this", 8: "Not applicable, cannot do this", 9: "No response",
+    },
+    "heat_off_unoccupied": {
+        1: "Always", 2: "Very often", 3: "Quite often", 4: "Not very often", 5: "Never",
+        6: "Not applicable, cannot do this",
+    },
+    "summer_night_windows": {
+        1: "Always", 2: "Often", 3: "Sometimes", 4: "Never",
+        5: "My home does not over-heat in summer / I can keep cool at night without opening windows",
+    },
+    "summer_overheating": {
+        1: "Yes, in all rooms", 2: "Yes, in multiple rooms but not all rooms",
+        3: "Yes, in one room", 4: "No",
+    },
+    "accom_type": {
+        1: "Detached", 2: "Semi detached", 3: "Terraced (including end terrace)",
+        4: "In a purpose-built block of flats or tenement",
+        5: "Part of a converted or shared house (including bedsits)",
+        6: "In a commercial building (e.g. in an office building, hotel or over a shop)",
+    },
+    "building_type": {
+        1: "Detached", 2: "Semi detached", 3: "Terraced (including end terrace)",
+        4: "In a purpose-built block of flats or tenement",
+        5: "Part of a converted or shared house (including bedsits)",
+        6: "In a commercial building (e.g. in an office building, hotel or over a shop)",
+    },
+    "self_contained": {1: "Yes, all the rooms are behind a door that only my household can use", 2: "No"},
+    "self_contained_accom": {1: "Yes, all the rooms are behind a door that only my household can use", 2: "No"},
+    "own_or_rent": {
+        1: "Own it outright / buying it with a mortgage/loan",
+        2: "Part own and part rent (shared ownership)",
+        3: "Privately",
+        4: "From council (local authority) or housing association",
+        5: "Live here rent free",
+    },
+    "own_rent_house?": {
+        1: "Own it outright / buying it with a mortgage/loan",
+        2: "Part own and part rent (shared ownership)",
+        3: "Rent it privately (with or without housing benefit)",
+        4: "Rent it from council (local authority) or housing association (with or without housing benefit)",
+        5: "Live here rent free",
+    },
+    "house_age": {
+        1: "Before 1900", 2: "1900 to 1929", 3: "1930 to 1949", 4: "1950 to 1975",
+        5: "1976 to 1990", 6: "1991 to 2002", 7: "2003 onwards",
+    },
+    "building_age": {
+        1: "Before 1900", 2: "1900 to 1929", 3: "1930 to 1949", 4: "1950 to 1975",
+        5: "1976 to 1990", 6: "1991 to 2002", 7: "2003 onwards", 8: "Don't know",
+    },
+    "no_bathrooms": {0: "0", 1: "1", 2: "2", 3: "3", 4: "4 or more", 5: "No response"},
+    "no_bathrooms_bath_shower": {0: "0", 1: "1", 2: "2", 3: "3", 4: "4 or more"},
+    "house_condition": {1: "Yes", 0: "No"},
+    "thermal_comfort": {1: "Yes", 2: "No"},
+    "leave_home_to_warm": {
+        1: "Daily", 2: "Most days", 3: "Rarely", 4: "Never", 5: "Don't know",
+        6: "Prefer not to say", 7: "No response",
+    },
+    "financial_status": {
+        1: "Living comfortably", 2: "Doing alright", 3: "Just about getting by",
+        4: "Finding it quite difficult", 5: "Finding it very difficult",
+    },
+    "annual_income": {
+        1: "Below £10,000", 2: "£10,001 to £20,000", 3: "£20,001 to £30,000",
+        4: "£30,001 to £40,000", 5: "£40,001 to £50,000", 6: "£50,001 to £60,000",
+        7: "£60,001 to £70,000", 8: "£70,001 to £80,000", 9: "£80,001 to £90,000",
+        10: "£90,001 to £100,000", 11: "Above £100,000",
+    },
+    **{name: {
+        1: "Direct debit (including online direct debit)",
+        2: "Payment on receipt of bill (by post, telephone, online or at bank/post office)",
+        3: "Pre-payment meter / Included in rent",
+        4: "Other / Not applicable / no mains gas",
+    } for name in ("payment_method_el", "payment_method_gas")},
+    "heat_fuel_cost_affordability": {
+        1: "Very easy", 2: "Fairly easy", 3: "Neither easy nor difficult",
+        4: "Fairly difficult", 5: "Very difficult", 6: "Don't know", 7: "No response",
+    },
+    "time_dependence_energy_price": {1: "Yes", 2: "No", 3: "Don't know"},
+    "gender": {1: "Male", 2: "Female", 3: "In some other way"},
+    "age_group": {1: "Under 18", 2: "18-24", 3: "25-44", 4: "45-64", 5: "65-74", 6: "75-84", 7: "85+"},
+    "ethnic_group": {
+        1: "Indian", 2: "Pakistani", 3: "Bangladeshi", 4: "Chinese", 5: "Any other Asian background",
+        6: "Caribbean", 7: "African", 8: "Any other Black, Black British, or Caribbean background",
+        9: "White and Black Caribbean", 10: "White and Black African", 11: "White and Asian",
+        12: "Any other Mixed or multiple ethnic background",
+        13: "English, Welsh, Scottish, Northern Irish or British", 14: "Irish",
+        15: "Gypsy or Irish Traveller", 16: "Roma", 17: "Any other White background",
+        18: "Arab", 19: "Any other ethnic group",
+    },
+    "current_employment_status": {
+        1: "Working (paid or unpaid): 30 hours a week or more",
+        2: "Working (paid or unpaid): less than 30 hours a week",
+        3: "Not working because of long-term sickness or disability",
+        4: "Unemployed but seeking work", 5: "A student",
+        6: "Retired/at home/not seeking work (including looking after the home or family)",
+        7: "Other",
+    },
+    "WFH_situation": {
+        1: "Always work from home", 2: "Sometimes work from home", 3: "Never work from home",
+        4: "Not applicable /prefer not to say", 5: "No response",
+    },
+    "weekday_occupancy": {1: "Yes", 2: "No", 3: "It varies a lot"},
+    "weekday_occ_frequency": {
+        1: "3 or more times a week", 2: "Once or twice a week",
+        3: "Less than that but more than twice a month", 4: "Once or twice a month",
+        5: "Less than that but more than twice a year", 6: "Once or twice a year",
+        7: "Less than that or never",
+    },
+    "no_cars_vans": {0: "0", 1: "1", 2: "2", 3: "3 or more", 4: "Don't know"},
+    "health_condition": {
+        1: "Very good", 2: "Good", 3: "Fair", 4: "Bad", 5: "Very bad", 6: "Prefer not to say",
+    },
+    "longterm_condition": {1: "Yes", 2: "No", 3: "Prefer not to say"},
+    "hh_others_longterm_condition": {
+        1: "Yes", 2: "No", 3: "Prefer not to say", 4: "Not applicable (living alone)",
+    },
+    "life_satisfaction": {0: "0 not at all satisfied", 10: "10 completely satisfied"},
+    "life_worthwhile_score": {0: "0 not at all worthwhile", 10: "10 completely worthwhile"},
+}
+
+
+def get_value_meanings(master_var_name: str) -> Dict[object, str]:
+    """Return {code: real meaning text} for master_var_name's actual sampled
+    codes, covering every code with a known real meaning (see the comment
+    above VAR_MEANING_OVERRIDES for sourcing). Used both to recognise a raw
+    text answer in _recode_raw_value() and to export
+    serl_2025_follow_up_survey_data_dictionary_edition09.csv."""
+    if master_var_name == "thermostat_C" or master_var_name in NUMERIC_COUNT_VARS:
+        missing_codes = (
+            [] if master_var_name == "thermostat_C"
+            else NUMERIC_COUNT_VARS[master_var_name][0]
+        )
+        return {code: MISSING_MEANINGS[code] for code in missing_codes if code in MISSING_MEANINGS}
+
+    codes = TEMPLATE_OVERRIDES.get(master_var_name, BINARY_FULL)
+    meanings: Dict[object, str] = {code: MISSING_MEANINGS[code] for code in codes if code in MISSING_MEANINGS}
+
+    if master_var_name in VAR_MEANING_OVERRIDES:
+        meanings.update(VAR_MEANING_OVERRIDES[master_var_name])
+        return meanings
+
+    for template, template_meanings in _SHARED_TEMPLATE_MEANINGS:
+        if codes is template:
+            meanings.update(template_meanings)
+            return meanings
+
+    if list(codes) == list(FREQ5_FULL):
+        meanings.update(_FREQ5_DEFAULT_MEANINGS)
+        return meanings
+
+    return meanings
+
+
+_TEXT_TO_CODE_CACHE: Dict[str, Dict[str, object]] = {}
+
+# Extra text synonyms, beyond get_value_meanings()' single canonical wording
+# per code — real SERL text varies this more than one string per code can
+# capture (e.g. "No response" alongside "No answer" for the same -2; "Yes,
+# Has been added or replaced in the last 12 months" as the longer real
+# wording for code 1 on any BINARY_FULL-templated *_add_rep_12m field, not
+# just "Yes"). Checked in addition to (not instead of) a variable's own
+# get_value_meanings(). Only used when the resolved code is actually one of
+# that variable's own valid codes — see _code_for_text() / the numeric
+# branch of _recode_raw_value() — never invented for a variable that
+# doesn't have it, so a coincidental text match on an unrelated variable is
+# harmless (the code wouldn't be valid there and falls through).
+_TEXT_SYNONYMS: Dict[str, object] = {
+    "not applicable": -9, "na": -9, "n/a": -9,
+    "prefer not to say": -3, "prefer not to answer": -3,
+    "no answer": -2, "no response": -2,
+    "don't know": -1, "dont know": -1,
+    "yes, has been added or replaced in the last 12 months": 1,
+    "has been added or replaced in the last 12 months": 1,
+}
+
+# Per-variable extra synonyms: only where get_value_meanings()' one canonical
+# wording per code isn't enough because the *same* code legitimately has two
+# distinct real-text phrasings for this specific variable (payment_method_el/
+# gas's code 3 combines "Pre-payment meter" and "Included in rent" into one
+# harmonised option) — narrower than _TEXT_SYNONYMS above precisely because
+# the mapping isn't safe to assume for any other variable.
+_VAR_TEXT_SYNONYMS: Dict[str, Dict[str, object]] = {
+    "payment_method_el": {"pre-payment meter": 3, "included in rent": 3},
+    "payment_method_gas": {"pre-payment meter": 3, "included in rent": 3},
+}
+
+_BARE_INT_RE = re.compile(r"^(-?\d+)")
+
+
+def _code_for_text(master_var_name: str, text: str) -> Optional[object]:
+    """Reverse-lookup: does `text` match one of master_var_name's known real
+    meanings (see get_value_meanings()), a per-variable synonym, a general
+    synonym, or a bare leading number (e.g. "6", "1 person") that's itself a
+    valid code? Case/whitespace-insensitive, since that's the only likely
+    source of mismatch between two independently written generators quoting
+    the same real SERL wording. Returns None (no match — caller falls back
+    to sampling) rather than guessing."""
+    cache = _TEXT_TO_CODE_CACHE.get(master_var_name)
+    if cache is None:
+        cache = {str(meaning).strip().lower(): code for code, meaning in get_value_meanings(master_var_name).items()}
+        cache.update({k.lower(): v for k, v in _VAR_TEXT_SYNONYMS.get(master_var_name, {}).items()})
+        _TEXT_TO_CODE_CACHE[master_var_name] = cache
+    normalized = text.strip().lower()
+    if normalized in cache:
+        return cache[normalized]
+
+    codes = TEMPLATE_OVERRIDES.get(master_var_name, BINARY_FULL)
+    synonym_code = _TEXT_SYNONYMS.get(normalized)
+    if synonym_code is not None and synonym_code in codes:
+        return synonym_code
+
+    # A bare number (e.g. life_satisfaction's "6", or a leading count like
+    # "1 person"/"0 people") that's itself one of this variable's valid
+    # codes — covers scales whose middle values are just their own number,
+    # with no separate descriptive text to have put in get_value_meanings().
+    match = _BARE_INT_RE.match(normalized)
+    if match:
+        as_int = int(match.group(1))
+        if as_int in codes:
+            return as_int
+    return None
+
+
 def _decide_participation(rnd: random.Random) -> List[str]:
     """
     Decide which survey occurrences a PUPRN appears in. Every PUPRN has a
@@ -509,25 +867,70 @@ def _recode_raw_value(rnd: random.Random, master_var_name: str, raw_value: objec
     master_var_name:
       - thermostat_C / NUMERIC_COUNT_VARS: numeric fields have no fixed code
         list to validate against, so any numeric raw value is reused as-is.
+      - A text answer (the 2023 survey stores real answer text, not numeric
+        codes — see the comment above VAR_MEANING_OVERRIDES) that matches one
+        of the variable's known real meanings is recoded to the matching
+        code via _code_for_text() — a genuine recode, not a passthrough.
       - Otherwise: a raw value already in MISSING_CODE_SET, or already a
         legal code in the variable's own template, is reused unchanged —
-        this covers the common case where a raw survey's own coding for a
-        simple Yes/No-style field already happens to match the harmonised
-        scheme (see this section's module-level comment above). Anything
-        else means the raw survey answered the question with a code we
-        can't reliably map (no per-field raw-to-harmonised table is
-        available) — sampled from the template's real (non-missing) codes
-        instead of a fabricated 1:1 mapping, since we at least know from
-        the raw cell that *something* was answered, not blank.
+        this covers the common case where a raw survey's own numeric coding
+        for a simple Yes/No-style field already happens to match the
+        harmonised scheme (see this section's module-level comment above).
+      - Anything else means the raw survey answered the question with a
+        value we can't reliably map (no per-field raw-to-harmonised table,
+        and no text match) — sampled from the template's real (non-missing)
+        codes instead of a fabricated 1:1 mapping, since we at least know
+        from the raw cell that *something* was answered, not blank.
     """
     if master_var_name == "thermostat_C" or master_var_name in NUMERIC_COUNT_VARS:
-        if isinstance(raw_value, (int, float)) and not isinstance(raw_value, bool):
+        # numbers.Number (not the narrower (int, float)) is required here: pandas
+        # stores integer/float columns as numpy.int64/float64, and numpy scalar
+        # types are NOT instances of Python's own int/float (isinstance(np.int64(5),
+        # int) is False) — a plain (int, float) check would silently treat every
+        # numeric raw cell as unusable and independently resample it instead.
+        if isinstance(raw_value, numbers.Number) and not isinstance(raw_value, bool):
             return raw_value
+        if isinstance(raw_value, str) and master_var_name in NUMERIC_COUNT_VARS:
+            normalized = raw_value.strip().lower()
+            missing_codes, low, high = NUMERIC_COUNT_VARS[master_var_name]
+            synonym_code = _TEXT_SYNONYMS.get(normalized)
+            if synonym_code is not None and synonym_code in missing_codes:
+                return synonym_code
+            # A count written as text (e.g. "0 people", "1 person", or a bare
+            # "3") — extract the leading number rather than discarding it.
+            match = _BARE_INT_RE.match(normalized)
+            if match:
+                as_int = int(match.group(1))
+                if low <= as_int <= high:
+                    return as_int
         return sample_field_independent(rnd, master_var_name)
 
     codes = TEMPLATE_OVERRIDES.get(master_var_name, BINARY_FULL)
-    if raw_value in MISSING_CODE_SET or raw_value in codes:
+    if isinstance(raw_value, str):
+        matched = _code_for_text(master_var_name, raw_value)
+        if matched is not None:
+            return matched
+    elif raw_value in MISSING_CODE_SET or raw_value in codes:
         return raw_value
+    elif isinstance(raw_value, numbers.Number) and not isinstance(raw_value, bool):
+        # The harmonisation doc's own canonical example: "a Yes/No question
+        # might use codes 1/0 in one survey and 1/2 in another". Several raw
+        # Sign Up fields code Yes/No as 1/2 (e.g. B8, A11, A6) or plain 0/1
+        # presence flags (e.g. the A12_* hot-water-source flags) against a
+        # harmonised template using the other convention — remap between the
+        # two only when it's unambiguous (the value not already being valid
+        # for this variable, and the swap partner being a legal real code).
+        if raw_value == 2 and 0 in codes and 2 not in codes:
+            return 0
+        if raw_value == 0 and 2 in codes and 0 not in codes:
+            return 2
+        # A13_01/A13_02 (switch_off_lights_freq/clothes_freq) legitimately
+        # have a real 6th documented code ("6, Not applicable, cannot do
+        # this") that FREQ5_FULL-templated harmonised variables don't carry —
+        # fold it into the template's own "not applicable" slot instead of
+        # treating it as unmappable.
+        if raw_value == 6 and -9 in codes and 6 not in codes:
+            return -9
     real_codes = [c for c in codes if c not in MISSING_CODE_SET]
     return rnd.choice(real_codes or codes)
 
@@ -1423,8 +1826,17 @@ class SERLContextualVariablesGenerator:
                                   else rnd.choice([1, 2, 3, 4, 5])) if puprn in self._ev_households else -9
                 elif field.startswith('C') and field[1:].isdigit():
                     row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.05 else rnd.randint(0, 15)
-                elif field.startswith('D') and field[1:].isdigit():
-                    row[field] = rnd.choice(_field_missing.get(field, missing_codes)) if rnd.random() < 0.15 else rnd.choice(_field_opts.get(field, multi_choice_responses))
+                elif field.startswith('D') and (field[1:].isdigit() or (field.endswith('_new') and field[1:-4].isdigit())):
+                    # D1_new/D2_new/D3_new are "filled from C1/C2/C3 if single
+                    # occupier" derived versions of D1/D2/D3 (per the real
+                    # dictionary) with the same real-answer codes — field[1:]
+                    # isn't all-digit for these (it has "_new" in it), so
+                    # without stripping the suffix here they'd silently fall
+                    # through to the generic else branch below and sample
+                    # multi_choice_responses ([1..5]) instead of their own
+                    # real range (e.g. D2_new only has 3 real codes, not 5).
+                    base_field = field[:-4] if field.endswith('_new') else field
+                    row[field] = rnd.choice(_field_missing.get(base_field, missing_codes)) if rnd.random() < 0.15 else rnd.choice(_field_opts.get(base_field, multi_choice_responses))
                 elif field.endswith('01') or field.endswith('02') or field.endswith('03'):
                     row[field] = rnd.choice(binary_responses)
                 else:
