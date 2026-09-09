@@ -19,7 +19,7 @@ edition: "08"
 
 # Folder under data/mock/ this run's output lands in. Not set by default —
 # falls back to "edition<N>" (e.g. "edition08").
-output_label: "edition08_2024_N1000"
+output_label: "edition08_with_2025survey"
 
 lsoa_vintage: "2011"
 
@@ -30,9 +30,21 @@ lsoa_vintage: "2011"
 
 # Skip any of the pipeline's outputs individually — all true by default.
 # See config/serl_mock.yaml for the full list of generate.<name> keys.
-# generate:
-#   weather: false
-#   epc: false
+generate:
+   hh_smart_meter: true       # half-hourly smart-meter data (step 2)
+   daily_smart_meter: true    # daily smart-meter data (step 3)
+   rt_summary: true           # read-type data quality summary (step 3b)
+   weather: true              # ERA5 weather data (step 4)
+   epc: true
+   survey: true
+   covid19_survey: true
+   follow_up_survey: true
+   harmonised_survey: true    # MasterSERL harmonised survey (mock, structural-only —
+                              # see src/serl_mock/generator_contextual_data.py)
+   survey_2025: true          # Raw 2025 SERL Observatory survey (mock —
+                              # see src/serl_mock/generator_contextual_data.py)
+   participant_summary: true
+   exporters_list: true
 
 # -------------------------
 # Time period for smart-meter data

@@ -44,6 +44,10 @@ generate:
    survey: false
    covid19_survey: false
    follow_up_survey: false
+   harmonised_survey: true    # MasterSERL harmonised survey (mock, structural-only —
+                              # see src/serl_mock/generator_contextual_data.py)
+   survey_2025: true          # Raw 2025 SERL Observatory survey (mock —
+                              # see src/serl_mock/generator_contextual_data.py)
    participant_summary: false
    exporters_list: false
 
@@ -112,5 +116,12 @@ filenames:
   covid19_survey: "serl_covid19_survey_data"
   survey: "serl_survey_data"
   followup_survey: "serl_2023_follow_up_survey_data"
+  harmonised_survey: "masterserl_surveys"
+  # "follow_up", matching followup_survey above, since both are the same
+  # kind of thing (a post-recruitment survey sent to the existing Sign Up
+  # pool) - distinguished from each other only by year, same as SERL's own
+  # naming. "serl_2025_survey_data" (no "follow_up") read too much like a
+  # second Sign Up survey rather than what it actually is.
+  survey_2025: "serl_2025_follow_up_survey_data"
   summary: "serl_participant_summary"
   tariff_data: "serl_tariff_data"

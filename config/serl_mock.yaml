@@ -45,6 +45,11 @@ lsoa_vintage: "2011"
 #   survey: true
 #   covid19_survey: true
 #   follow_up_survey: true
+#   harmonised_survey: false  # MasterSERL harmonised survey — off by default; needs
+#                             # data/reference/edition<N>/serl_master_mapping_edition<N>.csv,
+#                             # which today only exists for edition09 (see config/serl_mock_edition09.yaml)
+#   survey_2025: false        # Raw 2025 SERL Observatory survey — off by default, same reason
+#                             # (see src/serl_mock/generator_contextual_data.py)
 #   participant_summary: true
 #   exporters_list: true
 

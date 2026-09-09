@@ -455,6 +455,25 @@
       },
       "rows": 5
     },
+    "serl_2025_follow_up_survey_data_dictionary_edition09.csv": {
+      "columns": [
+        "Variable",
+        "Value",
+        "ValueDescription",
+        "QuestionOrMeaning",
+        "FreeText",
+        "Type"
+      ],
+      "dtypes": {
+        "FreeText": "bool",
+        "QuestionOrMeaning": "str",
+        "Type": "str",
+        "Value": "float64",
+        "ValueDescription": "str",
+        "Variable": "str"
+      },
+      "rows": 1745
+    },
     "serl_covid19_survey_data_dictionary_edition09.csv": {
       "columns": [
         "Variable",

@@ -35,16 +35,63 @@ generate:
   survey: true
   covid19_survey: true
   follow_up_survey: true
+  harmonised_survey: false   # MasterSERL harmonised survey — see below
+  survey_2025: false         # Raw 2025 SERL Observatory survey — see below
   participant_summary: true
   exporters_list: true
 ```
 
 `generate` lets you skip any single output independently of the others — every key defaults to
-`true` (today's behaviour) if the `generate:` section, or the key itself, is omitted. An unknown
-key under `generate:` raises an error at startup rather than being silently ignored, to catch
-typos. `--skip-weather` on the CLI always forces `generate.weather` off, regardless of what the
-config says. `survey_only: true` forces `hh_smart_meter`, `daily_smart_meter`, `rt_summary`, and
+`true` (today's behaviour) if the `generate:` section, or the key itself, is omitted, **except
+`harmonised_survey` and `survey_2025`, which default to `false`** (both need
+`data/reference/edition<N>/serl_master_mapping_edition<N>.csv`, which today only exists for
+edition09 — see `config/serl_mock_edition09.yaml`, which turns both on). An unknown key under
+`generate:` raises an error at startup rather than being silently ignored, to catch typos.
+`--skip-weather` on the CLI always forces `generate.weather` off, regardless of what the config
+says. `survey_only: true` forces `hh_smart_meter`, `daily_smart_meter`, `rt_summary`, and
 `weather` all off (steps 1-4 are skipped outright), independently of `generate:`.
+
+### MasterSERL harmonised survey (`generate.harmonised_survey`)
+
+Mock version of `masterserl_surveys_edition<N>.csv` — the harmonised dataframe described in
+`docs/documentation/SERL/edition09/serl_survey_harmonisation_documentation.pdf`, which merges the
+Sign Up, 2023, and 2025 SERL Observatory surveys into one longitudinal table (one row per PUPRN
+per survey occurrence it took part in). It's generated *from* this same run's Sign Up / 2023 /
+2025 raw survey dataframes (`generate_serl_survey()` / `generate_follow_up_survey()` /
+`generate_2025_survey()`, computed internally regardless of whether `generate.survey` /
+`follow_up_survey` / `survey_2025` are also writing those raw files to disk this run) — so a
+PUPRN's harmonised answer is consistent with its raw-survey row wherever a real raw cell can be
+reused as-is (see `src/serl_mock/generator_contextual_data.py`'s "MasterSERL harmonised survey" section above for exactly
+when that is), including inheriting the raw generators' own skip logic (a raw cell blanked by a
+skip rule harmonises to a missing code, never a fabricated answer).
+
+Driven by `data/reference/edition09/serl_master_mapping_edition09.csv` (the real SERL variable
+mapping), which is what decides, per variable and per survey occurrence, whether it gets a value
+at all or the documented `999999` ("this question wasn't asked in this survey") sentinel. Where a
+raw cell can't be reliably reused (no per-field raw-to-harmonised recoding table is available for
+most variables), the fallback is independent sampling from the same coding templates as before —
+so consistency is real but partial, not a guarantee across every cell. v1 also doesn't yet enforce
+the harmonisation doc's section 3.4 cross-field consistency rules beyond what a reused raw cell
+gives for free (e.g. a "present" flag and its matching "added/replaced in last 12 months" flag
+still aren't cross-checked against each other), so a small fraction of rows may still contain
+individually-valid-but-inconsistent combinations.
+
+### Raw 2025 SERL Observatory survey (`generate.survey_2025`)
+
+Mock version of `serl_2025_follow_up_survey_data_edition<N>.csv` (named to pair with
+`serl_2023_follow_up_survey_data` — both are the same kind of post-recruitment survey,
+distinguished only by year) — the *raw* per-respondent 2025 survey extract (one row per PUPRN,
+columns named after the real question codes, e.g. `Q15_2`, `Q1R1C1`, not the harmonised variable
+names), as distinct from the harmonised view of the same content in
+`masterserl_surveys_edition<N>.csv` above.
+
+Built from two real sources — `docs/documentation/SERL/edition09/serl_2025_survey_PaperSurveyFinalCopy.pdf`
+(the actual paper questionnaire, giving real question text, answer options, and skip logic) and
+the master mapping (which question code corresponds to which harmonised variable, letting this
+reuse the same vetted coding templates as the harmonised generator — see
+`src/serl_mock/generator_contextual_data.py`). The paper survey's own documented skip logic (e.g.
+"0 cars/vans → skip to Q37") is enforced, leaving dependent cells blank; the harmonisation doc's
+broader cross-field consistency rules are not, same limitation as `harmonised_survey` above.
 
 ---
 
@@ -200,6 +247,8 @@ filenames:
   covid19_survey:   serl_covid19_survey_data
   summary:          serl_participant_summary
   followup_survey:  serl_2023_follow_up_survey_data
+  harmonised_survey: masterserl_surveys
+  survey_2025:      serl_2025_follow_up_survey_data
   exporters_prefix: Elec
 ```
 

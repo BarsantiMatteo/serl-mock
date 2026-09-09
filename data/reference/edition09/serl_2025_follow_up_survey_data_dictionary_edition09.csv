@@ -1,0 +1,1746 @@
+Variable,Value,ValueDescription,QuestionOrMeaning,FreeText,Type
+PUPRN,,,Pseudonymised participant identifier,FALSE,Assigned
+Q1,,,How many people live in household?,TRUE,Primary
+Q1R1,,,How many people are there in 0-15 age group in your household?,TRUE,Primary
+Q1R1C1,-9,Not applicable,Males in household (0-15),TRUE,Primary
+Q1R1C1,-3,Prefer not to say,Males in household (0-15),TRUE,Primary
+Q1R1C1,-2,No answer,Males in household (0-15),TRUE,Primary
+Q1R1C1,-1,Don't know,Males in household (0-15),TRUE,Primary
+Q1R1C2,-9,Not applicable,Females in household (0-15),TRUE,Primary
+Q1R1C2,-3,Prefer not to say,Females in household (0-15),TRUE,Primary
+Q1R1C2,-2,No answer,Females in household (0-15),TRUE,Primary
+Q1R1C2,-1,Don't know,Females in household (0-15),TRUE,Primary
+Q1R2,,,How many people are there in 16-24 age group in your household?,TRUE,Primary
+Q1R2C1,-9,Not applicable,Males in household (16-24),TRUE,Primary
+Q1R2C1,-3,Prefer not to say,Males in household (16-24),TRUE,Primary
+Q1R2C1,-2,No answer,Males in household (16-24),TRUE,Primary
+Q1R2C1,-1,Don't know,Males in household (16-24),TRUE,Primary
+Q1R2C2,-9,Not applicable,Females in household (16-24),TRUE,Primary
+Q1R2C2,-3,Prefer not to say,Females in household (16-24),TRUE,Primary
+Q1R2C2,-2,No answer,Females in household (16-24),TRUE,Primary
+Q1R2C2,-1,Don't know,Females in household (16-24),TRUE,Primary
+Q1R3,,,How many people are there in 24-44 age group in your household?,TRUE,Primary
+Q1R3C1,-9,Not applicable,Males in household (25-44),TRUE,Primary
+Q1R3C1,-3,Prefer not to say,Males in household (25-44),TRUE,Primary
+Q1R3C1,-2,No answer,Males in household (25-44),TRUE,Primary
+Q1R3C1,-1,Don't know,Males in household (25-44),TRUE,Primary
+Q1R3C2,-9,Not applicable,Females in household (25-44),TRUE,Primary
+Q1R3C2,-3,Prefer not to say,Females in household (25-44),TRUE,Primary
+Q1R3C2,-2,No answer,Females in household (25-44),TRUE,Primary
+Q1R3C2,-1,Don't know,Females in household (25-44),TRUE,Primary
+Q1R4,,,How many people are there in 45-64 age group in your household?,TRUE,Primary
+Q1R4C1,-9,Not applicable,Males in household (45-64),TRUE,Primary
+Q1R4C1,-3,Prefer not to say,Males in household (45-64),TRUE,Primary
+Q1R4C1,-2,No answer,Males in household (45-64),TRUE,Primary
+Q1R4C1,-1,Don't know,Males in household (45-64),TRUE,Primary
+Q1R4C2,-9,Not applicable,Females in household (45-64),TRUE,Primary
+Q1R4C2,-3,Prefer not to say,Females in household (45-64),TRUE,Primary
+Q1R4C2,-2,No answer,Females in household (45-64),TRUE,Primary
+Q1R4C2,-1,Don't know,Females in household (45-64),TRUE,Primary
+Q1R5,,,How many people are there in 65-74 age group in your household?,TRUE,Primary
+Q1R5C1,-9,Not applicable,Males in household (65-74),TRUE,Primary
+Q1R5C1,-3,Prefer not to say,Males in household (65-74),TRUE,Primary
+Q1R5C1,-2,No answer,Males in household (65-74),TRUE,Primary
+Q1R5C1,-1,Don't know,Males in household (65-74),TRUE,Primary
+Q1R5C2,-9,Not applicable,Females in household (65-74),TRUE,Primary
+Q1R5C2,-3,Prefer not to say,Females in household (65-74),TRUE,Primary
+Q1R5C2,-2,No answer,Females in household (65-74),TRUE,Primary
+Q1R5C2,-1,Don't know,Females in household (65-74),TRUE,Primary
+Q1R6,,,How many people are there in 75-85 age group in your household?,TRUE,Primary
+Q1R6C1,-9,Not applicable,Males in household (75-84),TRUE,Primary
+Q1R6C1,-3,Prefer not to say,Males in household (75-84),TRUE,Primary
+Q1R6C1,-2,No answer,Males in household (75-84),TRUE,Primary
+Q1R6C1,-1,Don't know,Males in household (75-84),TRUE,Primary
+Q1R6C2,-9,Not applicable,Females in household (75-84),TRUE,Primary
+Q1R6C2,-3,Prefer not to say,Females in household (75-84),TRUE,Primary
+Q1R6C2,-2,No answer,Females in household (75-84),TRUE,Primary
+Q1R6C2,-1,Don't know,Females in household (75-84),TRUE,Primary
+Q1R7,,,How many people are there over 85 years old in your household?,TRUE,Primary
+Q1R7C1,-9,Not applicable,Males in household (85+),TRUE,Primary
+Q1R7C1,-3,Prefer not to say,Males in household (85+),TRUE,Primary
+Q1R7C1,-2,No answer,Males in household (85+),TRUE,Primary
+Q1R7C1,-1,Don't know,Males in household (85+),TRUE,Primary
+Q1R7C2,-9,Not applicable,Females in household (85+),TRUE,Primary
+Q1R7C2,-3,Prefer not to say,Females in household (85+),TRUE,Primary
+Q1R7C2,-2,No answer,Females in household (85+),TRUE,Primary
+Q1R7C2,-1,Don't know,Females in household (85+),TRUE,Primary
+Q2R1,-9,Not applicable,Working Status - Working 30 + hours per week,FALSE,Primary
+Q2R1,-3,Prefer not to say,Working Status - Working 30 + hours per week,FALSE,Primary
+Q2R1,-2,No answer,Working Status - Working 30 + hours per week,FALSE,Primary
+Q2R1,-1,Don't know,Working Status - Working 30 + hours per week,FALSE,Primary
+Q2R1,0,0 people,Working Status - Working 30 + hours per week,FALSE,Primary
+Q2R1,1,1 person,Working Status - Working 30 + hours per week,FALSE,Primary
+Q2R1,2,2 people,Working Status - Working 30 + hours per week,FALSE,Primary
+Q2R1,3,3 people,Working Status - Working 30 + hours per week,FALSE,Primary
+Q2R1,4,4 or more people,Working Status - Working 30 + hours per week,FALSE,Primary
+Q2R2,-9,Not applicable,Working Status - Working less than 30 hours per week,FALSE,Primary
+Q2R2,-3,Prefer not to say,Working Status - Working less than 30 hours per week,FALSE,Primary
+Q2R2,-2,No answer,Working Status - Working less than 30 hours per week,FALSE,Primary
+Q2R2,-1,Don't know,Working Status - Working less than 30 hours per week,FALSE,Primary
+Q2R2,0,0 people,Working Status - Working less than 30 hours per week,FALSE,Primary
+Q2R2,1,1 person,Working Status - Working less than 30 hours per week,FALSE,Primary
+Q2R2,2,2 people,Working Status - Working less than 30 hours per week,FALSE,Primary
+Q2R2,3,3 people,Working Status - Working less than 30 hours per week,FALSE,Primary
+Q2R2,4,4 or more people,Working Status - Working less than 30 hours per week,FALSE,Primary
+Q2R3,-9,Not applicable,Working Status - Not Working - long term sickness or disability,FALSE,Primary
+Q2R3,-3,Prefer not to say,Working Status - Not Working - long term sickness or disability,FALSE,Primary
+Q2R3,-2,No answer,Working Status - Not Working - long term sickness or disability,FALSE,Primary
+Q2R3,-1,Don't know,Working Status - Not Working - long term sickness or disability,FALSE,Primary
+Q2R3,0,0 people,Working Status - Not Working - long term sickness or disability,FALSE,Primary
+Q2R3,1,1 person,Working Status - Not Working - long term sickness or disability,FALSE,Primary
+Q2R3,2,2 people,Working Status - Not Working - long term sickness or disability,FALSE,Primary
+Q2R3,3,3 people,Working Status - Not Working - long term sickness or disability,FALSE,Primary
+Q2R3,4,4 or more people,Working Status - Not Working - long term sickness or disability,FALSE,Primary
+Q2R4,-9,Not applicable,Working Status - Unemployed but seeking work,FALSE,Primary
+Q2R4,-3,Prefer not to say,Working Status - Unemployed but seeking work,FALSE,Primary
+Q2R4,-2,No answer,Working Status - Unemployed but seeking work,FALSE,Primary
+Q2R4,-1,Don't know,Working Status - Unemployed but seeking work,FALSE,Primary
+Q2R4,0,0 people,Working Status - Unemployed but seeking work,FALSE,Primary
+Q2R4,1,1 person,Working Status - Unemployed but seeking work,FALSE,Primary
+Q2R4,2,2 people,Working Status - Unemployed but seeking work,FALSE,Primary
+Q2R4,3,3 people,Working Status - Unemployed but seeking work,FALSE,Primary
+Q2R4,4,4 or more people,Working Status - Unemployed but seeking work,FALSE,Primary
+Q2R5,-9,Not applicable,Working Status - Student,FALSE,Primary
+Q2R5,-3,Prefer not to say,Working Status - Student,FALSE,Primary
+Q2R5,-2,No answer,Working Status - Student,FALSE,Primary
+Q2R5,-1,Don't know,Working Status - Student,FALSE,Primary
+Q2R5,0,0 people,Working Status - Student,FALSE,Primary
+Q2R5,1,1 person,Working Status - Student,FALSE,Primary
+Q2R5,2,2 people,Working Status - Student,FALSE,Primary
+Q2R5,3,3 people,Working Status - Student,FALSE,Primary
+Q2R5,4,4 or more people,Working Status - Student,FALSE,Primary
+Q2R6,-9,Not applicable,Working Status - Retired / at home / not seeking work,FALSE,Primary
+Q2R6,-3,Prefer not to say,Working Status - Retired / at home / not seeking work,FALSE,Primary
+Q2R6,-2,No answer,Working Status - Retired / at home / not seeking work,FALSE,Primary
+Q2R6,-1,Don't know,Working Status - Retired / at home / not seeking work,FALSE,Primary
+Q2R6,0,0 people,Working Status - Retired / at home / not seeking work,FALSE,Primary
+Q2R6,1,1 person,Working Status - Retired / at home / not seeking work,FALSE,Primary
+Q2R6,2,2 people,Working Status - Retired / at home / not seeking work,FALSE,Primary
+Q2R6,3,3 people,Working Status - Retired / at home / not seeking work,FALSE,Primary
+Q2R6,4,4 or more people,Working Status - Retired / at home / not seeking work,FALSE,Primary
+Q2R7,-9,Not applicable,Working Status - Other,FALSE,Primary
+Q2R7,-3,Prefer not to say,Working Status - Other,FALSE,Primary
+Q2R7,-2,No answer,Working Status - Other,FALSE,Primary
+Q2R7,-1,Don't know,Working Status - Other,FALSE,Primary
+Q2R7,0,0 people,Working Status - Other,FALSE,Primary
+Q2R7,1,1 person,Working Status - Other,FALSE,Primary
+Q2R7,2,2 people,Working Status - Other,FALSE,Primary
+Q2R7,3,3 people,Working Status - Other,FALSE,Primary
+Q2R7,4,4 or more people,Working Status - Other,FALSE,Primary
+Q3,-9,Not applicable,Is there usually at least one person in the home on a weekday?,FALSE,Primary
+Q3,-3,Prefer not to say,Is there usually at least one person in the home on a weekday?,FALSE,Primary
+Q3,-2,No answer,Is there usually at least one person in the home on a weekday?,FALSE,Primary
+Q3,-1,Don't know,Is there usually at least one person in the home on a weekday?,FALSE,Primary
+Q3,1,Yes,Is there usually at least one person in the home on a weekday?,FALSE,Primary
+Q3,2,No,Is there usually at least one person in the home on a weekday?,FALSE,Primary
+Q3,3,It varies a lot,Is there usually at least one person in the home on a weekday?,FALSE,Primary
+Q4,-9,Not applicable,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q4,-3,Prefer not to say,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q4,-2,No answer,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q4,-1,Don't know,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q4,1,3 or more times a week,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q4,2,Once or twice a week,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q4,3,Less than that but more than twice a month,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q4,4,Once or twice a month,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q4,5,Less than that but more than twice a year,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q4,6,Once or twice a year,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q4,7,Less than that or never,How often is at least one adult in your household working or engaging in other activities (e.g. childcare) from home on a weekday?,FALSE,Primary
+Q5_1,-9,Not applicable,Do you have any pets that live with your household? No,FALSE,Primary
+Q5_1,-3,Prefer not to say,Do you have any pets that live with your household? No,FALSE,Primary
+Q5_1,-2,No answer,Do you have any pets that live with your household? No,FALSE,Primary
+Q5_1,-1,Don't know,Do you have any pets that live with your household? No,FALSE,Primary
+Q5_1,0,No,Do you have any pets that live with your household? No,FALSE,Primary
+Q5_1,1,Yes,Do you have any pets that live with your household? No,FALSE,Primary
+Q5_10,-9,Not applicable,Do you have snake?,FALSE,Primary
+Q5_10,-3,Prefer not to say,Do you have snake?,FALSE,Primary
+Q5_10,-2,No answer,Do you have snake?,FALSE,Primary
+Q5_10,-1,Don't know,Do you have snake?,FALSE,Primary
+Q5_10,0,No,Do you have snake?,FALSE,Primary
+Q5_10,1,Yes,Do you have snake?,FALSE,Primary
+Q5_11,-9,Not applicable,Do you have domestic fowl?,FALSE,Primary
+Q5_11,-3,Prefer not to say,Do you have domestic fowl?,FALSE,Primary
+Q5_11,-2,No answer,Do you have domestic fowl?,FALSE,Primary
+Q5_11,-1,Don't know,Do you have domestic fowl?,FALSE,Primary
+Q5_11,0,No,Do you have domestic fowl?,FALSE,Primary
+Q5_11,1,Yes,Do you have domestic fowl?,FALSE,Primary
+Q5_12,-9,Not applicable,Do you have indoor fish?,FALSE,Primary
+Q5_12,-3,Prefer not to say,Do you have indoor fish?,FALSE,Primary
+Q5_12,-2,No answer,Do you have indoor fish?,FALSE,Primary
+Q5_12,-1,Don't know,Do you have indoor fish?,FALSE,Primary
+Q5_12,0,No,Do you have indoor fish?,FALSE,Primary
+Q5_12,1,Yes,Do you have indoor fish?,FALSE,Primary
+Q5_13,-9,Not applicable,Do you have other pets?,FALSE,Primary
+Q5_13,-3,Prefer not to say,Do you have other pets?,FALSE,Primary
+Q5_13,-2,No answer,Do you have other pets?,FALSE,Primary
+Q5_13,-1,Don't know,Do you have other pets?,FALSE,Primary
+Q5_13,0,No,Do you have other pets?,FALSE,Primary
+Q5_13,1,Yes,Do you have other pets?,FALSE,Primary
+Q5_2,-9,Not applicable,Do you have dog?,FALSE,Primary
+Q5_2,-3,Prefer not to say,Do you have dog?,FALSE,Primary
+Q5_2,-2,No answer,Do you have dog?,FALSE,Primary
+Q5_2,-1,Don't know,Do you have dog?,FALSE,Primary
+Q5_2,0,No,Do you have dog?,FALSE,Primary
+Q5_2,1,Yes,Do you have dog?,FALSE,Primary
+Q5_3,-9,Not applicable,Do you have cat?,FALSE,Primary
+Q5_3,-3,Prefer not to say,Do you have cat?,FALSE,Primary
+Q5_3,-2,No answer,Do you have cat?,FALSE,Primary
+Q5_3,-1,Don't know,Do you have cat?,FALSE,Primary
+Q5_3,0,No,Do you have cat?,FALSE,Primary
+Q5_3,1,Yes,Do you have cat?,FALSE,Primary
+Q5_4,-9,Not applicable,Do you have rabbit?,FALSE,Primary
+Q5_4,-3,Prefer not to say,Do you have rabbit?,FALSE,Primary
+Q5_4,-2,No answer,Do you have rabbit?,FALSE,Primary
+Q5_4,-1,Don't know,Do you have rabbit?,FALSE,Primary
+Q5_4,0,No,Do you have rabbit?,FALSE,Primary
+Q5_4,1,Yes,Do you have rabbit?,FALSE,Primary
+Q5_5,-9,Not applicable,Do you have indoor bird?,FALSE,Primary
+Q5_5,-3,Prefer not to say,Do you have indoor bird?,FALSE,Primary
+Q5_5,-2,No answer,Do you have indoor bird?,FALSE,Primary
+Q5_5,-1,Don't know,Do you have indoor bird?,FALSE,Primary
+Q5_5,0,No,Do you have indoor bird?,FALSE,Primary
+Q5_5,1,Yes,Do you have indoor bird?,FALSE,Primary
+Q5_6,-9,Not applicable,Do you have guinea pigs?,FALSE,Primary
+Q5_6,-3,Prefer not to say,Do you have guinea pigs?,FALSE,Primary
+Q5_6,-2,No answer,Do you have guinea pigs?,FALSE,Primary
+Q5_6,-1,Don't know,Do you have guinea pigs?,FALSE,Primary
+Q5_6,0,No,Do you have guinea pigs?,FALSE,Primary
+Q5_6,1,Yes,Do you have guinea pigs?,FALSE,Primary
+Q5_7,-9,Not applicable,Do you have hamsters?,FALSE,Primary
+Q5_7,-3,Prefer not to say,Do you have hamsters?,FALSE,Primary
+Q5_7,-2,No answer,Do you have hamsters?,FALSE,Primary
+Q5_7,-1,Don't know,Do you have hamsters?,FALSE,Primary
+Q5_7,0,No,Do you have hamsters?,FALSE,Primary
+Q5_7,1,Yes,Do you have hamsters?,FALSE,Primary
+Q5_8,-9,Not applicable,Do you have tortoises and turtles?,FALSE,Primary
+Q5_8,-3,Prefer not to say,Do you have tortoises and turtles?,FALSE,Primary
+Q5_8,-2,No answer,Do you have tortoises and turtles?,FALSE,Primary
+Q5_8,-1,Don't know,Do you have tortoises and turtles?,FALSE,Primary
+Q5_8,0,No,Do you have tortoises and turtles?,FALSE,Primary
+Q5_8,1,Yes,Do you have tortoises and turtles?,FALSE,Primary
+Q5_9,-9,Not applicable,Do you have lizard?,FALSE,Primary
+Q5_9,-3,Prefer not to say,Do you have lizard?,FALSE,Primary
+Q5_9,-2,No answer,Do you have lizard?,FALSE,Primary
+Q5_9,-1,Don't know,Do you have lizard?,FALSE,Primary
+Q5_9,0,No,Do you have lizard?,FALSE,Primary
+Q5_9,1,Yes,Do you have lizard?,FALSE,Primary
+Q6,-9,Not applicable,What type of accommodation do you live in?,FALSE,Primary
+Q6,-3,Prefer not to say,What type of accommodation do you live in?,FALSE,Primary
+Q6,-2,No answer,What type of accommodation do you live in?,FALSE,Primary
+Q6,-1,Don't know,What type of accommodation do you live in?,FALSE,Primary
+Q6,1,Detached,What type of accommodation do you live in?,FALSE,Primary
+Q6,2,Semi detached,What type of accommodation do you live in?,FALSE,Primary
+Q6,3,Terraced (including end terrace),What type of accommodation do you live in?,FALSE,Primary
+Q6,4,In a purpose-built block of flats or tenement,What type of accommodation do you live in?,FALSE,Primary
+Q6,5,Part of a converted or shared house (including bedsits),What type of accommodation do you live in?,FALSE,Primary
+Q6,6,"In a commercial building (e.g. in an office building, hotel or over a shop)",What type of accommodation do you live in?,FALSE,Primary
+Q7,-9,Not applicable,Is your accommodation self-contained?,FALSE,Primary
+Q7,-3,Prefer not to say,Is your accommodation self-contained?,FALSE,Primary
+Q7,-2,No answer,Is your accommodation self-contained?,FALSE,Primary
+Q7,-1,Don't know,Is your accommodation self-contained?,FALSE,Primary
+Q7,1,"Yes, all the rooms are behind a door that only my household can use",Is your accommodation self-contained?,FALSE,Primary
+Q7,2,No,Is your accommodation self-contained?,FALSE,Primary
+Q8,-2,No answer,How many of these rooms count as bedrooms,TRUE,Primary
+Q9,-9,Not applicable,How many bathrooms do you have with a plumbed in bath or shower?,FALSE,Primary
+Q9,-3,Prefer not to say,How many bathrooms do you have with a plumbed in bath or shower?,FALSE,Primary
+Q9,-2,No answer,How many bathrooms do you have with a plumbed in bath or shower?,FALSE,Primary
+Q9,-1,Don't know,How many bathrooms do you have with a plumbed in bath or shower?,FALSE,Primary
+Q9,0,0,How many bathrooms do you have with a plumbed in bath or shower?,FALSE,Primary
+Q9,1,1,How many bathrooms do you have with a plumbed in bath or shower?,FALSE,Primary
+Q9,2,2,How many bathrooms do you have with a plumbed in bath or shower?,FALSE,Primary
+Q9,3,3,How many bathrooms do you have with a plumbed in bath or shower?,FALSE,Primary
+Q9,4,4 or more,How many bathrooms do you have with a plumbed in bath or shower?,FALSE,Primary
+Q10,-9,Not applicable,Do you (or your household) own or rent this accommodation?,FALSE,Primary
+Q10,-3,Prefer not to say,Do you (or your household) own or rent this accommodation?,FALSE,Primary
+Q10,-2,No answer,Do you (or your household) own or rent this accommodation?,FALSE,Primary
+Q10,-1,Don't know,Do you (or your household) own or rent this accommodation?,FALSE,Primary
+Q10,1,Own it outright / buying it with a mortgage/loan,Do you (or your household) own or rent this accommodation?,FALSE,Primary
+Q10,2,Part own and part rent (shared ownership),Do you (or your household) own or rent this accommodation?,FALSE,Primary
+Q10,3,Rent it privately (with or without housing benefit),Do you (or your household) own or rent this accommodation?,FALSE,Primary
+Q10,4,Rent it from council (local authority) or housing association (with or without housing benefit),Do you (or your household) own or rent this accommodation?,FALSE,Primary
+Q10,5,Live here rent free,Do you (or your household) own or rent this accommodation?,FALSE,Primary
+Q11,-9,Not applicable,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,-3,Prefer not to say,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,-2,No answer,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,-1,Don't know,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,1,Before 1900,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,2,1900 to 1929,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,3,1930 to 1949,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,4,1950 to 1975,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,5,1976 to 1990,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,6,1991 to 2002,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,7,2003 onwards,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q11,8,Don't know,Approximately when do you think your accommodation was built?,FALSE,Primary
+Q12R1,-9,Not applicable,Do you have mould around the windows or in the bathroom?,FALSE,Primary
+Q12R1,-3,Prefer not to say,Do you have mould around the windows or in the bathroom?,FALSE,Primary
+Q12R1,-2,No answer,Do you have mould around the windows or in the bathroom?,FALSE,Primary
+Q12R1,-1,Don't know,Do you have mould around the windows or in the bathroom?,FALSE,Primary
+Q12R1,1,None,Do you have mould around the windows or in the bathroom?,FALSE,Primary
+Q12R1,2,Minor,Do you have mould around the windows or in the bathroom?,FALSE,Primary
+Q12R1,3,Substantial,Do you have mould around the windows or in the bathroom?,FALSE,Primary
+Q12R2,-9,Not applicable,Do you have mould on any walls?,FALSE,Primary
+Q12R2,-3,Prefer not to say,Do you have mould on any walls?,FALSE,Primary
+Q12R2,-2,No answer,Do you have mould on any walls?,FALSE,Primary
+Q12R2,-1,Don't know,Do you have mould on any walls?,FALSE,Primary
+Q12R2,1,None,Do you have mould on any walls?,FALSE,Primary
+Q12R2,2,Minor,Do you have mould on any walls?,FALSE,Primary
+Q12R2,3,Substantial,Do you have mould on any walls?,FALSE,Primary
+Q12R3,-9,Not applicable,Do you have mould on furnishings?,FALSE,Primary
+Q12R3,-3,Prefer not to say,Do you have mould on furnishings?,FALSE,Primary
+Q12R3,-2,No answer,Do you have mould on furnishings?,FALSE,Primary
+Q12R3,-1,Don't know,Do you have mould on furnishings?,FALSE,Primary
+Q12R3,1,None,Do you have mould on furnishings?,FALSE,Primary
+Q12R3,2,Minor,Do you have mould on furnishings?,FALSE,Primary
+Q12R3,3,Substantial,Do you have mould on furnishings?,FALSE,Primary
+Q13_1,-9,Not applicable,Appliances in accommodation - Kitchen - Electric Oven,FALSE,Primary
+Q13_1,-3,Prefer not to say,Appliances in accommodation - Kitchen - Electric Oven,FALSE,Primary
+Q13_1,-2,No answer,Appliances in accommodation - Kitchen - Electric Oven,FALSE,Primary
+Q13_1,-1,Don't know,Appliances in accommodation - Kitchen - Electric Oven,FALSE,Primary
+Q13_1,0,No,Appliances in accommodation - Kitchen - Electric Oven,FALSE,Primary
+Q13_1,1,Yes,Appliances in accommodation - Kitchen - Electric Oven,FALSE,Primary
+Q13_10,-9,Not applicable,Appliances in accommodation - Laundry - Combined clothes washer dryer,FALSE,Primary
+Q13_10,-3,Prefer not to say,Appliances in accommodation - Laundry - Combined clothes washer dryer,FALSE,Primary
+Q13_10,-2,No answer,Appliances in accommodation - Laundry - Combined clothes washer dryer,FALSE,Primary
+Q13_10,-1,Don't know,Appliances in accommodation - Laundry - Combined clothes washer dryer,FALSE,Primary
+Q13_10,0,No,Appliances in accommodation - Laundry - Combined clothes washer dryer,FALSE,Primary
+Q13_10,1,Yes,Appliances in accommodation - Laundry - Combined clothes washer dryer,FALSE,Primary
+Q13_11,-9,Not applicable,Appliances in accommodation - Laundry - Washing machine,FALSE,Primary
+Q13_11,-3,Prefer not to say,Appliances in accommodation - Laundry - Washing machine,FALSE,Primary
+Q13_11,-2,No answer,Appliances in accommodation - Laundry - Washing machine,FALSE,Primary
+Q13_11,-1,Don't know,Appliances in accommodation - Laundry - Washing machine,FALSE,Primary
+Q13_11,0,No,Appliances in accommodation - Laundry - Washing machine,FALSE,Primary
+Q13_11,1,Yes,Appliances in accommodation - Laundry - Washing machine,FALSE,Primary
+Q13_12,-9,Not applicable,Appliances in accommodation - Laundry - Tumble dryer,FALSE,Primary
+Q13_12,-3,Prefer not to say,Appliances in accommodation - Laundry - Tumble dryer,FALSE,Primary
+Q13_12,-2,No answer,Appliances in accommodation - Laundry - Tumble dryer,FALSE,Primary
+Q13_12,-1,Don't know,Appliances in accommodation - Laundry - Tumble dryer,FALSE,Primary
+Q13_12,0,No,Appliances in accommodation - Laundry - Tumble dryer,FALSE,Primary
+Q13_12,1,Yes,Appliances in accommodation - Laundry - Tumble dryer,FALSE,Primary
+Q13_13,-9,Not applicable,Appliances in accommodation - Laundry - Electric Drying Rack (heated airer),FALSE,Primary
+Q13_13,-3,Prefer not to say,Appliances in accommodation - Laundry - Electric Drying Rack (heated airer),FALSE,Primary
+Q13_13,-2,No answer,Appliances in accommodation - Laundry - Electric Drying Rack (heated airer),FALSE,Primary
+Q13_13,-1,Don't know,Appliances in accommodation - Laundry - Electric Drying Rack (heated airer),FALSE,Primary
+Q13_13,0,No,Appliances in accommodation - Laundry - Electric Drying Rack (heated airer),FALSE,Primary
+Q13_13,1,Yes,Appliances in accommodation - Laundry - Electric Drying Rack (heated airer),FALSE,Primary
+Q13_14,-9,Not applicable,Appliances in accommodation - Laundry - Electric Iron,FALSE,Primary
+Q13_14,-3,Prefer not to say,Appliances in accommodation - Laundry - Electric Iron,FALSE,Primary
+Q13_14,-2,No answer,Appliances in accommodation - Laundry - Electric Iron,FALSE,Primary
+Q13_14,-1,Don't know,Appliances in accommodation - Laundry - Electric Iron,FALSE,Primary
+Q13_14,0,No,Appliances in accommodation - Laundry - Electric Iron,FALSE,Primary
+Q13_14,1,Yes,Appliances in accommodation - Laundry - Electric Iron,FALSE,Primary
+Q13_15,-9,Not applicable,Appliances in accommodation - Housework - Vacuum Cleaner,FALSE,Primary
+Q13_15,-3,Prefer not to say,Appliances in accommodation - Housework - Vacuum Cleaner,FALSE,Primary
+Q13_15,-2,No answer,Appliances in accommodation - Housework - Vacuum Cleaner,FALSE,Primary
+Q13_15,-1,Don't know,Appliances in accommodation - Housework - Vacuum Cleaner,FALSE,Primary
+Q13_15,0,No,Appliances in accommodation - Housework - Vacuum Cleaner,FALSE,Primary
+Q13_15,1,Yes,Appliances in accommodation - Housework - Vacuum Cleaner,FALSE,Primary
+Q13_16,-9,Not applicable,Appliances in accommodation - Electric Shower,FALSE,Primary
+Q13_16,-3,Prefer not to say,Appliances in accommodation - Electric Shower,FALSE,Primary
+Q13_16,-2,No answer,Appliances in accommodation - Electric Shower,FALSE,Primary
+Q13_16,-1,Don't know,Appliances in accommodation - Electric Shower,FALSE,Primary
+Q13_16,0,No,Appliances in accommodation - Electric Shower,FALSE,Primary
+Q13_16,1,Yes,Appliances in accommodation - Electric Shower,FALSE,Primary
+Q13_17,-9,Not applicable,"Appliances in accommodation - Consumer electronics - Laptop, computer",FALSE,Primary
+Q13_17,-3,Prefer not to say,"Appliances in accommodation - Consumer electronics - Laptop, computer",FALSE,Primary
+Q13_17,-2,No answer,"Appliances in accommodation - Consumer electronics - Laptop, computer",FALSE,Primary
+Q13_17,-1,Don't know,"Appliances in accommodation - Consumer electronics - Laptop, computer",FALSE,Primary
+Q13_17,0,No,"Appliances in accommodation - Consumer electronics - Laptop, computer",FALSE,Primary
+Q13_17,1,Yes,"Appliances in accommodation - Consumer electronics - Laptop, computer",FALSE,Primary
+Q13_18,-9,Not applicable,Appliances in accommodation - Consumer electronics - TV,FALSE,Primary
+Q13_18,-3,Prefer not to say,Appliances in accommodation - Consumer electronics - TV,FALSE,Primary
+Q13_18,-2,No answer,Appliances in accommodation - Consumer electronics - TV,FALSE,Primary
+Q13_18,-1,Don't know,Appliances in accommodation - Consumer electronics - TV,FALSE,Primary
+Q13_18,0,No,Appliances in accommodation - Consumer electronics - TV,FALSE,Primary
+Q13_18,1,Yes,Appliances in accommodation - Consumer electronics - TV,FALSE,Primary
+Q13_19,-9,Not applicable,Appliances in accommodation - Smart home assistants / speakers (e.g. Alexa),FALSE,Primary
+Q13_19,-3,Prefer not to say,Appliances in accommodation - Smart home assistants / speakers (e.g. Alexa),FALSE,Primary
+Q13_19,-2,No answer,Appliances in accommodation - Smart home assistants / speakers (e.g. Alexa),FALSE,Primary
+Q13_19,-1,Don't know,Appliances in accommodation - Smart home assistants / speakers (e.g. Alexa),FALSE,Primary
+Q13_19,0,No,Appliances in accommodation - Smart home assistants / speakers (e.g. Alexa),FALSE,Primary
+Q13_19,1,Yes,Appliances in accommodation - Smart home assistants / speakers (e.g. Alexa),FALSE,Primary
+Q13_2,-9,Not applicable,Appliances in accommodation - Kitchen - Gas Oven,FALSE,Primary
+Q13_2,-3,Prefer not to say,Appliances in accommodation - Kitchen - Gas Oven,FALSE,Primary
+Q13_2,-2,No answer,Appliances in accommodation - Kitchen - Gas Oven,FALSE,Primary
+Q13_2,-1,Don't know,Appliances in accommodation - Kitchen - Gas Oven,FALSE,Primary
+Q13_2,0,No,Appliances in accommodation - Kitchen - Gas Oven,FALSE,Primary
+Q13_2,1,Yes,Appliances in accommodation - Kitchen - Gas Oven,FALSE,Primary
+Q13_20,-9,Not applicable,"Appliances in accommodation - Other smart home solutions, like smart plugs or app enabled appliances:",FALSE,Primary
+Q13_20,-3,Prefer not to say,"Appliances in accommodation - Other smart home solutions, like smart plugs or app enabled appliances:",FALSE,Primary
+Q13_20,-2,No answer,"Appliances in accommodation - Other smart home solutions, like smart plugs or app enabled appliances:",FALSE,Primary
+Q13_20,-1,Don't know,"Appliances in accommodation - Other smart home solutions, like smart plugs or app enabled appliances:",FALSE,Primary
+Q13_20,0,No,"Appliances in accommodation - Other smart home solutions, like smart plugs or app enabled appliances:",FALSE,Primary
+Q13_20,1,Yes,"Appliances in accommodation - Other smart home solutions, like smart plugs or app enabled appliances:",FALSE,Primary
+Q13_21,-9,Not applicable,Appliances in accommodation - Cooling - air conditioning unit,FALSE,Primary
+Q13_21,-3,Prefer not to say,Appliances in accommodation - Cooling - air conditioning unit,FALSE,Primary
+Q13_21,-2,No answer,Appliances in accommodation - Cooling - air conditioning unit,FALSE,Primary
+Q13_21,-1,Don't know,Appliances in accommodation - Cooling - air conditioning unit,FALSE,Primary
+Q13_21,0,No,Appliances in accommodation - Cooling - air conditioning unit,FALSE,Primary
+Q13_21,1,Yes,Appliances in accommodation - Cooling - air conditioning unit,FALSE,Primary
+Q13_22,-9,Not applicable,Appliances in accommodation - Cooling - cooling fan,FALSE,Primary
+Q13_22,-3,Prefer not to say,Appliances in accommodation - Cooling - cooling fan,FALSE,Primary
+Q13_22,-2,No answer,Appliances in accommodation - Cooling - cooling fan,FALSE,Primary
+Q13_22,-1,Don't know,Appliances in accommodation - Cooling - cooling fan,FALSE,Primary
+Q13_22,0,No,Appliances in accommodation - Cooling - cooling fan,FALSE,Primary
+Q13_22,1,Yes,Appliances in accommodation - Cooling - cooling fan,FALSE,Primary
+Q13_23,-9,Not applicable,Appliances in accommodation - Air quality - Dehumidifier,FALSE,Primary
+Q13_23,-3,Prefer not to say,Appliances in accommodation - Air quality - Dehumidifier,FALSE,Primary
+Q13_23,-2,No answer,Appliances in accommodation - Air quality - Dehumidifier,FALSE,Primary
+Q13_23,-1,Don't know,Appliances in accommodation - Air quality - Dehumidifier,FALSE,Primary
+Q13_23,0,No,Appliances in accommodation - Air quality - Dehumidifier,FALSE,Primary
+Q13_23,1,Yes,Appliances in accommodation - Air quality - Dehumidifier,FALSE,Primary
+Q13_24,-9,Not applicable,Appliances in accommodation - Air quality - Humidifier,FALSE,Primary
+Q13_24,-3,Prefer not to say,Appliances in accommodation - Air quality - Humidifier,FALSE,Primary
+Q13_24,-2,No answer,Appliances in accommodation - Air quality - Humidifier,FALSE,Primary
+Q13_24,-1,Don't know,Appliances in accommodation - Air quality - Humidifier,FALSE,Primary
+Q13_24,0,No,Appliances in accommodation - Air quality - Humidifier,FALSE,Primary
+Q13_24,1,Yes,Appliances in accommodation - Air quality - Humidifier,FALSE,Primary
+Q13_25,-9,Not applicable,Appliances in accommodation - Heating - Electric Heater,FALSE,Primary
+Q13_25,-3,Prefer not to say,Appliances in accommodation - Heating - Electric Heater,FALSE,Primary
+Q13_25,-2,No answer,Appliances in accommodation - Heating - Electric Heater,FALSE,Primary
+Q13_25,-1,Don't know,Appliances in accommodation - Heating - Electric Heater,FALSE,Primary
+Q13_25,0,No,Appliances in accommodation - Heating - Electric Heater,FALSE,Primary
+Q13_25,1,Yes,Appliances in accommodation - Heating - Electric Heater,FALSE,Primary
+Q13_26,-9,Not applicable,Appliances in accommodation - Transport - E-scooter,FALSE,Primary
+Q13_26,-3,Prefer not to say,Appliances in accommodation - Transport - E-scooter,FALSE,Primary
+Q13_26,-2,No answer,Appliances in accommodation - Transport - E-scooter,FALSE,Primary
+Q13_26,-1,Don't know,Appliances in accommodation - Transport - E-scooter,FALSE,Primary
+Q13_26,0,No,Appliances in accommodation - Transport - E-scooter,FALSE,Primary
+Q13_26,1,Yes,Appliances in accommodation - Transport - E-scooter,FALSE,Primary
+Q13_27,-9,Not applicable,Appliances in accommodation - Transport - E-bike,FALSE,Primary
+Q13_27,-3,Prefer not to say,Appliances in accommodation - Transport - E-bike,FALSE,Primary
+Q13_27,-2,No answer,Appliances in accommodation - Transport - E-bike,FALSE,Primary
+Q13_27,-1,Don't know,Appliances in accommodation - Transport - E-bike,FALSE,Primary
+Q13_27,0,No,Appliances in accommodation - Transport - E-bike,FALSE,Primary
+Q13_27,1,Yes,Appliances in accommodation - Transport - E-bike,FALSE,Primary
+Q13_28,-9,Not applicable,Appliances in accommodation - Transport - E-cargo bike,FALSE,Primary
+Q13_28,-3,Prefer not to say,Appliances in accommodation - Transport - E-cargo bike,FALSE,Primary
+Q13_28,-2,No answer,Appliances in accommodation - Transport - E-cargo bike,FALSE,Primary
+Q13_28,-1,Don't know,Appliances in accommodation - Transport - E-cargo bike,FALSE,Primary
+Q13_28,0,No,Appliances in accommodation - Transport - E-cargo bike,FALSE,Primary
+Q13_28,1,Yes,Appliances in accommodation - Transport - E-cargo bike,FALSE,Primary
+Q13_3,-9,Not applicable,Appliances in accommodation - Kitchen - Electric Hob,FALSE,Primary
+Q13_3,-3,Prefer not to say,Appliances in accommodation - Kitchen - Electric Hob,FALSE,Primary
+Q13_3,-2,No answer,Appliances in accommodation - Kitchen - Electric Hob,FALSE,Primary
+Q13_3,-1,Don't know,Appliances in accommodation - Kitchen - Electric Hob,FALSE,Primary
+Q13_3,0,No,Appliances in accommodation - Kitchen - Electric Hob,FALSE,Primary
+Q13_3,1,Yes,Appliances in accommodation - Kitchen - Electric Hob,FALSE,Primary
+Q13_30,0,No,Appliances in accommodation - Kitchen - Microwave,FALSE,Primary
+Q13_30,1,Yes,Appliances in accommodation - Kitchen - Microwave,FALSE,Primary
+Q13_31,0,No,Appliances in accommodation - Kitchen - Air fryer,FALSE,Primary
+Q13_31,1,Yes,Appliances in accommodation - Kitchen - Air fryer,FALSE,Primary
+Q13_32,0,No,Appliances in accommodation - Kitchen - Slow cooker,FALSE,Primary
+Q13_32,1,Yes,Appliances in accommodation - Kitchen - Slow cooker,FALSE,Primary
+Q13_33,0,No,Appliances in accommodation - Kitchen - Smart plug,FALSE,Primary
+Q13_33,1,Yes,Appliances in accommodation - Kitchen - Smart plug,FALSE,Primary
+Q13_34,0,No,Appliances in accommodation - Kitchen - Smart thermostat,FALSE,Primary
+Q13_34,1,Yes,Appliances in accommodation - Kitchen - Smart thermostat,FALSE,Primary
+Q13_4,-9,Not applicable,Appliances in accommodation - Kitchen - Electric Induction Hob,FALSE,Primary
+Q13_4,-3,Prefer not to say,Appliances in accommodation - Kitchen - Electric Induction Hob,FALSE,Primary
+Q13_4,-2,No answer,Appliances in accommodation - Kitchen - Electric Induction Hob,FALSE,Primary
+Q13_4,-1,Don't know,Appliances in accommodation - Kitchen - Electric Induction Hob,FALSE,Primary
+Q13_4,0,No,Appliances in accommodation - Kitchen - Electric Induction Hob,FALSE,Primary
+Q13_4,1,Yes,Appliances in accommodation - Kitchen - Electric Induction Hob,FALSE,Primary
+Q13_5,-9,Not applicable,Appliances in accommodation - Kitchen - Gas Hob,FALSE,Primary
+Q13_5,-3,Prefer not to say,Appliances in accommodation - Kitchen - Gas Hob,FALSE,Primary
+Q13_5,-2,No answer,Appliances in accommodation - Kitchen - Gas Hob,FALSE,Primary
+Q13_5,-1,Don't know,Appliances in accommodation - Kitchen - Gas Hob,FALSE,Primary
+Q13_5,0,No,Appliances in accommodation - Kitchen - Gas Hob,FALSE,Primary
+Q13_5,1,Yes,Appliances in accommodation - Kitchen - Gas Hob,FALSE,Primary
+Q13_6,-9,Not applicable,Appliances in accommodation - Kitchen - Other,FALSE,Primary
+Q13_6,-3,Prefer not to say,Appliances in accommodation - Kitchen - Other,FALSE,Primary
+Q13_6,-2,No answer,Appliances in accommodation - Kitchen - Other,FALSE,Primary
+Q13_6,-1,Don't know,Appliances in accommodation - Kitchen - Other,FALSE,Primary
+Q13_6,0,No,Appliances in accommodation - Kitchen - Other,FALSE,Primary
+Q13_6,1,Yes,Appliances in accommodation - Kitchen - Other,FALSE,Primary
+Q13_7,-9,Not applicable,Appliances in accommodation - Kitchen - Dishwasher,FALSE,Primary
+Q13_7,-3,Prefer not to say,Appliances in accommodation - Kitchen - Dishwasher,FALSE,Primary
+Q13_7,-2,No answer,Appliances in accommodation - Kitchen - Dishwasher,FALSE,Primary
+Q13_7,-1,Don't know,Appliances in accommodation - Kitchen - Dishwasher,FALSE,Primary
+Q13_7,0,No,Appliances in accommodation - Kitchen - Dishwasher,FALSE,Primary
+Q13_7,1,Yes,Appliances in accommodation - Kitchen - Dishwasher,FALSE,Primary
+Q13_8,-9,Not applicable,Appliances in accommodation - Kitchen - Fridge or fridge-freezer,FALSE,Primary
+Q13_8,-3,Prefer not to say,Appliances in accommodation - Kitchen - Fridge or fridge-freezer,FALSE,Primary
+Q13_8,-2,No answer,Appliances in accommodation - Kitchen - Fridge or fridge-freezer,FALSE,Primary
+Q13_8,-1,Don't know,Appliances in accommodation - Kitchen - Fridge or fridge-freezer,FALSE,Primary
+Q13_8,0,No,Appliances in accommodation - Kitchen - Fridge or fridge-freezer,FALSE,Primary
+Q13_8,1,Yes,Appliances in accommodation - Kitchen - Fridge or fridge-freezer,FALSE,Primary
+Q13_9,-9,Not applicable,Appliances in accommodation - Kitchen - Separate stand alone freezer,FALSE,Primary
+Q13_9,-3,Prefer not to say,Appliances in accommodation - Kitchen - Separate stand alone freezer,FALSE,Primary
+Q13_9,-2,No answer,Appliances in accommodation - Kitchen - Separate stand alone freezer,FALSE,Primary
+Q13_9,-1,Don't know,Appliances in accommodation - Kitchen - Separate stand alone freezer,FALSE,Primary
+Q13_9,0,No,Appliances in accommodation - Kitchen - Separate stand alone freezer,FALSE,Primary
+Q13_9,1,Yes,Appliances in accommodation - Kitchen - Separate stand alone freezer,FALSE,Primary
+Q14_1,-9,Not applicable,Does your household have access to a private garden?,FALSE,Primary
+Q14_1,-3,Prefer not to say,Does your household have access to a private garden?,FALSE,Primary
+Q14_1,-2,No answer,Does your household have access to a private garden?,FALSE,Primary
+Q14_1,-1,Don't know,Does your household have access to a private garden?,FALSE,Primary
+Q14_1,0,No,Does your household have access to a private garden?,FALSE,Primary
+Q14_1,1,Yes,Does your household have access to a private garden?,FALSE,Primary
+Q14_2,-9,Not applicable,Does your household have access to a shared garden?,FALSE,Primary
+Q14_2,-3,Prefer not to say,Does your household have access to a shared garden?,FALSE,Primary
+Q14_2,-2,No answer,Does your household have access to a shared garden?,FALSE,Primary
+Q14_2,-1,Don't know,Does your household have access to a shared garden?,FALSE,Primary
+Q14_2,0,No,Does your household have access to a shared garden?,FALSE,Primary
+Q14_2,1,Yes,Does your household have access to a shared garden?,FALSE,Primary
+Q14_3,-9,Not applicable,"Does your household have access to a private balcony, private small patio, or private roof terrace?",FALSE,Primary
+Q14_3,-3,Prefer not to say,"Does your household have access to a private balcony, private small patio, or private roof terrace?",FALSE,Primary
+Q14_3,-2,No answer,"Does your household have access to a private balcony, private small patio, or private roof terrace?",FALSE,Primary
+Q14_3,-1,Don't know,"Does your household have access to a private balcony, private small patio, or private roof terrace?",FALSE,Primary
+Q14_3,0,No,"Does your household have access to a private balcony, private small patio, or private roof terrace?",FALSE,Primary
+Q14_3,1,Yes,"Does your household have access to a private balcony, private small patio, or private roof terrace?",FALSE,Primary
+Q14_4,-9,Not applicable,Does your household have access to a shared roof terrace?,FALSE,Primary
+Q14_4,-3,Prefer not to say,Does your household have access to a shared roof terrace?,FALSE,Primary
+Q14_4,-2,No answer,Does your household have access to a shared roof terrace?,FALSE,Primary
+Q14_4,-1,Don't know,Does your household have access to a shared roof terrace?,FALSE,Primary
+Q14_4,0,No,Does your household have access to a shared roof terrace?,FALSE,Primary
+Q14_4,1,Yes,Does your household have access to a shared roof terrace?,FALSE,Primary
+Q14_5,-9,Not applicable,"Does your household have access to a park, wood, or other green space your household can access within easy walking distance of your home?",FALSE,Primary
+Q14_5,-3,Prefer not to say,"Does your household have access to a park, wood, or other green space your household can access within easy walking distance of your home?",FALSE,Primary
+Q14_5,-2,No answer,"Does your household have access to a park, wood, or other green space your household can access within easy walking distance of your home?",FALSE,Primary
+Q14_5,-1,Don't know,"Does your household have access to a park, wood, or other green space your household can access within easy walking distance of your home?",FALSE,Primary
+Q14_5,0,No,"Does your household have access to a park, wood, or other green space your household can access within easy walking distance of your home?",FALSE,Primary
+Q14_5,1,Yes,"Does your household have access to a park, wood, or other green space your household can access within easy walking distance of your home?",FALSE,Primary
+Q14_6,-9,Not applicable,Household has no access in green spaces (all of the above).,FALSE,Primary
+Q14_6,-3,Prefer not to say,Household has no access in green spaces (all of the above).,FALSE,Primary
+Q14_6,-2,No answer,Household has no access in green spaces (all of the above).,FALSE,Primary
+Q14_6,-1,Don't know,Household has no access in green spaces (all of the above).,FALSE,Primary
+Q14_6,0,No,Household has no access in green spaces (all of the above).,FALSE,Primary
+Q14_6,1,Yes,Household has no access in green spaces (all of the above).,FALSE,Primary
+Q15B_1,-9,Not applicable,Has a heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_1,-3,Prefer not to say,Has a heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_1,-2,No answer,Has a heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_1,-1,Don't know,Has a heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_1,0,No,Has a heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_1,1,Yes,Has a heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_10,-9,Not applicable,Has district or community heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_10,-3,Prefer not to say,Has district or community heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_10,-2,No answer,Has district or community heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_10,-1,Don't know,Has district or community heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_10,0,No,Has district or community heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_10,1,Yes,Has district or community heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_11,-9,Not applicable,Has other heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_11,-3,Prefer not to say,Has other heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_11,-2,No answer,Has other heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_11,-1,Don't know,Has other heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_11,0,No,Has other heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_11,1,Yes,Has other heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_2,-9,Not applicable,Has a gas boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_2,-3,Prefer not to say,Has a gas boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_2,-2,No answer,Has a gas boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_2,-1,Don't know,Has a gas boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_2,0,No,Has a gas boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_2,1,Yes,Has a gas boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_3,-9,Not applicable,Have electric storage heaters been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_3,-3,Prefer not to say,Have electric storage heaters been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_3,-2,No answer,Have electric storage heaters been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_3,-1,Don't know,Have electric storage heaters been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_3,0,No,Have electric storage heaters been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_3,1,Yes,Have electric storage heaters been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_4,-9,Not applicable,Have electric radiators been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_4,-3,Prefer not to say,Have electric radiators been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_4,-2,No answer,Have electric radiators been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_4,-1,Don't know,Have electric radiators been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_4,0,No,Have electric radiators been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_4,1,Yes,Have electric radiators been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_5,-9,Not applicable,Has a heat pump been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_5,-3,Prefer not to say,Has a heat pump been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_5,-2,No answer,Has a heat pump been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_5,-1,Don't know,Has a heat pump been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_5,0,No,Has a heat pump been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_5,1,Yes,Has a heat pump been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_6,-9,Not applicable,Has another electric heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_6,-3,Prefer not to say,Has another electric heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_6,-2,No answer,Has another electric heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_6,-1,Don't know,Has another electric heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_6,0,No,Has another electric heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_6,1,Yes,Has another electric heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_7,-9,Not applicable,Has an oil heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_7,-3,Prefer not to say,Has an oil heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_7,-2,No answer,Has an oil heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_7,-1,Don't know,Has an oil heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_7,0,No,Has an oil heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_7,1,Yes,Has an oil heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_8,-9,Not applicable,Has an solid fuel heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_8,-3,Prefer not to say,Has an solid fuel heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_8,-2,No answer,Has an solid fuel heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_8,-1,Don't know,Has an solid fuel heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_8,0,No,Has an solid fuel heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_8,1,Yes,Has an solid fuel heating system been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_9,-9,Not applicable,Has a biomass boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_9,-3,Prefer not to say,Has a biomass boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_9,-2,No answer,Has a biomass boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_9,-1,Don't know,Has a biomass boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_9,0,No,Has a biomass boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15B_9,1,Yes,Has a biomass boiler been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q15_1,-9,Not applicable,no central heating,FALSE,Primary
+Q15_1,-3,Prefer not to say,no central heating,FALSE,Primary
+Q15_1,-2,No answer,no central heating,FALSE,Primary
+Q15_1,-1,Don't know,no central heating,FALSE,Primary
+Q15_1,0,No,no central heating,FALSE,Primary
+Q15_1,1,Yes,no central heating,FALSE,Primary
+Q15_10,-9,Not applicable,district or community present,FALSE,Primary
+Q15_10,-3,Prefer not to say,district or community present,FALSE,Primary
+Q15_10,-2,No answer,district or community present,FALSE,Primary
+Q15_10,-1,Don't know,district or community present,FALSE,Primary
+Q15_10,0,No,district or community present,FALSE,Primary
+Q15_10,1,Yes,district or community present,FALSE,Primary
+Q15_11,-9,Not applicable,other heating present,FALSE,Primary
+Q15_11,-3,Prefer not to say,other heating present,FALSE,Primary
+Q15_11,-2,No answer,other heating present,FALSE,Primary
+Q15_11,-1,Don't know,other heating present,FALSE,Primary
+Q15_11,0,No,other heating present,FALSE,Primary
+Q15_11,1,Yes,other heating present,FALSE,Primary
+Q15_2,-9,Not applicable,gas heating present,FALSE,Primary
+Q15_2,-3,Prefer not to say,gas heating present,FALSE,Primary
+Q15_2,-2,No answer,gas heating present,FALSE,Primary
+Q15_2,-1,Don't know,gas heating present,FALSE,Primary
+Q15_2,0,No,gas heating present,FALSE,Primary
+Q15_2,1,Yes,gas heating present,FALSE,Primary
+Q15_3,-9,Not applicable,electric storage heaters present,FALSE,Primary
+Q15_3,-3,Prefer not to say,electric storage heaters present,FALSE,Primary
+Q15_3,-2,No answer,electric storage heaters present,FALSE,Primary
+Q15_3,-1,Don't know,electric storage heaters present,FALSE,Primary
+Q15_3,0,No,electric storage heaters present,FALSE,Primary
+Q15_3,1,Yes,electric storage heaters present,FALSE,Primary
+Q15_4,-9,Not applicable,electric radiators present,FALSE,Primary
+Q15_4,-3,Prefer not to say,electric radiators present,FALSE,Primary
+Q15_4,-2,No answer,electric radiators present,FALSE,Primary
+Q15_4,-1,Don't know,electric radiators present,FALSE,Primary
+Q15_4,0,No,electric radiators present,FALSE,Primary
+Q15_4,1,Yes,electric radiators present,FALSE,Primary
+Q15_5,-9,Not applicable,heat pump heating present,FALSE,Primary
+Q15_5,-3,Prefer not to say,heat pump heating present,FALSE,Primary
+Q15_5,-2,No answer,heat pump heating present,FALSE,Primary
+Q15_5,-1,Don't know,heat pump heating present,FALSE,Primary
+Q15_5,0,No,heat pump heating present,FALSE,Primary
+Q15_5,1,Yes,heat pump heating present,FALSE,Primary
+Q15_6,-9,Not applicable,other electric heating present,FALSE,Primary
+Q15_6,-3,Prefer not to say,other electric heating present,FALSE,Primary
+Q15_6,-2,No answer,other electric heating present,FALSE,Primary
+Q15_6,-1,Don't know,other electric heating present,FALSE,Primary
+Q15_6,0,No,other electric heating present,FALSE,Primary
+Q15_6,1,Yes,other electric heating present,FALSE,Primary
+Q15_7,-9,Not applicable,oil heating present,FALSE,Primary
+Q15_7,-3,Prefer not to say,oil heating present,FALSE,Primary
+Q15_7,-2,No answer,oil heating present,FALSE,Primary
+Q15_7,-1,Don't know,oil heating present,FALSE,Primary
+Q15_7,0,No,oil heating present,FALSE,Primary
+Q15_7,1,Yes,oil heating present,FALSE,Primary
+Q15_8,-9,Not applicable,solid fuel present,FALSE,Primary
+Q15_8,-3,Prefer not to say,solid fuel present,FALSE,Primary
+Q15_8,-2,No answer,solid fuel present,FALSE,Primary
+Q15_8,-1,Don't know,solid fuel present,FALSE,Primary
+Q15_8,0,No,solid fuel present,FALSE,Primary
+Q15_8,1,Yes,solid fuel present,FALSE,Primary
+Q15_9,-9,Not applicable,biomass present,FALSE,Primary
+Q15_9,-3,Prefer not to say,biomass present,FALSE,Primary
+Q15_9,-2,No answer,biomass present,FALSE,Primary
+Q15_9,-1,Don't know,biomass present,FALSE,Primary
+Q15_9,0,No,biomass present,FALSE,Primary
+Q15_9,1,Yes,biomass present,FALSE,Primary
+Q16B_1,-9,Not applicable,Have solar panels for electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_1,-3,Prefer not to say,Have solar panels for electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_1,-2,No answer,Have solar panels for electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_1,-1,Don't know,Have solar panels for electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_1,0,No,Have solar panels for electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_1,1,Yes,Have solar panels for electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_10,-9,Not applicable,Has thermostat on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_10,-3,Prefer not to say,Has thermostat on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_10,-2,No answer,Has thermostat on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_10,-1,Don't know,Has thermostat on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_10,0,No,Has thermostat on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_10,1,Yes,Has thermostat on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_11,-9,Not applicable,Has another sustainable metre been added or replaced in your home in the last 12 months? - None of the above,FALSE,Primary
+Q16B_11,-3,Prefer not to say,Has another sustainable metre been added or replaced in your home in the last 12 months? - None of the above,FALSE,Primary
+Q16B_11,-2,No answer,Has another sustainable metre been added or replaced in your home in the last 12 months? - None of the above,FALSE,Primary
+Q16B_11,-1,Don't know,Has another sustainable metre been added or replaced in your home in the last 12 months? - None of the above,FALSE,Primary
+Q16B_11,0,No,Has another sustainable metre been added or replaced in your home in the last 12 months? - None of the above,FALSE,Primary
+Q16B_11,1,Yes,Has another sustainable metre been added or replaced in your home in the last 12 months? - None of the above,FALSE,Primary
+Q16B_12,-9,Not applicable,Has another sustainable metre been added or replaced in your home in the last 12 months? - Don't know,FALSE,Primary
+Q16B_12,-3,Prefer not to say,Has another sustainable metre been added or replaced in your home in the last 12 months? - Don't know,FALSE,Primary
+Q16B_12,-2,No answer,Has another sustainable metre been added or replaced in your home in the last 12 months? - Don't know,FALSE,Primary
+Q16B_12,-1,Don't know,Has another sustainable metre been added or replaced in your home in the last 12 months? - Don't know,FALSE,Primary
+Q16B_12,0,No,Has another sustainable metre been added or replaced in your home in the last 12 months? - Don't know,FALSE,Primary
+Q16B_12,1,Yes,Has another sustainable metre been added or replaced in your home in the last 12 months? - Don't know,FALSE,Primary
+Q16B_2,-9,Not applicable,Has solar water heating been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_2,-3,Prefer not to say,Has solar water heating been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_2,-2,No answer,Has solar water heating been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_2,-1,Don't know,Has solar water heating been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_2,0,No,Has solar water heating been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_2,1,Yes,Has solar water heating been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_3,-9,Not applicable,Has battery storage that is wired into your mains electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_3,-3,Prefer not to say,Has battery storage that is wired into your mains electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_3,-2,No answer,Has battery storage that is wired into your mains electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_3,-1,Don't know,Has battery storage that is wired into your mains electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_3,0,No,Has battery storage that is wired into your mains electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_3,1,Yes,Has battery storage that is wired into your mains electricity been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_4,-9,Not applicable,Have LED light bulbs in most of your lights been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_4,-3,Prefer not to say,Have LED light bulbs in most of your lights been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_4,-2,No answer,Have LED light bulbs in most of your lights been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_4,-1,Don't know,Have LED light bulbs in most of your lights been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_4,0,No,Have LED light bulbs in most of your lights been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_4,1,Yes,Have LED light bulbs in most of your lights been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_5,-9,Not applicable,Have radiators in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_5,-3,Prefer not to say,Have radiators in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_5,-2,No answer,Have radiators in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_5,-1,Don't know,Have radiators in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_5,0,No,Have radiators in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_5,1,Yes,Have radiators in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_6,-9,Not applicable,Has underfloor heating in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_6,-3,Prefer not to say,Has underfloor heating in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_6,-2,No answer,Has underfloor heating in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_6,-1,Don't know,Has underfloor heating in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_6,0,No,Has underfloor heating in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_6,1,Yes,Has underfloor heating in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_7,-9,Not applicable,Have warm air heating units in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_7,-3,Prefer not to say,Have warm air heating units in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_7,-2,No answer,Have warm air heating units in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_7,-1,Don't know,Have warm air heating units in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_7,0,No,Have warm air heating units in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_7,1,Yes,Have warm air heating units in main living areas been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_8,-9,Not applicable,Has hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_8,-3,Prefer not to say,Has hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_8,-2,No answer,Has hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_8,-1,Don't know,Has hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_8,0,No,Has hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_8,1,Yes,Has hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_9,-9,Not applicable,Have insulating jacket on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_9,-3,Prefer not to say,Have insulating jacket on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_9,-2,No answer,Have insulating jacket on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_9,-1,Don't know,Have insulating jacket on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_9,0,No,Have insulating jacket on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16B_9,1,Yes,Have insulating jacket on hot water cylinder been added or replaced in your home in the last 12 months?,FALSE,Primary
+Q16_1,-9,Not applicable,Does your household have solar panels for electricity?,FALSE,Primary
+Q16_1,-3,Prefer not to say,Does your household have solar panels for electricity?,FALSE,Primary
+Q16_1,-2,No answer,Does your household have solar panels for electricity?,FALSE,Primary
+Q16_1,-1,Don't know,Does your household have solar panels for electricity?,FALSE,Primary
+Q16_1,0,No,Does your household have solar panels for electricity?,FALSE,Primary
+Q16_1,1,Yes,Does your household have solar panels for electricity?,FALSE,Primary
+Q16_10,-9,Not applicable,Does your household have thermostat on hot water cylinder?,FALSE,Primary
+Q16_10,-3,Prefer not to say,Does your household have thermostat on hot water cylinder?,FALSE,Primary
+Q16_10,-2,No answer,Does your household have thermostat on hot water cylinder?,FALSE,Primary
+Q16_10,-1,Don't know,Does your household have thermostat on hot water cylinder?,FALSE,Primary
+Q16_10,0,No,Does your household have thermostat on hot water cylinder?,FALSE,Primary
+Q16_10,1,Yes,Does your household have thermostat on hot water cylinder?,FALSE,Primary
+Q16_11,-9,Not applicable,Does your household have other sustainable solutions? No sustainable solution,FALSE,Primary
+Q16_11,-3,Prefer not to say,Does your household have other sustainable solutions? No sustainable solution,FALSE,Primary
+Q16_11,-2,No answer,Does your household have other sustainable solutions? No sustainable solution,FALSE,Primary
+Q16_11,-1,Don't know,Does your household have other sustainable solutions? No sustainable solution,FALSE,Primary
+Q16_11,0,No,Does your household have other sustainable solutions? No sustainable solution,FALSE,Primary
+Q16_11,1,Yes,Does your household have other sustainable solutions? No sustainable solution,FALSE,Primary
+Q16_12,-9,Not applicable,Does your household have other sustainable solutions? Don't know,FALSE,Primary
+Q16_12,-3,Prefer not to say,Does your household have other sustainable solutions? Don't know,FALSE,Primary
+Q16_12,-2,No answer,Does your household have other sustainable solutions? Don't know,FALSE,Primary
+Q16_12,-1,Don't know,Does your household have other sustainable solutions? Don't know,FALSE,Primary
+Q16_12,0,No,Does your household have other sustainable solutions? Don't know,FALSE,Primary
+Q16_12,1,Yes,Does your household have other sustainable solutions? Don't know,FALSE,Primary
+Q16_2,-9,Not applicable,Does your household have solar water heating?,FALSE,Primary
+Q16_2,-3,Prefer not to say,Does your household have solar water heating?,FALSE,Primary
+Q16_2,-2,No answer,Does your household have solar water heating?,FALSE,Primary
+Q16_2,-1,Don't know,Does your household have solar water heating?,FALSE,Primary
+Q16_2,0,No,Does your household have solar water heating?,FALSE,Primary
+Q16_2,1,Yes,Does your household have solar water heating?,FALSE,Primary
+Q16_3,-9,Not applicable,Does your household have battery storage that is wired into your mains electricity?,FALSE,Primary
+Q16_3,-3,Prefer not to say,Does your household have battery storage that is wired into your mains electricity?,FALSE,Primary
+Q16_3,-2,No answer,Does your household have battery storage that is wired into your mains electricity?,FALSE,Primary
+Q16_3,-1,Don't know,Does your household have battery storage that is wired into your mains electricity?,FALSE,Primary
+Q16_3,0,No,Does your household have battery storage that is wired into your mains electricity?,FALSE,Primary
+Q16_3,1,Yes,Does your household have battery storage that is wired into your mains electricity?,FALSE,Primary
+Q16_4,-9,Not applicable,Does your household have LED light bulbs in most of your lights?,FALSE,Primary
+Q16_4,-3,Prefer not to say,Does your household have LED light bulbs in most of your lights?,FALSE,Primary
+Q16_4,-2,No answer,Does your household have LED light bulbs in most of your lights?,FALSE,Primary
+Q16_4,-1,Don't know,Does your household have LED light bulbs in most of your lights?,FALSE,Primary
+Q16_4,0,No,Does your household have LED light bulbs in most of your lights?,FALSE,Primary
+Q16_4,1,Yes,Does your household have LED light bulbs in most of your lights?,FALSE,Primary
+Q16_5,-9,Not applicable, Does your household have thermostatic radiator valves on at least half of your radiators?,FALSE,Primary
+Q16_5,-3,Prefer not to say, Does your household have thermostatic radiator valves on at least half of your radiators?,FALSE,Primary
+Q16_5,-2,No answer, Does your household have thermostatic radiator valves on at least half of your radiators?,FALSE,Primary
+Q16_5,-1,Don't know, Does your household have thermostatic radiator valves on at least half of your radiators?,FALSE,Primary
+Q16_5,0,No, Does your household have thermostatic radiator valves on at least half of your radiators?,FALSE,Primary
+Q16_5,1,Yes, Does your household have thermostatic radiator valves on at least half of your radiators?,FALSE,Primary
+Q16_6,-9,Not applicable,Does your household have underfloor heating in main living areas?,FALSE,Primary
+Q16_6,-3,Prefer not to say,Does your household have underfloor heating in main living areas?,FALSE,Primary
+Q16_6,-2,No answer,Does your household have underfloor heating in main living areas?,FALSE,Primary
+Q16_6,-1,Don't know,Does your household have underfloor heating in main living areas?,FALSE,Primary
+Q16_6,0,No,Does your household have underfloor heating in main living areas?,FALSE,Primary
+Q16_6,1,Yes,Does your household have underfloor heating in main living areas?,FALSE,Primary
+Q16_7,-9,Not applicable,Does your household have warm air heating units in main living areas?,FALSE,Primary
+Q16_7,-3,Prefer not to say,Does your household have warm air heating units in main living areas?,FALSE,Primary
+Q16_7,-2,No answer,Does your household have warm air heating units in main living areas?,FALSE,Primary
+Q16_7,-1,Don't know,Does your household have warm air heating units in main living areas?,FALSE,Primary
+Q16_7,0,No,Does your household have warm air heating units in main living areas?,FALSE,Primary
+Q16_7,1,Yes,Does your household have warm air heating units in main living areas?,FALSE,Primary
+Q16_8,-9,Not applicable,Does your household have hot water cylinder?,FALSE,Primary
+Q16_8,-3,Prefer not to say,Does your household have hot water cylinder?,FALSE,Primary
+Q16_8,-2,No answer,Does your household have hot water cylinder?,FALSE,Primary
+Q16_8,-1,Don't know,Does your household have hot water cylinder?,FALSE,Primary
+Q16_8,0,No,Does your household have hot water cylinder?,FALSE,Primary
+Q16_8,1,Yes,Does your household have hot water cylinder?,FALSE,Primary
+Q16_9,-9,Not applicable,Does your household have insulating jacket on hot water cylinder?,FALSE,Primary
+Q16_9,-3,Prefer not to say,Does your household have insulating jacket on hot water cylinder?,FALSE,Primary
+Q16_9,-2,No answer,Does your household have insulating jacket on hot water cylinder?,FALSE,Primary
+Q16_9,-1,Don't know,Does your household have insulating jacket on hot water cylinder?,FALSE,Primary
+Q16_9,0,No,Does your household have insulating jacket on hot water cylinder?,FALSE,Primary
+Q16_9,1,Yes,Does your household have insulating jacket on hot water cylinder?,FALSE,Primary
+Q17B_1,-9,Not applicable,Do you use the central heating thermostat?,FALSE,Primary
+Q17B_1,-3,Prefer not to say,Do you use the central heating thermostat?,FALSE,Primary
+Q17B_1,-2,No answer,Do you use the central heating thermostat?,FALSE,Primary
+Q17B_1,-1,Don't know,Do you use the central heating thermostat?,FALSE,Primary
+Q17B_1,0,No,Do you use the central heating thermostat?,FALSE,Primary
+Q17B_1,1,Yes,Do you use the central heating thermostat?,FALSE,Primary
+Q17B_2,-9,Not applicable,Do you use the central heating time clock/ programmer?,FALSE,Primary
+Q17B_2,-3,Prefer not to say,Do you use the central heating time clock/ programmer?,FALSE,Primary
+Q17B_2,-2,No answer,Do you use the central heating time clock/ programmer?,FALSE,Primary
+Q17B_2,-1,Don't know,Do you use the central heating time clock/ programmer?,FALSE,Primary
+Q17B_2,0,No,Do you use the central heating time clock/ programmer?,FALSE,Primary
+Q17B_2,1,Yes,Do you use the central heating time clock/ programmer?,FALSE,Primary
+Q17B_3,-9,Not applicable,"Do you use the smart heating control (e.g., Nest, Hive, Tado)",FALSE,Primary
+Q17B_3,-3,Prefer not to say,"Do you use the smart heating control (e.g., Nest, Hive, Tado)",FALSE,Primary
+Q17B_3,-2,No answer,"Do you use the smart heating control (e.g., Nest, Hive, Tado)",FALSE,Primary
+Q17B_3,-1,Don't know,"Do you use the smart heating control (e.g., Nest, Hive, Tado)",FALSE,Primary
+Q17B_3,0,No,"Do you use the smart heating control (e.g., Nest, Hive, Tado)",FALSE,Primary
+Q17B_3,1,Yes,"Do you use the smart heating control (e.g., Nest, Hive, Tado)",FALSE,Primary
+Q17B_4,-9,Not applicable,Do you use the thermostatic radiator valves (TRVs) on more than half of radiators?,FALSE,Primary
+Q17B_4,-3,Prefer not to say,Do you use the thermostatic radiator valves (TRVs) on more than half of radiators?,FALSE,Primary
+Q17B_4,-2,No answer,Do you use the thermostatic radiator valves (TRVs) on more than half of radiators?,FALSE,Primary
+Q17B_4,-1,Don't know,Do you use the thermostatic radiator valves (TRVs) on more than half of radiators?,FALSE,Primary
+Q17B_4,0,No,Do you use the thermostatic radiator valves (TRVs) on more than half of radiators?,FALSE,Primary
+Q17B_4,1,Yes,Do you use the thermostatic radiator valves (TRVs) on more than half of radiators?,FALSE,Primary
+Q17B_5,-9,Not applicable,Do you use different zones of the house that can independently heated to different temperatures at different time?,FALSE,Primary
+Q17B_5,-3,Prefer not to say,Do you use different zones of the house that can independently heated to different temperatures at different time?,FALSE,Primary
+Q17B_5,-2,No answer,Do you use different zones of the house that can independently heated to different temperatures at different time?,FALSE,Primary
+Q17B_5,-1,Don't know,Do you use different zones of the house that can independently heated to different temperatures at different time?,FALSE,Primary
+Q17B_5,0,No,Do you use different zones of the house that can independently heated to different temperatures at different time?,FALSE,Primary
+Q17B_5,1,Yes,Do you use different zones of the house that can independently heated to different temperatures at different time?,FALSE,Primary
+Q17B_6,-9,Not applicable,Do you use the boiler flow temperature that can be adjusted?,FALSE,Primary
+Q17B_6,-3,Prefer not to say,Do you use the boiler flow temperature that can be adjusted?,FALSE,Primary
+Q17B_6,-2,No answer,Do you use the boiler flow temperature that can be adjusted?,FALSE,Primary
+Q17B_6,-1,Don't know,Do you use the boiler flow temperature that can be adjusted?,FALSE,Primary
+Q17B_6,0,No,Do you use the boiler flow temperature that can be adjusted?,FALSE,Primary
+Q17B_6,1,Yes,Do you use the boiler flow temperature that can be adjusted?,FALSE,Primary
+Q17B_7,-9,Not applicable,You don't use none of the above.,FALSE,Primary
+Q17B_7,-3,Prefer not to say,You don't use none of the above.,FALSE,Primary
+Q17B_7,-2,No answer,You don't use none of the above.,FALSE,Primary
+Q17B_7,-1,Don't know,You don't use none of the above.,FALSE,Primary
+Q17B_7,0,No,You don't use none of the above.,FALSE,Primary
+Q17B_7,1,Yes,You don't use none of the above.,FALSE,Primary
+Q17B_8,-9,Not applicable,You don't know.,FALSE,Primary
+Q17B_8,-3,Prefer not to say,You don't know.,FALSE,Primary
+Q17B_8,-2,No answer,You don't know.,FALSE,Primary
+Q17B_8,-1,Don't know,You don't know.,FALSE,Primary
+Q17B_8,0,No,You don't know.,FALSE,Primary
+Q17B_8,1,Yes,You don't know.,FALSE,Primary
+Q17_1,-9,Not applicable,Does your household have central heating thermostat?,FALSE,Primary
+Q17_1,-3,Prefer not to say,Does your household have central heating thermostat?,FALSE,Primary
+Q17_1,-2,No answer,Does your household have central heating thermostat?,FALSE,Primary
+Q17_1,-1,Don't know,Does your household have central heating thermostat?,FALSE,Primary
+Q17_1,0,No,Does your household have central heating thermostat?,FALSE,Primary
+Q17_1,1,Yes,Does your household have central heating thermostat?,FALSE,Primary
+Q17_2,-9,Not applicable,Does your household have central heating time clock / programmer?,FALSE,Primary
+Q17_2,-3,Prefer not to say,Does your household have central heating time clock / programmer?,FALSE,Primary
+Q17_2,-2,No answer,Does your household have central heating time clock / programmer?,FALSE,Primary
+Q17_2,-1,Don't know,Does your household have central heating time clock / programmer?,FALSE,Primary
+Q17_2,0,No,Does your household have central heating time clock / programmer?,FALSE,Primary
+Q17_2,1,Yes,Does your household have central heating time clock / programmer?,FALSE,Primary
+Q17_3,-9,Not applicable,"Does your household have smart heating control (e.g., Nest, Hive, Tado)?",FALSE,Primary
+Q17_3,-3,Prefer not to say,"Does your household have smart heating control (e.g., Nest, Hive, Tado)?",FALSE,Primary
+Q17_3,-2,No answer,"Does your household have smart heating control (e.g., Nest, Hive, Tado)?",FALSE,Primary
+Q17_3,-1,Don't know,"Does your household have smart heating control (e.g., Nest, Hive, Tado)?",FALSE,Primary
+Q17_3,0,No,"Does your household have smart heating control (e.g., Nest, Hive, Tado)?",FALSE,Primary
+Q17_3,1,Yes,"Does your household have smart heating control (e.g., Nest, Hive, Tado)?",FALSE,Primary
+Q17_4,-9,Not applicable,Does your household have radiators in main living areas?,FALSE,Primary
+Q17_4,-3,Prefer not to say,Does your household have radiators in main living areas?,FALSE,Primary
+Q17_4,-2,No answer,Does your household have radiators in main living areas?,FALSE,Primary
+Q17_4,-1,Don't know,Does your household have radiators in main living areas?,FALSE,Primary
+Q17_4,0,No,Does your household have radiators in main living areas?,FALSE,Primary
+Q17_4,1,Yes,Does your household have radiators in main living areas?,FALSE,Primary
+Q17_5,-9,Not applicable,Can different zones of the house be independently heated to different temperatures at different times?,FALSE,Primary
+Q17_5,-3,Prefer not to say,Can different zones of the house be independently heated to different temperatures at different times?,FALSE,Primary
+Q17_5,-2,No answer,Can different zones of the house be independently heated to different temperatures at different times?,FALSE,Primary
+Q17_5,-1,Don't know,Can different zones of the house be independently heated to different temperatures at different times?,FALSE,Primary
+Q17_5,0,No,Can different zones of the house be independently heated to different temperatures at different times?,FALSE,Primary
+Q17_5,1,Yes,Can different zones of the house be independently heated to different temperatures at different times?,FALSE,Primary
+Q17_6,-9,Not applicable,Can the boiler flow temperature be adjusted?,FALSE,Primary
+Q17_6,-3,Prefer not to say,Can the boiler flow temperature be adjusted?,FALSE,Primary
+Q17_6,-2,No answer,Can the boiler flow temperature be adjusted?,FALSE,Primary
+Q17_6,-1,Don't know,Can the boiler flow temperature be adjusted?,FALSE,Primary
+Q17_6,0,No,Can the boiler flow temperature be adjusted?,FALSE,Primary
+Q17_6,1,Yes,Can the boiler flow temperature be adjusted?,FALSE,Primary
+Q17_7,-9,Not applicable,Does your household have heating controls? No,FALSE,Primary
+Q17_7,-3,Prefer not to say,Does your household have heating controls? No,FALSE,Primary
+Q17_7,-2,No answer,Does your household have heating controls? No,FALSE,Primary
+Q17_7,-1,Don't know,Does your household have heating controls? No,FALSE,Primary
+Q17_7,0,No,Does your household have heating controls? No,FALSE,Primary
+Q17_7,1,Yes,Does your household have heating controls? No,FALSE,Primary
+Q17_8,-9,Not applicable,Does your household have heating controls? Don't know,FALSE,Primary
+Q17_8,-3,Prefer not to say,Does your household have heating controls? Don't know,FALSE,Primary
+Q17_8,-2,No answer,Does your household have heating controls? Don't know,FALSE,Primary
+Q17_8,-1,Don't know,Does your household have heating controls? Don't know,FALSE,Primary
+Q17_8,0,No,Does your household have heating controls? Don't know,FALSE,Primary
+Q17_8,1,Yes,Does your household have heating controls? Don't know,FALSE,Primary
+Q18_1,-9,Not applicable,Does your household have loft insulation?,FALSE,Primary
+Q18_1,-3,Prefer not to say,Does your household have loft insulation?,FALSE,Primary
+Q18_1,-2,No answer,Does your household have loft insulation?,FALSE,Primary
+Q18_1,-1,Don't know,Does your household have loft insulation?,FALSE,Primary
+Q18_1,0,No,Does your household have loft insulation?,FALSE,Primary
+Q18_1,1,Yes,Does your household have loft insulation?,FALSE,Primary
+Q18_2,-9,Not applicable,Does your household have cavity wall insulation?,FALSE,Primary
+Q18_2,-3,Prefer not to say,Does your household have cavity wall insulation?,FALSE,Primary
+Q18_2,-2,No answer,Does your household have cavity wall insulation?,FALSE,Primary
+Q18_2,-1,Don't know,Does your household have cavity wall insulation?,FALSE,Primary
+Q18_2,0,No,Does your household have cavity wall insulation?,FALSE,Primary
+Q18_2,1,Yes,Does your household have cavity wall insulation?,FALSE,Primary
+Q18_3,-9,Not applicable,Does your household have solid wall insulation?,FALSE,Primary
+Q18_3,-3,Prefer not to say,Does your household have solid wall insulation?,FALSE,Primary
+Q18_3,-2,No answer,Does your household have solid wall insulation?,FALSE,Primary
+Q18_3,-1,Don't know,Does your household have solid wall insulation?,FALSE,Primary
+Q18_3,0,No,Does your household have solid wall insulation?,FALSE,Primary
+Q18_3,1,Yes,Does your household have solid wall insulation?,FALSE,Primary
+Q18_4,-9,Not applicable,Does your household have underfloor insulation?,FALSE,Primary
+Q18_4,-3,Prefer not to say,Does your household have underfloor insulation?,FALSE,Primary
+Q18_4,-2,No answer,Does your household have underfloor insulation?,FALSE,Primary
+Q18_4,-1,Don't know,Does your household have underfloor insulation?,FALSE,Primary
+Q18_4,0,No,Does your household have underfloor insulation?,FALSE,Primary
+Q18_4,1,Yes,Does your household have underfloor insulation?,FALSE,Primary
+Q18_5,-9,Not applicable,Does your household have double or secondary glazed windows?,FALSE,Primary
+Q18_5,-3,Prefer not to say,Does your household have double or secondary glazed windows?,FALSE,Primary
+Q18_5,-2,No answer,Does your household have double or secondary glazed windows?,FALSE,Primary
+Q18_5,-1,Don't know,Does your household have double or secondary glazed windows?,FALSE,Primary
+Q18_5,0,No,Does your household have double or secondary glazed windows?,FALSE,Primary
+Q18_5,1,Yes,Does your household have double or secondary glazed windows?,FALSE,Primary
+Q18_6,-9,Not applicable,"Does your household have draughtproofing on windows, doors and/or chimneys?",FALSE,Primary
+Q18_6,-3,Prefer not to say,"Does your household have draughtproofing on windows, doors and/or chimneys?",FALSE,Primary
+Q18_6,-2,No answer,"Does your household have draughtproofing on windows, doors and/or chimneys?",FALSE,Primary
+Q18_6,-1,Don't know,"Does your household have draughtproofing on windows, doors and/or chimneys?",FALSE,Primary
+Q18_6,0,No,"Does your household have draughtproofing on windows, doors and/or chimneys?",FALSE,Primary
+Q18_6,1,Yes,"Does your household have draughtproofing on windows, doors and/or chimneys?",FALSE,Primary
+Q18_7,-9,Not applicable,Other type of insulation?,FALSE,Primary
+Q18_7,-3,Prefer not to say,Other type of insulation?,FALSE,Primary
+Q18_7,-2,No answer,Other type of insulation?,FALSE,Primary
+Q18_7,-1,Don't know,Other type of insulation?,FALSE,Primary
+Q18_7,0,No,Other type of insulation?,FALSE,Primary
+Q18_7,1,Yes,Other type of insulation?,FALSE,Primary
+Q18_8,-9,Not applicable,Don't know if house has any insulation.,FALSE,Primary
+Q18_8,-3,Prefer not to say,Don't know if house has any insulation.,FALSE,Primary
+Q18_8,-2,No answer,Don't know if house has any insulation.,FALSE,Primary
+Q18_8,-1,Don't know,Don't know if house has any insulation.,FALSE,Primary
+Q18_8,0,No,Don't know if house has any insulation.,FALSE,Primary
+Q18_8,1,Yes,Don't know if house has any insulation.,FALSE,Primary
+Q18_9,-9,Not applicable,None of the above types of insulation.,FALSE,Primary
+Q18_9,-3,Prefer not to say,None of the above types of insulation.,FALSE,Primary
+Q18_9,-2,No answer,None of the above types of insulation.,FALSE,Primary
+Q18_9,-1,Don't know,None of the above types of insulation.,FALSE,Primary
+Q18_9,0,No,None of the above types of insulation.,FALSE,Primary
+Q18_9,1,Yes,None of the above types of insulation.,FALSE,Primary
+Q19,-9,Not applicable,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+Q19,-3,Prefer not to say,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+Q19,-2,No answer,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+Q19,-1,Don't know,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+Q19,1,A great deal of effort,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+Q19,2,Some effort,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+Q19,3,A little effort,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+Q19,4,No effort at all,How much effort do you say your household makes to limit energy usage,FALSE,Primary
+Q20_1,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_1,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_1,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_1,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_1,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_1,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_10,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the combined clothes washer dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_10,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the combined clothes washer dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_10,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the combined clothes washer dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_10,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the combined clothes washer dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_10,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the combined clothes washer dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_10,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the combined clothes washer dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_11,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the washing machine at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_11,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the washing machine at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_11,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the washing machine at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_11,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the washing machine at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_11,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the washing machine at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_11,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the washing machine at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_12,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the tumble dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_12,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the tumble dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_12,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the tumble dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_12,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the tumble dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_12,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the tumble dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_12,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the tumble dryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_13,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric drying rack (heated airer) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_13,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric drying rack (heated airer) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_13,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric drying rack (heated airer) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_13,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric drying rack (heated airer) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_13,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric drying rack (heated airer) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_13,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric drying rack (heated airer) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_14,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the iron at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_14,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the iron at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_14,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the iron at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_14,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the iron at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_14,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the iron at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_14,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the iron at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_15,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the vacuum cleaner at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_15,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the vacuum cleaner at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_15,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the vacuum cleaner at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_15,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the vacuum cleaner at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_15,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the vacuum cleaner at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_15,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the vacuum cleaner at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_16,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric shower at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_16,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric shower at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_16,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric shower at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_16,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric shower at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_16,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric shower at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_16,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric shower at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_17,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the laptop/computer(s) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_17,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the laptop/computer(s) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_17,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the laptop/computer(s) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_17,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the laptop/computer(s) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_17,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the laptop/computer(s) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_17,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the laptop/computer(s) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_18,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the TV at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_18,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the TV at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_18,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the TV at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_18,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the TV at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_18,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the TV at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_18,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the TV at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_19,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the smart home assistants / speakers (e.g. Alexa) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_19,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the smart home assistants / speakers (e.g. Alexa) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_19,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the smart home assistants / speakers (e.g. Alexa) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_19,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the smart home assistants / speakers (e.g. Alexa) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_19,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the smart home assistants / speakers (e.g. Alexa) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_19,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the smart home assistants / speakers (e.g. Alexa) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_2,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_2,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_2,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_2,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_2,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_2,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas oven at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_20,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other smart home solutions, like smart plugs or app enabled appliances, at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_20,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other smart home solutions, like smart plugs or app enabled appliances, at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_20,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other smart home solutions, like smart plugs or app enabled appliances, at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_20,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other smart home solutions, like smart plugs or app enabled appliances, at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_20,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other smart home solutions, like smart plugs or app enabled appliances, at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_20,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other smart home solutions, like smart plugs or app enabled appliances, at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_21,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the air conditioning unit at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_21,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the air conditioning unit at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_21,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the air conditioning unit at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_21,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the air conditioning unit at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_21,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the air conditioning unit at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_21,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the air conditioning unit at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_22,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the cooling fan at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_22,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the cooling fan at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_22,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the cooling fan at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_22,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the cooling fan at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_22,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the cooling fan at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_22,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the cooling fan at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_23,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dehumidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_23,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dehumidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_23,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dehumidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_23,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dehumidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_23,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dehumidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_23,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dehumidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_24,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the humidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_24,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the humidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_24,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the humidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_24,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the humidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_24,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the humidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_24,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the humidifier at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_25,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_25,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_25,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_25,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_25,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_25,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_26,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_26,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_26,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_26,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_26,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_26,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric heater at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_27,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_27,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_27,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_27,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_27,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_27,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_28,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-cargo bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_28,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-cargo bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_28,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-cargo bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_28,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-cargo bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_28,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-cargo bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_28,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the e-cargo bike at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_29,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use or charge any of these appliances at a different time of day compared to weekdays when you are away from home? No",FALSE,Primary
+Q20_29,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use or charge any of these appliances at a different time of day compared to weekdays when you are away from home? No",FALSE,Primary
+Q20_29,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use or charge any of these appliances at a different time of day compared to weekdays when you are away from home? No",FALSE,Primary
+Q20_29,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use or charge any of these appliances at a different time of day compared to weekdays when you are away from home? No",FALSE,Primary
+Q20_29,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use or charge any of these appliances at a different time of day compared to weekdays when you are away from home? No",FALSE,Primary
+Q20_29,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use or charge any of these appliances at a different time of day compared to weekdays when you are away from home? No",FALSE,Primary
+Q20_3,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_3,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_3,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_3,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_3,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_3,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_30,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the microwave at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_30,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the microwave at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_31,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the air fryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_31,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the air fryer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_32,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the slow cooker at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_32,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the slow cooker at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_33,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the smart plug at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_33,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the smart plug at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_34,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the smart thermostat at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_34,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the smart thermostat at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_4,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric induction hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_4,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric induction hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_4,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric induction hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_4,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric induction hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_4,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric induction hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_4,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the electric induction hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_5,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_5,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_5,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_5,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_5,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_5,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the gas hob at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_6,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other kitchen appliances (e.g. Micorwave/ Air fryer/ Instant pot) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_6,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other kitchen appliances (e.g. Micorwave/ Air fryer/ Instant pot) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_6,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other kitchen appliances (e.g. Micorwave/ Air fryer/ Instant pot) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_6,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other kitchen appliances (e.g. Micorwave/ Air fryer/ Instant pot) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_6,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other kitchen appliances (e.g. Micorwave/ Air fryer/ Instant pot) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_6,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use other kitchen appliances (e.g. Micorwave/ Air fryer/ Instant pot) at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_7,1,Always,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dishwasher at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_7,2,Very often,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dishwasher at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_7,3,Quite often,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dishwasher at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_7,4,Not very often,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dishwasher at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_7,5,Never,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dishwasher at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_7,6,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dishwasher at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_7,7,cannot do this,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dishwasher at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_7,8,"Not applicable, cannot do this","When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dishwasher at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_7,9,No response,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the dishwasher at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_8,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the fridge or combined fridge freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_8,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the fridge or combined fridge freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_8,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the fridge or combined fridge freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_8,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the fridge or combined fridge freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_8,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the fridge or combined fridge freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_8,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the fridge or combined fridge freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_9,-9,Not applicable,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the separate stand-alone freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_9,-3,Prefer not to say,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the separate stand-alone freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_9,-2,No answer,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the separate stand-alone freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_9,-1,Don't know,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the separate stand-alone freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_9,0,No,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the separate stand-alone freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q20_9,1,Yes,"When you are working or engaging in other activities (e.g. childcare) from home on weekdays, do you tend to use the separate stand-alone freezer at a different time of day compared to weekdays when you are away from home?",FALSE,Primary
+Q21,-9,Not applicable,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,-3,Prefer not to say,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,-2,No answer,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,-1,Don't know,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,1,Most days,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,2,About once or twice per week,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,3,About once or twice per month,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,4,Less often than once per month,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,5,Never,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,6,I don't have this,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,7,It is not working,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q21,8,Don't know,"How often, if at all, do you or anyone in your household look at information about how much energy you are using (or your credit balance) through your smart meter In-Home Display/Smart Energy Display?",FALSE,Primary
+Q22R1,-9,Not applicable,How often do you .. Switch off lights,FALSE,Primary
+Q22R1,-3,Prefer not to say,How often do you .. Switch off lights,FALSE,Primary
+Q22R1,-2,No answer,How often do you .. Switch off lights,FALSE,Primary
+Q22R1,-1,Don't know,How often do you .. Switch off lights,FALSE,Primary
+Q22R1,1,Always,How often do you .. Switch off lights,FALSE,Primary
+Q22R1,2,Very often,How often do you .. Switch off lights,FALSE,Primary
+Q22R1,3,Quite often,How often do you .. Switch off lights,FALSE,Primary
+Q22R1,4,Not very often,How often do you .. Switch off lights,FALSE,Primary
+Q22R1,5,Never,How often do you .. Switch off lights,FALSE,Primary
+Q22R2,-9,Not applicable,Run the washing machine with a full load rather than running it part full,FALSE,Primary
+Q22R2,-3,Prefer not to say,Run the washing machine with a full load rather than running it part full,FALSE,Primary
+Q22R2,-2,No answer,Run the washing machine with a full load rather than running it part full,FALSE,Primary
+Q22R2,-1,Don't know,Run the washing machine with a full load rather than running it part full,FALSE,Primary
+Q22R2,1,Always,Run the washing machine with a full load rather than running it part full,FALSE,Primary
+Q22R2,2,Very often,Run the washing machine with a full load rather than running it part full,FALSE,Primary
+Q22R2,3,Quite often,Run the washing machine with a full load rather than running it part full,FALSE,Primary
+Q22R2,4,Not very often,Run the washing machine with a full load rather than running it part full,FALSE,Primary
+Q22R2,5,Never,Run the washing machine with a full load rather than running it part full,FALSE,Primary
+Q22R3,-9,Not applicable,Run the washing machine at 30 degrees or lower,FALSE,Primary
+Q22R3,-3,Prefer not to say,Run the washing machine at 30 degrees or lower,FALSE,Primary
+Q22R3,-2,No answer,Run the washing machine at 30 degrees or lower,FALSE,Primary
+Q22R3,-1,Don't know,Run the washing machine at 30 degrees or lower,FALSE,Primary
+Q22R3,1,Always,Run the washing machine at 30 degrees or lower,FALSE,Primary
+Q22R3,2,Very often,Run the washing machine at 30 degrees or lower,FALSE,Primary
+Q22R3,3,Quite often,Run the washing machine at 30 degrees or lower,FALSE,Primary
+Q22R3,4,Not very often,Run the washing machine at 30 degrees or lower,FALSE,Primary
+Q22R3,5,Never,Run the washing machine at 30 degrees or lower,FALSE,Primary
+Q22R4,-9,Not applicable,Dry clothes without using a tumble dryer,FALSE,Primary
+Q22R4,-3,Prefer not to say,Dry clothes without using a tumble dryer,FALSE,Primary
+Q22R4,-2,No answer,Dry clothes without using a tumble dryer,FALSE,Primary
+Q22R4,-1,Don't know,Dry clothes without using a tumble dryer,FALSE,Primary
+Q22R4,1,Always,Dry clothes without using a tumble dryer,FALSE,Primary
+Q22R4,2,Very often,Dry clothes without using a tumble dryer,FALSE,Primary
+Q22R4,3,Quite often,Dry clothes without using a tumble dryer,FALSE,Primary
+Q22R4,4,Not very often,Dry clothes without using a tumble dryer,FALSE,Primary
+Q22R4,5,Never,Dry clothes without using a tumble dryer,FALSE,Primary
+Q22R5,-9,Not applicable,Turn appliances off standby when they are not in use,FALSE,Primary
+Q22R5,-3,Prefer not to say,Turn appliances off standby when they are not in use,FALSE,Primary
+Q22R5,-2,No answer,Turn appliances off standby when they are not in use,FALSE,Primary
+Q22R5,-1,Don't know,Turn appliances off standby when they are not in use,FALSE,Primary
+Q22R5,1,Always,Turn appliances off standby when they are not in use,FALSE,Primary
+Q22R5,2,Very often,Turn appliances off standby when they are not in use,FALSE,Primary
+Q22R5,3,Quite often,Turn appliances off standby when they are not in use,FALSE,Primary
+Q22R5,4,Not very often,Turn appliances off standby when they are not in use,FALSE,Primary
+Q22R5,5,Never,Turn appliances off standby when they are not in use,FALSE,Primary
+Q22R6,-9,Not applicable,Close curtains / blinds at night,FALSE,Primary
+Q22R6,-3,Prefer not to say,Close curtains / blinds at night,FALSE,Primary
+Q22R6,-2,No answer,Close curtains / blinds at night,FALSE,Primary
+Q22R6,-1,Don't know,Close curtains / blinds at night,FALSE,Primary
+Q22R6,1,Always,Close curtains / blinds at night,FALSE,Primary
+Q22R6,2,Very often,Close curtains / blinds at night,FALSE,Primary
+Q22R6,3,Quite often,Close curtains / blinds at night,FALSE,Primary
+Q22R6,4,Not very often,Close curtains / blinds at night,FALSE,Primary
+Q22R6,5,Never,Close curtains / blinds at night,FALSE,Primary
+Q22R7,-9,Not applicable,Take a shower rather than having a bath,FALSE,Primary
+Q22R7,-3,Prefer not to say,Take a shower rather than having a bath,FALSE,Primary
+Q22R7,-2,No answer,Take a shower rather than having a bath,FALSE,Primary
+Q22R7,-1,Don't know,Take a shower rather than having a bath,FALSE,Primary
+Q22R7,1,Always,Take a shower rather than having a bath,FALSE,Primary
+Q22R7,2,Very often,Take a shower rather than having a bath,FALSE,Primary
+Q22R7,3,Quite often,Take a shower rather than having a bath,FALSE,Primary
+Q22R7,4,Not very often,Take a shower rather than having a bath,FALSE,Primary
+Q22R7,5,Never,Take a shower rather than having a bath,FALSE,Primary
+Q22R8,-9,Not applicable,Take short showers rather than longer showers,FALSE,Primary
+Q22R8,-3,Prefer not to say,Take short showers rather than longer showers,FALSE,Primary
+Q22R8,-2,No answer,Take short showers rather than longer showers,FALSE,Primary
+Q22R8,-1,Don't know,Take short showers rather than longer showers,FALSE,Primary
+Q22R8,1,Always,Take short showers rather than longer showers,FALSE,Primary
+Q22R8,2,Very often,Take short showers rather than longer showers,FALSE,Primary
+Q22R8,3,Quite often,Take short showers rather than longer showers,FALSE,Primary
+Q22R8,4,Not very often,Take short showers rather than longer showers,FALSE,Primary
+Q22R8,5,Never,Take short showers rather than longer showers,FALSE,Primary
+Q22R9,-9,Not applicable,Avoid using the cooker or oven when preparing a main meal,FALSE,Primary
+Q22R9,-3,Prefer not to say,Avoid using the cooker or oven when preparing a main meal,FALSE,Primary
+Q22R9,-2,No answer,Avoid using the cooker or oven when preparing a main meal,FALSE,Primary
+Q22R9,-1,Don't know,Avoid using the cooker or oven when preparing a main meal,FALSE,Primary
+Q22R9,1,Always,Avoid using the cooker or oven when preparing a main meal,FALSE,Primary
+Q22R9,2,Very often,Avoid using the cooker or oven when preparing a main meal,FALSE,Primary
+Q22R9,3,Quite often,Avoid using the cooker or oven when preparing a main meal,FALSE,Primary
+Q22R9,4,Not very often,Avoid using the cooker or oven when preparing a main meal,FALSE,Primary
+Q22R9,5,Never,Avoid using the cooker or oven when preparing a main meal,FALSE,Primary
+Q23,-9,Not applicable,"During the cold winter weather, can you normally keep comfortably warm in your living room?",FALSE,Primary
+Q23,-3,Prefer not to say,"During the cold winter weather, can you normally keep comfortably warm in your living room?",FALSE,Primary
+Q23,-2,No answer,"During the cold winter weather, can you normally keep comfortably warm in your living room?",FALSE,Primary
+Q23,-1,Don't know,"During the cold winter weather, can you normally keep comfortably warm in your living room?",FALSE,Primary
+Q23,1,Yes,"During the cold winter weather, can you normally keep comfortably warm in your living room?",FALSE,Primary
+Q23,2,No,"During the cold winter weather, can you normally keep comfortably warm in your living room?",FALSE,Primary
+Q23B,-9,Not applicable,use of standalone heaters,FALSE,Primary
+Q23B,-3,Prefer not to say,use of standalone heaters,FALSE,Primary
+Q23B,-2,No answer,use of standalone heaters,FALSE,Primary
+Q23B,-1,Don't know,use of standalone heaters,FALSE,Primary
+Q23B,0,No,use of standalone heaters,FALSE,Primary
+Q23B,1,Yes,use of standalone heaters,FALSE,Primary
+Q23C,-9,Not applicable,any of your standalone heaters have their own source of power,FALSE,Primary
+Q23C,-3,Prefer not to say,any of your standalone heaters have their own source of power,FALSE,Primary
+Q23C,-2,No answer,any of your standalone heaters have their own source of power,FALSE,Primary
+Q23C,-1,Don't know,any of your standalone heaters have their own source of power,FALSE,Primary
+Q23C,1,"Yes, own source power",any of your standalone heaters have their own source of power,FALSE,Primary
+Q23C,2,"No, all are powered by mains gas and el.",any of your standalone heaters have their own source of power,FALSE,Primary
+Q24_1,-9,Not applicable,Do you feel your home is difficult to heat?,FALSE,Primary
+Q24_1,-3,Prefer not to say,Do you feel your home is difficult to heat?,FALSE,Primary
+Q24_1,-2,No answer,Do you feel your home is difficult to heat?,FALSE,Primary
+Q24_1,-1,Don't know,Do you feel your home is difficult to heat?,FALSE,Primary
+Q24_1,0,No,Do you feel your home is difficult to heat?,FALSE,Primary
+Q24_1,1,Yes,Do you feel your home is difficult to heat?,FALSE,Primary
+Q24_1,2,None of the above,Do you feel your home is difficult to heat?,FALSE,Primary
+Q24_1,3,Other reason,Do you feel your home is difficult to heat?,FALSE,Primary
+Q24_2,-9,Not applicable,Do you feel it is difficult to afford the fuel to heat your home?,FALSE,Primary
+Q24_2,-3,Prefer not to say,Do you feel it is difficult to afford the fuel to heat your home?,FALSE,Primary
+Q24_2,-2,No answer,Do you feel it is difficult to afford the fuel to heat your home?,FALSE,Primary
+Q24_2,-1,Don't know,Do you feel it is difficult to afford the fuel to heat your home?,FALSE,Primary
+Q24_2,0,No,Do you feel it is difficult to afford the fuel to heat your home?,FALSE,Primary
+Q24_2,1,Yes,Do you feel it is difficult to afford the fuel to heat your home?,FALSE,Primary
+Q24_2,2,None of the above,Do you feel it is difficult to afford the fuel to heat your home?,FALSE,Primary
+Q24_2,3,Other reason,Do you feel it is difficult to afford the fuel to heat your home?,FALSE,Primary
+Q24_3,-9,Not applicable,"Prefer not to say, why not warm.",FALSE,Primary
+Q24_3,-3,Prefer not to say,"Prefer not to say, why not warm.",FALSE,Primary
+Q24_3,-2,No answer,"Prefer not to say, why not warm.",FALSE,Primary
+Q24_3,-1,Don't know,"Prefer not to say, why not warm.",FALSE,Primary
+Q24_3,0,No,"Prefer not to say, why not warm.",FALSE,Primary
+Q24_3,1,Yes,"Prefer not to say, why not warm.",FALSE,Primary
+Q24_3,2,None of the above,"Prefer not to say, why not warm.",FALSE,Primary
+Q24_3,3,Other reason,"Prefer not to say, why not warm.",FALSE,Primary
+Q24_4,-9,Not applicable,None of the above applies for not being warm.,FALSE,Primary
+Q24_4,-3,Prefer not to say,None of the above applies for not being warm.,FALSE,Primary
+Q24_4,-2,No answer,None of the above applies for not being warm.,FALSE,Primary
+Q24_4,-1,Don't know,None of the above applies for not being warm.,FALSE,Primary
+Q24_4,0,No,None of the above applies for not being warm.,FALSE,Primary
+Q24_4,1,Yes,None of the above applies for not being warm.,FALSE,Primary
+Q24_4,2,None of the above,None of the above applies for not being warm.,FALSE,Primary
+Q24_4,3,Other reason,None of the above applies for not being warm.,FALSE,Primary
+Q24_5,-9,Not applicable,Other reason for not being warm.,FALSE,Primary
+Q24_5,-3,Prefer not to say,Other reason for not being warm.,FALSE,Primary
+Q24_5,-2,No answer,Other reason for not being warm.,FALSE,Primary
+Q24_5,-1,Don't know,Other reason for not being warm.,FALSE,Primary
+Q24_5,0,No,Other reason for not being warm.,FALSE,Primary
+Q24_5,1,Yes,Other reason for not being warm.,FALSE,Primary
+Q24_5,2,None of the above,Other reason for not being warm.,FALSE,Primary
+Q24_5,3,Other reason,Other reason for not being warm.,FALSE,Primary
+Q25,-9,Not applicable,"During the winter, are there living spaces not normally heated?",FALSE,Primary
+Q25,-3,Prefer not to say,"During the winter, are there living spaces not normally heated?",FALSE,Primary
+Q25,-2,No answer,"During the winter, are there living spaces not normally heated?",FALSE,Primary
+Q25,-1,Don't know,"During the winter, are there living spaces not normally heated?",FALSE,Primary
+Q25,0,No,"During the winter, are there living spaces not normally heated?",FALSE,Primary
+Q25,1,Yes,"During the winter, are there living spaces not normally heated?",FALSE,Primary
+Q26,-9,Not applicable,"During the winter months, for how many hours a day do you typically heat your home?",TRUE,Primary
+Q26,-3,Prefer not to say,"During the winter months, for how many hours a day do you typically heat your home?",TRUE,Primary
+Q26,-2,No answer,"During the winter months, for how many hours a day do you typically heat your home?",TRUE,Primary
+Q26,-1,Don't know,"During the winter months, for how many hours a day do you typically heat your home?",TRUE,Primary
+Q26DK_1,-9,Not applicable,"During the winter months, for how many hours a day do you typically heat your home? - Don't know",TRUE,Primary
+Q26DK_1,-3,Prefer not to say,"During the winter months, for how many hours a day do you typically heat your home? - Don't know",TRUE,Primary
+Q26DK_1,-2,No answer,"During the winter months, for how many hours a day do you typically heat your home? - Don't know",TRUE,Primary
+Q26DK_1,-1,Don't know,"During the winter months, for how many hours a day do you typically heat your home? - Don't know",TRUE,Primary
+Q27,-9,Not applicable,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+Q27,-3,Prefer not to say,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+Q27,-2,No answer,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+Q27,-1,Don't know,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+Q27,1,Open them all the time,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+Q27,2,Open them a few times a day (e.g. an hour in the morning and an hour in the evening),How often will your household open the windows .. on a typical cold day,FALSE,Primary
+Q27,3,Open them once a day for a limited period (e.g. first thing in the morning),How often will your household open the windows .. on a typical cold day,FALSE,Primary
+Q27,4,Open them a few times a week (e.g. if it gets hot /stuffy),How often will your household open the windows .. on a typical cold day,FALSE,Primary
+Q27,5,Never open them,How often will your household open the windows .. on a typical cold day,FALSE,Primary
+Q28R1,-9,Not applicable,How often do you .. Put on more clothes when cold,FALSE,Primary
+Q28R1,-3,Prefer not to say,How often do you .. Put on more clothes when cold,FALSE,Primary
+Q28R1,-2,No answer,How often do you .. Put on more clothes when cold,FALSE,Primary
+Q28R1,-1,Don't know,How often do you .. Put on more clothes when cold,FALSE,Primary
+Q28R1,1,Always,How often do you .. Put on more clothes when cold,FALSE,Primary
+Q28R1,2,Very often,How often do you .. Put on more clothes when cold,FALSE,Primary
+Q28R1,3,Quite often,How often do you .. Put on more clothes when cold,FALSE,Primary
+Q28R1,4,Not very often,How often do you .. Put on more clothes when cold,FALSE,Primary
+Q28R1,5,Never,How often do you .. Put on more clothes when cold,FALSE,Primary
+Q28R2,-9,Not applicable,Turn down your thermostat or turn off your heating when you leave the house,FALSE,Primary
+Q28R2,-3,Prefer not to say,Turn down your thermostat or turn off your heating when you leave the house,FALSE,Primary
+Q28R2,-2,No answer,Turn down your thermostat or turn off your heating when you leave the house,FALSE,Primary
+Q28R2,-1,Don't know,Turn down your thermostat or turn off your heating when you leave the house,FALSE,Primary
+Q28R2,1,Always,Turn down your thermostat or turn off your heating when you leave the house,FALSE,Primary
+Q28R2,2,Very often,Turn down your thermostat or turn off your heating when you leave the house,FALSE,Primary
+Q28R2,3,Quite often,Turn down your thermostat or turn off your heating when you leave the house,FALSE,Primary
+Q28R2,4,Not very often,Turn down your thermostat or turn off your heating when you leave the house,FALSE,Primary
+Q28R2,5,Never,Turn down your thermostat or turn off your heating when you leave the house,FALSE,Primary
+Q28R3,-9,Not applicable,"When your home is unoccupied for a day or more, turn the heating down or off?",FALSE,Primary
+Q28R3,-3,Prefer not to say,"When your home is unoccupied for a day or more, turn the heating down or off?",FALSE,Primary
+Q28R3,-2,No answer,"When your home is unoccupied for a day or more, turn the heating down or off?",FALSE,Primary
+Q28R3,-1,Don't know,"When your home is unoccupied for a day or more, turn the heating down or off?",FALSE,Primary
+Q28R3,1,Always,"When your home is unoccupied for a day or more, turn the heating down or off?",FALSE,Primary
+Q28R3,2,Very often,"When your home is unoccupied for a day or more, turn the heating down or off?",FALSE,Primary
+Q28R3,3,Quite often,"When your home is unoccupied for a day or more, turn the heating down or off?",FALSE,Primary
+Q28R3,4,Not very often,"When your home is unoccupied for a day or more, turn the heating down or off?",FALSE,Primary
+Q28R3,5,Never,"When your home is unoccupied for a day or more, turn the heating down or off?",FALSE,Primary
+Q28R3,6,"Not applicable, cannot do this","When your home is unoccupied for a day or more, turn the heating down or off?",FALSE,Primary
+Q28R4,-9,Not applicable,Use a standalone heater rather than putting the heating on or turning it up,FALSE,Primary
+Q28R4,-3,Prefer not to say,Use a standalone heater rather than putting the heating on or turning it up,FALSE,Primary
+Q28R4,-2,No answer,Use a standalone heater rather than putting the heating on or turning it up,FALSE,Primary
+Q28R4,-1,Don't know,Use a standalone heater rather than putting the heating on or turning it up,FALSE,Primary
+Q28R4,1,Always,Use a standalone heater rather than putting the heating on or turning it up,FALSE,Primary
+Q28R4,2,Very often,Use a standalone heater rather than putting the heating on or turning it up,FALSE,Primary
+Q28R4,3,Quite often,Use a standalone heater rather than putting the heating on or turning it up,FALSE,Primary
+Q28R4,4,Not very often,Use a standalone heater rather than putting the heating on or turning it up,FALSE,Primary
+Q28R4,5,Never,Use a standalone heater rather than putting the heating on or turning it up,FALSE,Primary
+Q28R5,-9,Not applicable,"Use an electric blanket, hot water bottle or similar when feeling cold rather than putting the heating on or turning it up",FALSE,Primary
+Q28R5,-3,Prefer not to say,"Use an electric blanket, hot water bottle or similar when feeling cold rather than putting the heating on or turning it up",FALSE,Primary
+Q28R5,-2,No answer,"Use an electric blanket, hot water bottle or similar when feeling cold rather than putting the heating on or turning it up",FALSE,Primary
+Q28R5,-1,Don't know,"Use an electric blanket, hot water bottle or similar when feeling cold rather than putting the heating on or turning it up",FALSE,Primary
+Q28R5,1,Always,"Use an electric blanket, hot water bottle or similar when feeling cold rather than putting the heating on or turning it up",FALSE,Primary
+Q28R5,2,Very often,"Use an electric blanket, hot water bottle or similar when feeling cold rather than putting the heating on or turning it up",FALSE,Primary
+Q28R5,3,Quite often,"Use an electric blanket, hot water bottle or similar when feeling cold rather than putting the heating on or turning it up",FALSE,Primary
+Q28R5,4,Not very often,"Use an electric blanket, hot water bottle or similar when feeling cold rather than putting the heating on or turning it up",FALSE,Primary
+Q28R5,5,Never,"Use an electric blanket, hot water bottle or similar when feeling cold rather than putting the heating on or turning it up",FALSE,Primary
+Q28R6,-9,Not applicable,Turn down radiators when rooms are not in use,FALSE,Primary
+Q28R6,-3,Prefer not to say,Turn down radiators when rooms are not in use,FALSE,Primary
+Q28R6,-2,No answer,Turn down radiators when rooms are not in use,FALSE,Primary
+Q28R6,-1,Don't know,Turn down radiators when rooms are not in use,FALSE,Primary
+Q28R6,1,Always,Turn down radiators when rooms are not in use,FALSE,Primary
+Q28R6,2,Very often,Turn down radiators when rooms are not in use,FALSE,Primary
+Q28R6,3,Quite often,Turn down radiators when rooms are not in use,FALSE,Primary
+Q28R6,4,Not very often,Turn down radiators when rooms are not in use,FALSE,Primary
+Q28R6,5,Never,Turn down radiators when rooms are not in use,FALSE,Primary
+Q28R7,-9,Not applicable,Turn down radiators in rooms that are in use,FALSE,Primary
+Q28R7,-3,Prefer not to say,Turn down radiators in rooms that are in use,FALSE,Primary
+Q28R7,-2,No answer,Turn down radiators in rooms that are in use,FALSE,Primary
+Q28R7,-1,Don't know,Turn down radiators in rooms that are in use,FALSE,Primary
+Q28R7,1,Always,Turn down radiators in rooms that are in use,FALSE,Primary
+Q28R7,2,Very often,Turn down radiators in rooms that are in use,FALSE,Primary
+Q28R7,3,Quite often,Turn down radiators in rooms that are in use,FALSE,Primary
+Q28R7,4,Not very often,Turn down radiators in rooms that are in use,FALSE,Primary
+Q28R7,5,Never,Turn down radiators in rooms that are in use,FALSE,Primary
+Q29,-9,Not applicable,During the summer does it ever get uncomfortably hot inside your home?,FALSE,Primary
+Q29,-3,Prefer not to say,During the summer does it ever get uncomfortably hot inside your home?,FALSE,Primary
+Q29,-2,No answer,During the summer does it ever get uncomfortably hot inside your home?,FALSE,Primary
+Q29,-1,Don't know,During the summer does it ever get uncomfortably hot inside your home?,FALSE,Primary
+Q29,1,"Yes, in all rooms",During the summer does it ever get uncomfortably hot inside your home?,FALSE,Primary
+Q29,2,"Yes, in multiple rooms but not all rooms",During the summer does it ever get uncomfortably hot inside your home?,FALSE,Primary
+Q29,3,"Yes, in one room",During the summer does it ever get uncomfortably hot inside your home?,FALSE,Primary
+Q29,4,No,During the summer does it ever get uncomfortably hot inside your home?,FALSE,Primary
+Q30R1,-9,Not applicable,"In the summer, do you open the windows to keep the home cool?",FALSE,Primary
+Q30R1,-3,Prefer not to say,"In the summer, do you open the windows to keep the home cool?",FALSE,Primary
+Q30R1,-2,No answer,"In the summer, do you open the windows to keep the home cool?",FALSE,Primary
+Q30R1,-1,Don't know,"In the summer, do you open the windows to keep the home cool?",FALSE,Primary
+Q30R1,1,Yes,"In the summer, do you open the windows to keep the home cool?",FALSE,Primary
+Q30R1,2,No,"In the summer, do you open the windows to keep the home cool?",FALSE,Primary
+Q30R1,3,"Not applicable, cannot do this","In the summer, do you open the windows to keep the home cool?",FALSE,Primary
+Q30R2,-9,Not applicable,"In the summer, do you switch on fan(s) to keep the home cool?",FALSE,Primary
+Q30R2,-3,Prefer not to say,"In the summer, do you switch on fan(s) to keep the home cool?",FALSE,Primary
+Q30R2,-2,No answer,"In the summer, do you switch on fan(s) to keep the home cool?",FALSE,Primary
+Q30R2,-1,Don't know,"In the summer, do you switch on fan(s) to keep the home cool?",FALSE,Primary
+Q30R2,1,Yes,"In the summer, do you switch on fan(s) to keep the home cool?",FALSE,Primary
+Q30R2,2,No,"In the summer, do you switch on fan(s) to keep the home cool?",FALSE,Primary
+Q30R2,3,"Not applicable, cannot do this","In the summer, do you switch on fan(s) to keep the home cool?",FALSE,Primary
+Q30R3,-9,Not applicable,"In the summer, do you close shutters to keep the home cool?",FALSE,Primary
+Q30R3,-3,Prefer not to say,"In the summer, do you close shutters to keep the home cool?",FALSE,Primary
+Q30R3,-2,No answer,"In the summer, do you close shutters to keep the home cool?",FALSE,Primary
+Q30R3,-1,Don't know,"In the summer, do you close shutters to keep the home cool?",FALSE,Primary
+Q30R3,1,Yes,"In the summer, do you close shutters to keep the home cool?",FALSE,Primary
+Q30R3,2,No,"In the summer, do you close shutters to keep the home cool?",FALSE,Primary
+Q30R3,3,"Not applicable, cannot do this","In the summer, do you close shutters to keep the home cool?",FALSE,Primary
+Q30R4,-9,Not applicable,"In the summer, do you close curtains to keep the home cool?",FALSE,Primary
+Q30R4,-3,Prefer not to say,"In the summer, do you close curtains to keep the home cool?",FALSE,Primary
+Q30R4,-2,No answer,"In the summer, do you close curtains to keep the home cool?",FALSE,Primary
+Q30R4,-1,Don't know,"In the summer, do you close curtains to keep the home cool?",FALSE,Primary
+Q30R4,1,Yes,"In the summer, do you close curtains to keep the home cool?",FALSE,Primary
+Q30R4,2,No,"In the summer, do you close curtains to keep the home cool?",FALSE,Primary
+Q30R4,3,"Not applicable, cannot do this","In the summer, do you close curtains to keep the home cool?",FALSE,Primary
+Q30R5,-9,Not applicable,"In the summer, do you close blinds to keep the home cool?",FALSE,Primary
+Q30R5,-3,Prefer not to say,"In the summer, do you close blinds to keep the home cool?",FALSE,Primary
+Q30R5,-2,No answer,"In the summer, do you close blinds to keep the home cool?",FALSE,Primary
+Q30R5,-1,Don't know,"In the summer, do you close blinds to keep the home cool?",FALSE,Primary
+Q30R5,1,Yes,"In the summer, do you close blinds to keep the home cool?",FALSE,Primary
+Q30R5,2,No,"In the summer, do you close blinds to keep the home cool?",FALSE,Primary
+Q30R5,3,"Not applicable, cannot do this","In the summer, do you close blinds to keep the home cool?",FALSE,Primary
+Q30R6,-9,Not applicable,"In the summer, do you unroll an awning or canopy to keep the home cool?",FALSE,Primary
+Q30R6,-3,Prefer not to say,"In the summer, do you unroll an awning or canopy to keep the home cool?",FALSE,Primary
+Q30R6,-2,No answer,"In the summer, do you unroll an awning or canopy to keep the home cool?",FALSE,Primary
+Q30R6,-1,Don't know,"In the summer, do you unroll an awning or canopy to keep the home cool?",FALSE,Primary
+Q30R6,1,Yes,"In the summer, do you unroll an awning or canopy to keep the home cool?",FALSE,Primary
+Q30R6,2,No,"In the summer, do you unroll an awning or canopy to keep the home cool?",FALSE,Primary
+Q30R6,3,"Not applicable, cannot do this","In the summer, do you unroll an awning or canopy to keep the home cool?",FALSE,Primary
+Q30R7,-9,Not applicable,"In the summer, do you switch on air conditioner to keep the home cool?",FALSE,Primary
+Q30R7,-3,Prefer not to say,"In the summer, do you switch on air conditioner to keep the home cool?",FALSE,Primary
+Q30R7,-2,No answer,"In the summer, do you switch on air conditioner to keep the home cool?",FALSE,Primary
+Q30R7,-1,Don't know,"In the summer, do you switch on air conditioner to keep the home cool?",FALSE,Primary
+Q30R7,1,Yes,"In the summer, do you switch on air conditioner to keep the home cool?",FALSE,Primary
+Q30R7,2,No,"In the summer, do you switch on air conditioner to keep the home cool?",FALSE,Primary
+Q30R7,3,"Not applicable, cannot do this","In the summer, do you switch on air conditioner to keep the home cool?",FALSE,Primary
+Q30R8,-9,Not applicable,"In the summer, do you use Mechanical Extract Ventilation or Mechanical Ventilation with Heat Recovery systems to keep the home cool?",FALSE,Primary
+Q30R8,-3,Prefer not to say,"In the summer, do you use Mechanical Extract Ventilation or Mechanical Ventilation with Heat Recovery systems to keep the home cool?",FALSE,Primary
+Q30R8,-2,No answer,"In the summer, do you use Mechanical Extract Ventilation or Mechanical Ventilation with Heat Recovery systems to keep the home cool?",FALSE,Primary
+Q30R8,-1,Don't know,"In the summer, do you use Mechanical Extract Ventilation or Mechanical Ventilation with Heat Recovery systems to keep the home cool?",FALSE,Primary
+Q30R8,1,Yes,"In the summer, do you use Mechanical Extract Ventilation or Mechanical Ventilation with Heat Recovery systems to keep the home cool?",FALSE,Primary
+Q30R8,2,No,"In the summer, do you use Mechanical Extract Ventilation or Mechanical Ventilation with Heat Recovery systems to keep the home cool?",FALSE,Primary
+Q30R8,3,"Not applicable, cannot do this","In the summer, do you use Mechanical Extract Ventilation or Mechanical Ventilation with Heat Recovery systems to keep the home cool?",FALSE,Primary
+Q31,-9,Not applicable,"In the summer, are you able to keep yourself cool at night by opening the windows?",FALSE,Primary
+Q31,-3,Prefer not to say,"In the summer, are you able to keep yourself cool at night by opening the windows?",FALSE,Primary
+Q31,-2,No answer,"In the summer, are you able to keep yourself cool at night by opening the windows?",FALSE,Primary
+Q31,-1,Don't know,"In the summer, are you able to keep yourself cool at night by opening the windows?",FALSE,Primary
+Q31,1,Always,"In the summer, are you able to keep yourself cool at night by opening the windows?",FALSE,Primary
+Q31,2,Often,"In the summer, are you able to keep yourself cool at night by opening the windows?",FALSE,Primary
+Q31,3,Sometimes,"In the summer, are you able to keep yourself cool at night by opening the windows?",FALSE,Primary
+Q31,4,Never,"In the summer, are you able to keep yourself cool at night by opening the windows?",FALSE,Primary
+Q31,5,My home does not over-heat in summer / I can keep cool at night without opening windows,"In the summer, are you able to keep yourself cool at night by opening the windows?",FALSE,Primary
+Q32,-9,Not applicable,How many cars and vans does your household own or have available to use?,FALSE,Primary
+Q32,-3,Prefer not to say,How many cars and vans does your household own or have available to use?,FALSE,Primary
+Q32,-2,No answer,How many cars and vans does your household own or have available to use?,FALSE,Primary
+Q32,-1,Don't know,How many cars and vans does your household own or have available to use?,FALSE,Primary
+Q32,0,0,How many cars and vans does your household own or have available to use?,FALSE,Primary
+Q32,1,1,How many cars and vans does your household own or have available to use?,FALSE,Primary
+Q32,2,2,How many cars and vans does your household own or have available to use?,FALSE,Primary
+Q32,3,3 or more,How many cars and vans does your household own or have available to use?,FALSE,Primary
+Q32,4,Don't know,How many cars and vans does your household own or have available to use?,FALSE,Primary
+Q32AREF_1,-9,Not applicable,How many cars and vans does your household own or have available to use? - Prefer not to say,TRUE,Primary
+Q32AREF_1,-3,Prefer not to say,How many cars and vans does your household own or have available to use? - Prefer not to say,TRUE,Primary
+Q32AREF_1,-2,No answer,How many cars and vans does your household own or have available to use? - Prefer not to say,TRUE,Primary
+Q32AREF_1,-1,Don't know,How many cars and vans does your household own or have available to use? - Prefer not to say,TRUE,Primary
+Q33_1,-9,Not applicable,"Private garage, driveway",FALSE,Primary
+Q33_1,-3,Prefer not to say,"Private garage, driveway",FALSE,Primary
+Q33_1,-2,No answer,"Private garage, driveway",FALSE,Primary
+Q33_1,-1,Don't know,"Private garage, driveway",FALSE,Primary
+Q33_1,0,No,"Private garage, driveway",FALSE,Primary
+Q33_1,1,Yes,"Private garage, driveway",FALSE,Primary
+Q33_2,-9,Not applicable,Personal space in a car park,FALSE,Primary
+Q33_2,-3,Prefer not to say,Personal space in a car park,FALSE,Primary
+Q33_2,-2,No answer,Personal space in a car park,FALSE,Primary
+Q33_2,-1,Don't know,Personal space in a car park,FALSE,Primary
+Q33_2,0,No,Personal space in a car park,FALSE,Primary
+Q33_2,1,Yes,Personal space in a car park,FALSE,Primary
+Q33_3,-9,Not applicable,Car park or parking area without allocated space,FALSE,Primary
+Q33_3,-3,Prefer not to say,Car park or parking area without allocated space,FALSE,Primary
+Q33_3,-2,No answer,Car park or parking area without allocated space,FALSE,Primary
+Q33_3,-1,Don't know,Car park or parking area without allocated space,FALSE,Primary
+Q33_3,0,No,Car park or parking area without allocated space,FALSE,Primary
+Q33_3,1,Yes,Car park or parking area without allocated space,FALSE,Primary
+Q33_4,-9,Not applicable,On street in a controlled parking zone (e.g. residents` parking zone),FALSE,Primary
+Q33_4,-3,Prefer not to say,On street in a controlled parking zone (e.g. residents` parking zone),FALSE,Primary
+Q33_4,-2,No answer,On street in a controlled parking zone (e.g. residents` parking zone),FALSE,Primary
+Q33_4,-1,Don't know,On street in a controlled parking zone (e.g. residents` parking zone),FALSE,Primary
+Q33_4,0,No,On street in a controlled parking zone (e.g. residents` parking zone),FALSE,Primary
+Q33_4,1,Yes,On street in a controlled parking zone (e.g. residents` parking zone),FALSE,Primary
+Q33_5,-9,Not applicable,"On street, where there are no restrictions",FALSE,Primary
+Q33_5,-3,Prefer not to say,"On street, where there are no restrictions",FALSE,Primary
+Q33_5,-2,No answer,"On street, where there are no restrictions",FALSE,Primary
+Q33_5,-1,Don't know,"On street, where there are no restrictions",FALSE,Primary
+Q33_5,0,No,"On street, where there are no restrictions",FALSE,Primary
+Q33_5,1,Yes,"On street, where there are no restrictions",FALSE,Primary
+Q33_6,-9,Not applicable,Other parking service (please type in),FALSE,Primary
+Q33_6,-3,Prefer not to say,Other parking service (please type in),FALSE,Primary
+Q33_6,-2,No answer,Other parking service (please type in),FALSE,Primary
+Q33_6,-1,Don't know,Other parking service (please type in),FALSE,Primary
+Q33_6,0,No,Other parking service (please type in),FALSE,Primary
+Q33_6,1,Yes,Other parking service (please type in),FALSE,Primary
+Q34,-9,Not applicable,How many plug-in electric vehicles does your household have?,FALSE,Primary
+Q34,-3,Prefer not to say,How many plug-in electric vehicles does your household have?,FALSE,Primary
+Q34,-2,No answer,How many plug-in electric vehicles does your household have?,FALSE,Primary
+Q34,-1,Don't know,How many plug-in electric vehicles does your household have?,FALSE,Primary
+Q34,0,0,How many plug-in electric vehicles does your household have?,FALSE,Primary
+Q34,1,1,How many plug-in electric vehicles does your household have?,FALSE,Primary
+Q34,2,2,How many plug-in electric vehicles does your household have?,FALSE,Primary
+Q34,3,3 or more,How many plug-in electric vehicles does your household have?,FALSE,Primary
+Q35,-9,Not applicable,Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q35,-3,Prefer not to say,Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q35,-2,No answer,Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q35,-1,Don't know,Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q35,1,"At home, using a three-pin plug (trickle charge)",Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q35,2,"At home, using a dedicated EV charger",Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q35,3,"Near home, using an EV charger provided by third party for residents",Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q35,4,"At work, at a charging station provided by my workplace",Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q35,5,"At public charging stations (e.g. at supermarkets, service stations, public car parks)",Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q35,6,Somewhere else,Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q35,7,Don't know,Where does your household mostly charge your electric vehicle(s)?,FALSE,Primary
+Q36,-9,"Not applicable, charging is not done at home (e.g. at work)",When does household charge electric vehicle at home?,FALSE,Primary
+Q36,-3,Prefer not to say,When does household charge electric vehicle at home?,FALSE,Primary
+Q36,-2,No answer,When does household charge electric vehicle at home?,FALSE,Primary
+Q36,-1,Don't know,When does household charge electric vehicle at home?,FALSE,Primary
+Q36,1,Mostly overnight (8pm to 7am),When does household charge electric vehicle at home?,FALSE,Primary
+Q36,2,Mostly during the day (7am to 4pm),When does household charge electric vehicle at home?,FALSE,Primary
+Q36,3,Mostly in the evening (4pm to 8pm),When does household charge electric vehicle at home?,FALSE,Primary
+Q36,4,Varies - whenever it's needed,When does household charge electric vehicle at home?,FALSE,Primary
+Q37,-9,Not applicable,"Overall, how satisfied are you with your life nowadays, where 0 is 'not at all satisfied' and 10 is 'completely satisfied'?",FALSE,Primary
+Q37,-3,Prefer not to say,"Overall, how satisfied are you with your life nowadays, where 0 is 'not at all satisfied' and 10 is 'completely satisfied'?",FALSE,Primary
+Q37,-2,No answer,"Overall, how satisfied are you with your life nowadays, where 0 is 'not at all satisfied' and 10 is 'completely satisfied'?",FALSE,Primary
+Q37,-1,Don't know,"Overall, how satisfied are you with your life nowadays, where 0 is 'not at all satisfied' and 10 is 'completely satisfied'?",FALSE,Primary
+Q37,0,0 not at all satisfied,"Overall, how satisfied are you with your life nowadays, where 0 is 'not at all satisfied' and 10 is 'completely satisfied'?",FALSE,Primary
+Q37,10,10 completely satisfied,"Overall, how satisfied are you with your life nowadays, where 0 is 'not at all satisfied' and 10 is 'completely satisfied'?",FALSE,Primary
+Q38,-9,Not applicable,"Overall, to what extent do you feel that the things you do in your life are worthwhile, where 0 is 'not at all worthwhile' and 10 is 'completely worthwhile'?",FALSE,Primary
+Q38,-3,Prefer not to say,"Overall, to what extent do you feel that the things you do in your life are worthwhile, where 0 is 'not at all worthwhile' and 10 is 'completely worthwhile'?",FALSE,Primary
+Q38,-2,No answer,"Overall, to what extent do you feel that the things you do in your life are worthwhile, where 0 is 'not at all worthwhile' and 10 is 'completely worthwhile'?",FALSE,Primary
+Q38,-1,Don't know,"Overall, to what extent do you feel that the things you do in your life are worthwhile, where 0 is 'not at all worthwhile' and 10 is 'completely worthwhile'?",FALSE,Primary
+Q38,0,0 not at all worthwhile,"Overall, to what extent do you feel that the things you do in your life are worthwhile, where 0 is 'not at all worthwhile' and 10 is 'completely worthwhile'?",FALSE,Primary
+Q38,10,10 completely worthwhile,"Overall, to what extent do you feel that the things you do in your life are worthwhile, where 0 is 'not at all worthwhile' and 10 is 'completely worthwhile'?",FALSE,Primary
+Q39,-9,Not applicable,How is your health in general? Is it..,FALSE,Primary
+Q39,-3,Prefer not to say,How is your health in general? Is it..,FALSE,Primary
+Q39,-2,No answer,How is your health in general? Is it..,FALSE,Primary
+Q39,-1,Don't know,How is your health in general? Is it..,FALSE,Primary
+Q39,1,Very good,How is your health in general? Is it..,FALSE,Primary
+Q39,2,Good,How is your health in general? Is it..,FALSE,Primary
+Q39,3,Fair,How is your health in general? Is it..,FALSE,Primary
+Q39,4,Bad,How is your health in general? Is it..,FALSE,Primary
+Q39,5,Very bad,How is your health in general? Is it..,FALSE,Primary
+Q39,6,Prefer not to say,How is your health in general? Is it..,FALSE,Primary
+Q40,-9,Not applicable,Do you have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q40,-3,Prefer not to say,Do you have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q40,-2,No answer,Do you have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q40,-1,Don't know,Do you have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q40,1,Yes,Do you have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q40,2,No,Do you have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q40,3,Prefer not to say,Do you have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q41_1,-9,Not applicable,Is your vision fine?,FALSE,Primary
+Q41_1,-3,Prefer not to say,Is your vision fine?,FALSE,Primary
+Q41_1,-2,No answer,Is your vision fine?,FALSE,Primary
+Q41_1,-1,Don't know,Is your vision fine?,FALSE,Primary
+Q41_1,0,No,Is your vision fine?,FALSE,Primary
+Q41_1,1,Yes,Is your vision fine?,FALSE,Primary
+Q41_10,-9,Not applicable,Do you have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q41_10,-3,Prefer not to say,Do you have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q41_10,-2,No answer,Do you have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q41_10,-1,Don't know,Do you have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q41_10,0,No,Do you have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q41_10,1,Yes,Do you have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q41_2,-9,Not applicable,Is your hearing fine?,FALSE,Primary
+Q41_2,-3,Prefer not to say,Is your hearing fine?,FALSE,Primary
+Q41_2,-2,No answer,Is your hearing fine?,FALSE,Primary
+Q41_2,-1,Don't know,Is your hearing fine?,FALSE,Primary
+Q41_2,0,No,Is your hearing fine?,FALSE,Primary
+Q41_2,1,Yes,Is your hearing fine?,FALSE,Primary
+Q41_3,-9,Not applicable,Do you have learning difficulties?,FALSE,Primary
+Q41_3,-3,Prefer not to say,Do you have learning difficulties?,FALSE,Primary
+Q41_3,-2,No answer,Do you have learning difficulties?,FALSE,Primary
+Q41_3,-1,Don't know,Do you have learning difficulties?,FALSE,Primary
+Q41_3,0,No,Do you have learning difficulties?,FALSE,Primary
+Q41_3,1,Yes,Do you have learning difficulties?,FALSE,Primary
+Q41_4,-9,Not applicable,Are you mobile?,FALSE,Primary
+Q41_4,-3,Prefer not to say,Are you mobile?,FALSE,Primary
+Q41_4,-2,No answer,Are you mobile?,FALSE,Primary
+Q41_4,-1,Don't know,Are you mobile?,FALSE,Primary
+Q41_4,0,No,Are you mobile?,FALSE,Primary
+Q41_4,1,Yes,Are you mobile?,FALSE,Primary
+Q41_5,-9,Not applicable,Do you have breathing problems?,FALSE,Primary
+Q41_5,-3,Prefer not to say,Do you have breathing problems?,FALSE,Primary
+Q41_5,-2,No answer,Do you have breathing problems?,FALSE,Primary
+Q41_5,-1,Don't know,Do you have breathing problems?,FALSE,Primary
+Q41_5,0,No,Do you have breathing problems?,FALSE,Primary
+Q41_5,1,Yes,Do you have breathing problems?,FALSE,Primary
+Q41_6,-9,Not applicable,Do you have any heart disease?,FALSE,Primary
+Q41_6,-3,Prefer not to say,Do you have any heart disease?,FALSE,Primary
+Q41_6,-2,No answer,Do you have any heart disease?,FALSE,Primary
+Q41_6,-1,Don't know,Do you have any heart disease?,FALSE,Primary
+Q41_6,0,No,Do you have any heart disease?,FALSE,Primary
+Q41_6,1,Yes,Do you have any heart disease?,FALSE,Primary
+Q41_7,-9,Not applicable,Do you have mental health problems?,FALSE,Primary
+Q41_7,-3,Prefer not to say,Do you have mental health problems?,FALSE,Primary
+Q41_7,-2,No answer,Do you have mental health problems?,FALSE,Primary
+Q41_7,-1,Don't know,Do you have mental health problems?,FALSE,Primary
+Q41_7,0,No,Do you have mental health problems?,FALSE,Primary
+Q41_7,1,Yes,Do you have mental health problems?,FALSE,Primary
+Q41_8,-9,Not applicable,Do you have any other chronic illness?,FALSE,Primary
+Q41_8,-3,Prefer not to say,Do you have any other chronic illness?,FALSE,Primary
+Q41_8,-2,No answer,Do you have any other chronic illness?,FALSE,Primary
+Q41_8,-1,Don't know,Do you have any other chronic illness?,FALSE,Primary
+Q41_8,0,No,Do you have any other chronic illness?,FALSE,Primary
+Q41_8,1,Yes,Do you have any other chronic illness?,FALSE,Primary
+Q41_9,-9,Not applicable,Do you have any other chronic illness? - Don't know,FALSE,Primary
+Q41_9,-3,Prefer not to say,Do you have any other chronic illness? - Don't know,FALSE,Primary
+Q41_9,-2,No answer,Do you have any other chronic illness? - Don't know,FALSE,Primary
+Q41_9,-1,Don't know,Do you have any other chronic illness? - Don't know,FALSE,Primary
+Q41_9,0,No,Do you have any other chronic illness? - Don't know,FALSE,Primary
+Q41_9,1,Yes,Do you have any other chronic illness? - Don't know,FALSE,Primary
+Q42,-9,Not applicable,Does anyone else in the household have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q42,-3,Prefer not to say,Does anyone else in the household have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q42,-2,No answer,Does anyone else in the household have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q42,-1,Don't know,Does anyone else in the household have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q42,1,Yes,Does anyone else in the household have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q42,2,No,Does anyone else in the household have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q42,3,Prefer not to say,Does anyone else in the household have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q42,4,Not applicable (living alone),Does anyone else in the household have any physical or mental health conditions or illnesses lasting or expected to last for 12 months or more?,FALSE,Primary
+Q43_1,-9,Not applicable,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_1,-3,Prefer not to say,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_1,-2,No answer,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_1,-1,Don't know,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_1,0,No,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_1,1,Yes,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_10,-9,Not applicable,Do other household members have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q43_10,-3,Prefer not to say,Do other household members have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q43_10,-2,No answer,Do other household members have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q43_10,-1,Don't know,Do other household members have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q43_10,0,No,Do other household members have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q43_10,1,Yes,Do other household members have any other chronic illness? - Prefer not to say,FALSE,Primary
+Q43_2,-9,Not applicable,Do other household members have any issues with their hearing?,FALSE,Primary
+Q43_2,-3,Prefer not to say,Do other household members have any issues with their hearing?,FALSE,Primary
+Q43_2,-2,No answer,Do other household members have any issues with their hearing?,FALSE,Primary
+Q43_2,-1,Don't know,Do other household members have any issues with their hearing?,FALSE,Primary
+Q43_2,0,No,Do other household members have any issues with their hearing?,FALSE,Primary
+Q43_2,1,Yes,Do other household members have any issues with their hearing?,FALSE,Primary
+Q43_3,-9,Not applicable,Do other household members have any issues with learning?,FALSE,Primary
+Q43_3,-3,Prefer not to say,Do other household members have any issues with learning?,FALSE,Primary
+Q43_3,-2,No answer,Do other household members have any issues with learning?,FALSE,Primary
+Q43_3,-1,Don't know,Do other household members have any issues with learning?,FALSE,Primary
+Q43_3,0,No,Do other household members have any issues with learning?,FALSE,Primary
+Q43_3,1,Yes,Do other household members have any issues with learning?,FALSE,Primary
+Q43_4,-9,Not applicable,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_4,-3,Prefer not to say,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_4,-2,No answer,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_4,-1,Don't know,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_4,0,No,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_4,1,Yes,Do other household members have any issues with their vision?,FALSE,Primary
+Q43_5,-9,Not applicable,Do other household members have any issues with their breathing?,FALSE,Primary
+Q43_5,-3,Prefer not to say,Do other household members have any issues with their breathing?,FALSE,Primary
+Q43_5,-2,No answer,Do other household members have any issues with their breathing?,FALSE,Primary
+Q43_5,-1,Don't know,Do other household members have any issues with their breathing?,FALSE,Primary
+Q43_5,0,No,Do other household members have any issues with their breathing?,FALSE,Primary
+Q43_5,1,Yes,Do other household members have any issues with their breathing?,FALSE,Primary
+Q43_6,-9,Not applicable,Do other household members have any heart disease?,FALSE,Primary
+Q43_6,-3,Prefer not to say,Do other household members have any heart disease?,FALSE,Primary
+Q43_6,-2,No answer,Do other household members have any heart disease?,FALSE,Primary
+Q43_6,-1,Don't know,Do other household members have any heart disease?,FALSE,Primary
+Q43_6,0,No,Do other household members have any heart disease?,FALSE,Primary
+Q43_6,1,Yes,Do other household members have any heart disease?,FALSE,Primary
+Q43_7,-9,Not applicable,Do other household members have any mental health problems?,FALSE,Primary
+Q43_7,-3,Prefer not to say,Do other household members have any mental health problems?,FALSE,Primary
+Q43_7,-2,No answer,Do other household members have any mental health problems?,FALSE,Primary
+Q43_7,-1,Don't know,Do other household members have any mental health problems?,FALSE,Primary
+Q43_7,0,No,Do other household members have any mental health problems?,FALSE,Primary
+Q43_7,1,Yes,Do other household members have any mental health problems?,FALSE,Primary
+Q43_8,-9,Not applicable,Do other household members have any other chronic illness?,FALSE,Primary
+Q43_8,-3,Prefer not to say,Do other household members have any other chronic illness?,FALSE,Primary
+Q43_8,-2,No answer,Do other household members have any other chronic illness?,FALSE,Primary
+Q43_8,-1,Don't know,Do other household members have any other chronic illness?,FALSE,Primary
+Q43_8,0,No,Do other household members have any other chronic illness?,FALSE,Primary
+Q43_8,1,Yes,Do other household members have any other chronic illness?,FALSE,Primary
+Q43_9,-9,Not applicable,Do other household members have any other chronic illness? - Don't know,FALSE,Primary
+Q43_9,-3,Prefer not to say,Do other household members have any other chronic illness? - Don't know,FALSE,Primary
+Q43_9,-2,No answer,Do other household members have any other chronic illness? - Don't know,FALSE,Primary
+Q43_9,-1,Don't know,Do other household members have any other chronic illness? - Don't know,FALSE,Primary
+Q43_9,0,No,Do other household members have any other chronic illness? - Don't know,FALSE,Primary
+Q43_9,1,Yes,Do other household members have any other chronic illness? - Don't know,FALSE,Primary
+Q44,-9,Not applicable,How many people in household hold a degree or higher qualification?,TRUE,Primary
+Q44,-3,Prefer not to say,How many people in household hold a degree or higher qualification?,TRUE,Primary
+Q44,-2,No answer,How many people in household hold a degree or higher qualification?,TRUE,Primary
+Q44DK_1,,,How many people in household hold a degree or higher qualification? - Prefer not to say,TRUE,Primary
+Q45,-9,Not applicable,To which ethnic group do you belong?,FALSE,Primary
+Q45,-3,Prefer not to say,To which ethnic group do you belong?,FALSE,Primary
+Q45,-2,No answer,To which ethnic group do you belong?,FALSE,Primary
+Q45,-1,Don't know,To which ethnic group do you belong?,FALSE,Primary
+Q45,1,Indian,To which ethnic group do you belong?,FALSE,Primary
+Q45,2,Pakistani,To which ethnic group do you belong?,FALSE,Primary
+Q45,3,Bangladeshi,To which ethnic group do you belong?,FALSE,Primary
+Q45,4,Chinese,To which ethnic group do you belong?,FALSE,Primary
+Q45,5,Any other Asian background,To which ethnic group do you belong?,FALSE,Primary
+Q45,6,Caribbean,To which ethnic group do you belong?,FALSE,Primary
+Q45,7,African,To which ethnic group do you belong?,FALSE,Primary
+Q45,8,"Any other Black, Black British, or Caribbean background",To which ethnic group do you belong?,FALSE,Primary
+Q45,9,White and Black Caribbean,To which ethnic group do you belong?,FALSE,Primary
+Q45,10,White and Black African,To which ethnic group do you belong?,FALSE,Primary
+Q45,11,White and Asian,To which ethnic group do you belong?,FALSE,Primary
+Q45,12,Any other Mixed or multiple ethnic background,To which ethnic group do you belong?,FALSE,Primary
+Q45,13,"English, Welsh, Scottish, Northern Irish or British",To which ethnic group do you belong?,FALSE,Primary
+Q45,14,Irish,To which ethnic group do you belong?,FALSE,Primary
+Q45,15,Gypsy or Irish Traveller,To which ethnic group do you belong?,FALSE,Primary
+Q45,16,Roma,To which ethnic group do you belong?,FALSE,Primary
+Q45,17,Any other White background,To which ethnic group do you belong?,FALSE,Primary
+Q45,18,Arab,To which ethnic group do you belong?,FALSE,Primary
+Q45,19,Any other ethnic group,To which ethnic group do you belong?,FALSE,Primary
+Q46B,-9,Not applicable,"Does the price you pay for your electricity depend on the time of day it is used? (for example, cheaper overnight or when there is less demand)",FALSE,Primary
+Q46B,-3,Prefer not to say,"Does the price you pay for your electricity depend on the time of day it is used? (for example, cheaper overnight or when there is less demand)",FALSE,Primary
+Q46B,-2,No answer,"Does the price you pay for your electricity depend on the time of day it is used? (for example, cheaper overnight or when there is less demand)",FALSE,Primary
+Q46B,-1,Don't know,"Does the price you pay for your electricity depend on the time of day it is used? (for example, cheaper overnight or when there is less demand)",FALSE,Primary
+Q46B,1,Yes,"Does the price you pay for your electricity depend on the time of day it is used? (for example, cheaper overnight or when there is less demand)",FALSE,Primary
+Q46B,2,No,"Does the price you pay for your electricity depend on the time of day it is used? (for example, cheaper overnight or when there is less demand)",FALSE,Primary
+Q46B,3,Don't know,"Does the price you pay for your electricity depend on the time of day it is used? (for example, cheaper overnight or when there is less demand)",FALSE,Primary
+Q46R1,-9,Not applicable,Which of these methods do you use to pay for your energy? - gas,FALSE,Primary
+Q46R1,-3,Prefer not to say,Which of these methods do you use to pay for your energy? - gas,FALSE,Primary
+Q46R1,-2,No answer,Which of these methods do you use to pay for your energy? - gas,FALSE,Primary
+Q46R1,-1,Don't know,Which of these methods do you use to pay for your energy? - gas,FALSE,Primary
+Q46R1,1,Direct debit (including online direct debit),Which of these methods do you use to pay for your energy? - gas,FALSE,Primary
+Q46R1,2,"Payment on receipt of bill (by post, telephone, online or at bank/post office)",Which of these methods do you use to pay for your energy? - gas,FALSE,Primary
+Q46R1,3,Pre-payment meter / Included in rent,Which of these methods do you use to pay for your energy? - gas,FALSE,Primary
+Q46R1,4,Other / Not applicable / no mains gas,Which of these methods do you use to pay for your energy? - gas,FALSE,Primary
+Q46R2,-9,Not applicable,Which of these methods do you use to pay for your energy? - electricity,FALSE,Primary
+Q46R2,-3,Prefer not to say,Which of these methods do you use to pay for your energy? - electricity,FALSE,Primary
+Q46R2,-2,No answer,Which of these methods do you use to pay for your energy? - electricity,FALSE,Primary
+Q46R2,-1,Don't know,Which of these methods do you use to pay for your energy? - electricity,FALSE,Primary
+Q46R2,1,Direct debit (including online direct debit),Which of these methods do you use to pay for your energy? - electricity,FALSE,Primary
+Q46R2,2,"Payment on receipt of bill (by post, telephone, online or at bank/post office)",Which of these methods do you use to pay for your energy? - electricity,FALSE,Primary
+Q46R2,3,Pre-payment meter / Included in rent,Which of these methods do you use to pay for your energy? - electricity,FALSE,Primary
+Q46R2,4,Other / Not applicable / no mains gas,Which of these methods do you use to pay for your energy? - electricity,FALSE,Primary
+Q47,-9,Not applicable,How well do you manage financially?,FALSE,Primary
+Q47,-3,Prefer not to say,How well do you manage financially?,FALSE,Primary
+Q47,-2,No answer,How well do you manage financially?,FALSE,Primary
+Q47,-1,Don't know,How well do you manage financially?,FALSE,Primary
+Q47,1,Living comfortably,How well do you manage financially?,FALSE,Primary
+Q47,2,Doing alright,How well do you manage financially?,FALSE,Primary
+Q47,3,Just about getting by,How well do you manage financially?,FALSE,Primary
+Q47,4,Finding it quite difficult,How well do you manage financially?,FALSE,Primary
+Q47,5,Finding it very difficult,How well do you manage financially?,FALSE,Primary
+Q48,-9,Not applicable,Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,-3,Prefer not to say,Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,-2,No answer,Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,-1,Don't know,Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,1,"Below £10,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,2,"£10,001 to £20,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,3,"£20,001 to £30,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,4,"£30,001 to £40,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,5,"£40,001 to £50,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,6,"£50,001 to £60,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,7,"£60,001 to £70,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,8,"£70,001 to £80,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,9,"£80,001 to £90,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,10,"£90,001 to £100,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary
+Q48,11,"Above £100,000",Select option that corresponds with your recent gross household annual income?,FALSE,Primary

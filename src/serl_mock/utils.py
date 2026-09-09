@@ -146,3 +146,27 @@ def read_lsoa_codes(path: str, vintage: str = "2021") -> Dict[str, List[str]]:
     for code in df["code"]:
         by_prefix.setdefault(code[:3], []).append(code)
     return by_prefix
+
+# ---------- MasterSERL harmonised-survey mapping ----------
+def read_master_mapping(path: str) -> List[Dict[str, Any]]:
+    """
+    Read the MasterSERL harmonised-survey master mapping CSV
+    (data/reference/edition<N>/serl_master_mapping_edition<N>.csv, exported
+    from the "Master Mapping" sheet of serl_mastermapping_methodology_edition01.xlsx
+    - see generator_contextual_data.py's "MasterSERL harmonised survey" section).
+
+    Returns one dict per harmonised variable, in file order, with at least
+    'domain', 'master_var_name', and 'Sign Up Survey' / '2023 Survey' /
+    '2025 Survey' (the original column name in that raw survey, or None if
+    that survey never asked this question - this is what decides 999999
+    vs. a sampled value per survey occurrence). Raises if the file is
+    missing: unlike read_survey_dictionary, there's no fallback - the
+    mapping is required, not an optional convenience.
+    """
+    df = pd.read_csv(path)
+    # Cast to object dtype before replacing NaN with None - otherwise pandas
+    # silently coerces None back to NaN in any float-typed column, and
+    # bool(float('nan')) is True, which would make every such cell look
+    # "present" to callers doing a plain truthiness check.
+    df = df.astype(object).where(pd.notnull(df), None)
+    return df.to_dict(orient="records")

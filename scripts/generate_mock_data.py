@@ -86,7 +86,7 @@ from src.serl_mock.utils import read_config
 # programmatic callers of run_all(), which defaults to config/serl_mock.yaml
 # on its own.
 # DEFAULT_CONFIG_PATH: Optional[Path] = None
-DEFAULT_CONFIG_PATH = CONFIG_DIR / "serl_mock_edition09.yaml"
+DEFAULT_CONFIG_PATH = CONFIG_DIR / "serl_mock_edition08.yaml"
 
 # Which datasets a run produces. All True by default (today's behaviour) —
 # set any to False via the config file's `generate:` section to skip that
@@ -100,6 +100,14 @@ DEFAULT_GENERATE_FLAGS = {
     "survey": True,
     "covid19_survey": True,
     "follow_up_survey": True,
+    # Off by default (unlike every other dataset here): needs
+    # data/reference/edition<N>/serl_master_mapping_edition<N>.csv, which
+    # today only exists for edition09 — see generator_contextual_data.py's
+    # "MasterSERL harmonised survey" section.
+    "harmonised_survey": False,
+    # Also off by default, same reason — see generator_contextual_data.py's
+    # "Raw 2025 SERL Observatory survey" section.
+    "survey_2025": False,
     "participant_summary": True,
     "exporters_list": True,
 }
@@ -147,7 +155,7 @@ def run_all(
     `generate:` section says — see _resolve_generate_flags() below for the
     full per-dataset generate.<name> controls (hh_smart_meter,
     daily_smart_meter, rt_summary, weather, epc, survey, covid19_survey,
-    follow_up_survey, participant_summary, exporters_list), each
+    follow_up_survey, harmonised_survey, survey_2025, participant_summary, exporters_list), each
     independently skippable and all True by default.
     """
     cfg_path = Path(config_path) if config_path is not None else (CONFIG_DIR / "serl_mock.yaml")
@@ -209,6 +217,8 @@ def run_all(
             f"serl_survey_data_dictionary_edition{edition}.csv",
         f"serl_covid19_survey_data_dictionary_edition{dict_source_edition}.csv":
             f"serl_covid19_survey_data_dictionary_edition{edition}.csv",
+        f"serl_2025_follow_up_survey_data_dictionary_edition{dict_source_edition}.csv":
+            f"serl_2025_follow_up_survey_data_dictionary_edition{edition}.csv",
     }
     for src_name, dst_name in dict_renames.items():
         src = edition_reference_dir / src_name
@@ -359,6 +369,8 @@ def run_all(
         survey=generate_flags["survey"],
         covid19_survey=generate_flags["covid19_survey"],
         follow_up_survey=generate_flags["follow_up_survey"],
+        harmonised_survey=generate_flags["harmonised_survey"],
+        survey_2025=generate_flags["survey_2025"],
         participant_summary=generate_flags["participant_summary"],
         exporters_list=generate_flags["exporters_list"],
     )
