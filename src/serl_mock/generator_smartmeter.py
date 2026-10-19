@@ -21,10 +21,16 @@ Both can be replaced or extended independently of the generator logic.
 
 Edition 07 compliance
 ---------------------
-    - UTC month cut-off for HH files.
+    - Each HH reading is the energy over the half-hour ENDING at its timestamp
+      (SERL smart-meter documentation: a midnight read "pertains to the
+      previous day"). A file for month M therefore holds stamps from 00:30 on
+      the 1st to 00:00 on the 1st of M+1 (UTC month cut-off on the half-hour's
+      start), so every half-hour of the month is in its own month's file.
     - Europe/London local timestamps, BST/GMT label.
-    - Effective date at UTC midnight rollover.
-    - HH index 1–48 or NA when timestamp is not on a 30-min boundary.
+    - Effective date: the local date, or the previous day for a midnight read.
+    - HH = position of the half-hour within its effective local day
+      (1 = 00:00–00:30 … 46/48/50 on spring/normal/autumn days), or NA when
+      the timestamp is not on a 30-min boundary.
     - Edition 07-aligned error flags; -5 for invalid read time.
     - Gas Wh from CV = 39.5 MJ/m³ (~10 972 Wh/m³).
 """
@@ -196,23 +202,43 @@ class HHSmartMeterGenerator:
 
     @staticmethod
     def _effective_date_local(ts: pd.Timestamp) -> str:
-        eff = (ts - pd.Timedelta(days=1)).date() if (ts.hour == ts.minute == ts.second == 0) else ts.date()
+        # A midnight read covers the previous day's last half-hour. Subtract a
+        # calendar day from the date — not 24 elapsed hours, which lands two
+        # days back after the 23-hour spring-forward day.
+        eff = ts.date() - pd.Timedelta(days=1) if (ts.hour == ts.minute == ts.second == 0) else ts.date()
         return eff.strftime("%d/%m/%Y")
 
     @staticmethod
     def _hh_index_or_na(ts: pd.Timestamp):
-        if ts.second == 0 and ts.minute in (0, 30):
-            return (ts.hour * 60 + ts.minute) // 30 + 1
-        return None
+        """Position (1-based) of the half-hour ENDING at `ts` within its
+        effective local day — 1 = 00:00–00:30 local, up to 46/48/50 on
+        spring-forward/normal/fall-back days — or None when `ts` isn't on a
+        30-min boundary. `ts` must be timezone-aware (any zone).
+
+        Counted in elapsed half-hours from local midnight, so it agrees with
+        `_effective_date_local` (a midnight read is the last half-hour of the
+        previous day) and never repeats on the autumn clock-change day.
+        """
+        if not (ts.second == 0 and ts.minute in (0, 30)):
+            return None
+        start_local = (ts - pd.Timedelta(minutes=30)).tz_convert("Europe/London")
+        midnight_local = start_local.normalize()
+        return int((start_local - midnight_local) / pd.Timedelta(minutes=30)) + 1
 
     # ---------- Month generation ----------
 
     def generate_month(self, year: int, month: int) -> pd.DataFrame:
-        """Generate all households for a single calendar month (UTC cut-off)."""
+        """Generate all households for a single calendar month (UTC cut-off).
 
-        # UTC timestamps for the month
-        start_utc = pd.Timestamp(year=year, month=month, day=1, tz="UTC")
-        end_utc   = start_utc + pd.offsets.MonthBegin(1) - pd.Timedelta(minutes=30)
+        Readings are stamped at the END of their half-hour, so the month's
+        half-hours (starting 00:00 on the 1st … 23:30 on the last day, UTC)
+        carry stamps from 00:30 on the 1st to 00:00 on the 1st of next month.
+        """
+
+        # UTC end-of-half-hour stamps for the month's half-hours
+        month_start_utc = pd.Timestamp(year=year, month=month, day=1, tz="UTC")
+        start_utc = month_start_utc + pd.Timedelta(minutes=30)
+        end_utc   = month_start_utc + pd.offsets.MonthBegin(1)
         idx_utc   = pd.date_range(start=start_utc, end=end_utc, freq=self.freq, tz="UTC")
 
         # Minimal skew (~0.05 %) to exercise Valid_read_time and HH index logic
@@ -711,10 +737,12 @@ class ReadTypeDataQualitySummaryGenerator:
             raise FileNotFoundError("No half-hourly files found; cannot build rt summary.")
 
         hh = pd.concat(parts, ignore_index=True)
-        hh["_date"] = pd.to_datetime(
-            hh["Read_date_time_UTC"].astype(str).str.slice(0, 10),
-            format="%Y-%m-%d",
-            errors="coerce",
+        # The day a reading belongs to is its effective local date (a midnight
+        # stamp is the previous day's last half-hour), not the UTC date of the
+        # stamp — which would push each year's last reading into the next year.
+        eff = hh["Read_date_effective_local"].astype(str)
+        hh["_date"] = pd.to_datetime(eff, format="%d/%m/%Y", errors="coerce").fillna(
+            pd.to_datetime(eff, format="%Y-%m-%d", errors="coerce")
         )
         hh["_valid_time"] = hh["Valid_read_time"].astype(bool)
         return hh

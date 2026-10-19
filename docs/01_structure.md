@@ -228,7 +228,7 @@ Contains three generators:
 `HHSmartMeterGenerator`:
 - Reads configuration and instantiates household profiles at `__init__` time
 - `generate_month(year, month)` builds the full T × H DataFrame vectorised — unaffected by format/layout
-- Applies Edition 08 timestamp rules (UTC cut-off, BST/GMT labels, HH index, `Valid_read_time`)
+- Applies Edition 08 timestamp rules (readings stamped at the end of their half-hour, UTC month cut-off, BST/GMT labels, effective date, HH position, `Valid_read_time`)
 - Computes Edition 08-style error flags with `np.where` (no Python loops)
 - `generate_all(outfolder)` asks `self.layout` (see `layout.py`) how to group months into files, then writes each group via `write_table` using `self.format`
 

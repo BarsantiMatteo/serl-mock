@@ -125,10 +125,10 @@ future edition ever changes them.
 
 | Rule | Implementation |
 |---|---|
-| UTC month cut-off | `pd.date_range` bounded by UTC calendar month start/end |
+| UTC month cut-off | `pd.date_range` of end-of-half-hour stamps: 00:30Z on the 1st to 00:00Z on the 1st of the next month |
 | Local label (BST/GMT) | `tz_convert("Europe/London")` → `tzname()` |
-| Effective date | Midnight UTC rolls back to the previous local date |
-| HH index (1–48) | Derived from UTC timestamp; `NA` if not on a 30-min boundary |
+| Effective date | Local date; a read at local midnight rolls back one calendar day |
+| HH index (1–46/48/50) | Position of the half-hour ending at the stamp within its effective local day; `NA` if not on a 30-min boundary |
 | `Valid_read_time` | `True` if HH is not NA |
 | Error flags | `-5` invalid time, `-2` very high, `-1` meter max, `1` valid, `0` missing |
 

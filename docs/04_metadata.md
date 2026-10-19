@@ -15,15 +15,15 @@ or `output_label` changes the folder and filename suffix — see
 
 **File pattern:** `serl_smart_meter_hh_edition08/serl_half_hourly_<year>_<MM>_edition08.csv`  
 **Grain:** one row per household per 30-minute UTC period  
-**Coverage:** UTC calendar month (00:00:00Z on the 1st to 23:30:00Z on the last day)
+**Coverage:** the half-hours of a UTC calendar month. Each reading is stamped at the **end** of the half-hour it measures (SERL: a midnight read "pertains to the previous day"), so a file runs from 00:30:00Z on the 1st to 00:00:00Z on the 1st of the next month
 
 | Column | Type | Description |
 |---|---|---|
 | PUPRN | text | Pseudonymised household identifier (8-character alphanumeric) |
-| Read_date_time_UTC | text | Timestamp of the reading in UTC — format `YYYY-MM-DDTHH:MM:SSZ` |
+| Read_date_time_UTC | text | Timestamp of the reading in UTC — the **end** of the half-hour measured — format `YYYY-MM-DDTHH:MM:SSZ` |
 | Read_date_time_local | text | Timestamp in Europe/London local time with timezone label (GMT or BST) |
-| Read_date_effective_local | text | Local calendar date the reading belongs to (format `DD/MM/YYYY`); midnight UTC reads roll to the previous local date |
-| HH | int (nullable) | Half-hour interval index within the local day (1 = 00:00–00:30, 48 = 23:30–00:00); `NA` if the timestamp is not on a 30-minute boundary |
+| Read_date_effective_local | text | Local calendar date the reading belongs to (format `DD/MM/YYYY`): the local date of the reading, or the previous day for a read at local midnight |
+| HH | int (nullable) | Position of the half-hour within its effective local day: 1 = 00:00–00:30 (stamped 00:30), 48 = 23:30–00:00 (stamped 00:00 next day); 46 / 50 on the spring / autumn clock-change days; `NA` if the timestamp is not on a 30-minute boundary. SERL documents HH only as "between 1 and 48"; the numbering on clock-change days is an assumption to confirm against real data |
 | Valid_read_time | boolean | `True` if HH is not NA (timestamp is aligned to a 30-minute boundary) |
 | Elec_act_imp_hh_Wh | int | Electricity active import for the half-hour period (Wh) |
 | Elec_react_imp_hh_varh | int | Electricity reactive import for the half-hour period (varh) |

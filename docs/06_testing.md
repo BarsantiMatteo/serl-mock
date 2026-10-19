@@ -42,6 +42,19 @@ list — no config file, no disk I/O, no full pipeline run. Fast, and the first 
 household-trait logic changes. A failure here means the function's columns, trait-fraction
 counts, or reproducibility (same seed → same output) changed.
 
+### 1b. Timestamp conventions — `test_hh_timestamps.py`
+
+Pins how HH smart-meter readings are timed (SERL stamps each reading at the **end** of the
+half-hour it measures):
+- unit tests for `HH` and `Read_date_effective_local` on normal days and both clock-change
+  days (46 / 50 half-hours), including the midnight read after the 23-hour spring day;
+- on the generated 2021 fixture: every monthly file runs from 00:30 on the 1st to 00:00 on
+  the 1st of the next month, effective dates cover exactly 2021, and `HH` never repeats and
+  covers 1–46/48/50 within each effective day.
+
+A failure here means the half-hour ↔ day ↔ `HH` mapping drifted — downstream pipelines
+assign readings to days and clock times from these columns.
+
 ### 2. Pipeline smoke test — `test_pipeline_smoke.py`
 
 Runs the *whole* pipeline once (via the session-scoped `generated_output_dir` fixture — every
