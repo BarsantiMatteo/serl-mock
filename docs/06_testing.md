@@ -115,6 +115,20 @@ expected file when turned on). Coverage includes: the `999999` "not asked" senti
 A failure here usually means either the coding templates in `generator_contextual_data.py`
 changed shape, or the skip-logic/presence rules stopped matching the master mapping.
 
+### 5. Synthetic missingness — `test_missingness.py`
+
+Runs the smart-meter steps on `TINY_CONFIG` plus a `missingness:` block
+covering every type and effect (edition08, and once for edition09), and
+checks the HH files, daily files and `rt_summary` against the written
+ground truth: dropped rows absent, flags and emptied values where planted,
+trait selection and time windows respected, duplicates and off-grid
+counts, incomplete daily sums, `missing` counting absent and flag-`0`
+reads. It also compares with the session's plain fixture run: every
+reading missingness didn't touch must be identical (its rngs are separate
+from the generator's). Unit tests cover determinism and config
+validation. The golden manifests don't include missingness, so they're
+unaffected.
+
 ## Fixture config
 
 All tests run against one small, deterministic config (`tests/_shared.py::TINY_CONFIG`), not the

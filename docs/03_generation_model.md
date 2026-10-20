@@ -130,9 +130,35 @@ future edition ever changes them.
 | Effective date | Local date; a read at local midnight rolls back one calendar day |
 | HH index (1–46/48/50) | Position of the half-hour ending at the stamp within its effective local day; `NA` if not on a 30-min boundary |
 | `Valid_read_time` | `True` if HH is not NA |
-| Error flags | `-5` invalid time, `-2` very high, `-1` meter max, `1` valid, `0` missing |
+| Error flags | `-5` invalid time, `-2` very high, `-1` meter max, `1` valid, `0` missing (only from synthetic missingness) |
 
 A small fraction (~0.05 %) of timestamps is deliberately skewed by 60 seconds to exercise `Valid_read_time = False` and `HH = NA` paths.
+
+---
+
+## Synthetic missingness
+
+Optional, configured under `missingness:` (see
+[02_configuration.md](02_configuration.md#synthetic-missingness-missingness)),
+implemented in `missingness.py`.
+
+- **Where.** `HHSmartMeterGenerator.generate_month()` hands its finished
+  frame (flags set, before the edition09 reshape) to
+  `MissingnessPlanner.apply()`. The daily generator calls `generate_month()`
+  through its own HH generator, so it sees exactly the same gaps.
+- **Randomness.** Every draw uses its own `np.random.Generator`, seeded
+  from `(seed, salt, pattern, purpose[, year, month])`. The base
+  generator's rng is never touched, so every reading missingness leaves
+  alone is identical to a run without it (tested). Outage, event and
+  late/early runs are drawn once per household for the whole period;
+  scattered half-hours per month.
+- **Daily data.** A half-hour counts towards a full day only with a valid
+  time, a flag other than `0` and a value; electricity and gas are judged
+  separately (`Valid_hh_sum_or_daily_elec` / `_gas`, the HH sums). Without
+  missingness this is the same as before.
+- **rt_summary.** `missing` = reads flagged `0` plus expected reads absent
+  from the file (`maxPossReads` minus distinct stamps present);
+  `percMissing` follows. Both stay `0` without missingness.
 
 ---
 

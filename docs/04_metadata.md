@@ -152,14 +152,14 @@ no `serl_` prefix for the moment)
 | maxPossReads | int | Maximum possible reads in the schedule |
 | percValid | float | Percent of valid reads (flag `1` and valid read time) |
 | percValidOrUnitError | float | Percent of valid reads or unit-error reads |
-| percMissing | float | Percent of missing reads (flag `0`) |
+| percMissing | float | Percent of missing reads (`missing` / `maxPossReads`) |
 | percError | float | Percent of error reads |
 | valid | int | Count of valid reads |
 | validOrHHsumValid | int | Count valid or valid HH-sum rows |
 | validWrongTime | int | Count of otherwise-valid reads at invalid time |
 | wrongUnits | int | Count of unit-error reads (flag `-4`) |
 | suspiciousZero | int | Count of suspicious zero reads |
-| missing | int | Count of missing reads |
+| missing | int | Count of missing reads: flag `0`, plus expected reads absent from the file. Always `0` unless synthetic missingness is on |
 | maxRead | int | Count of meter-max reads (flag `-1`) |
 | highRead | int | Count of very-high reads (flag `-2`) |
 | negative | int | Count of negative reads (flag `-3`) |
@@ -482,3 +482,5 @@ All flag columns use the same integer coding:
 | `-5` | Invalid read time — timestamp is not aligned to a 30-minute boundary (`Valid_read_time = False`) |
 
 > `-3` (negative reading) and `-4` (unit error) are recognised by the read-type data quality summary generator (`ReadTypeDataQualitySummaryGenerator`) but are never emitted by the half-hourly or daily generators — `negative` and `wrongUnits` counts in `serl_smart_meter_rt_summary_edition08.csv` are always `0` in the current mock data.
+>
+> `0` (missing), and any code a pattern sets, only appear with synthetic missingness on (`missingness:`, see [02_configuration.md](02_configuration.md#synthetic-missingness-missingness)). A missing read then has an empty value, so value columns can be empty; without missingness they never are.

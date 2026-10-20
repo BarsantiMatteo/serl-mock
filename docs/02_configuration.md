@@ -272,6 +272,89 @@ The contextual generator uses this top-level `year` (default `2023`, independent
 
 ---
 
+## Synthetic missingness (`missingness`)
+
+Real SERL data has gaps; the base generator makes almost none. The
+`missingness:` block plants configurable ones in the half-hourly data,
+for developing missing-data analysis against realistic gaps. It is **off
+unless `enabled: true`**: without it the output is byte-identical to a
+run with no block. A ready-made scenario is
+`config/serl_mock_edition08_gappy.yaml` (output `data/mock/edition08_gappy/`),
+whose header documents every key.
+
+```yaml
+missingness:
+  enabled: true
+  patterns:
+    - name: export_flag_failures         # unique; used in the ground truth
+      type: scattered                    # outage | scattered | event | late_start | early_end
+      households: {share: 0.3, traits: {has_export_meter: true}}
+      time_window: {start: "08:00", end: "18:00"}   # optional, local, half-open
+      prob_per_slot: {low: 0.05, high: 0.4}
+      streams: [elec_exp]
+      effect: {type: flag, code: -1}
+```
+
+Each pattern chooses households (a `share` of those matching `traits`
+from `household_traits.csv`), then half-hours by `type`, then changes
+the rows by `effect`:
+
+| `type` | Half-hours | Keys |
+|---|---|---|
+| `outage` | runs at random positions in the period | `per_household: [min, max]`, `length_days` |
+| `scattered` | single half-hours; each household's rate drawn log-uniformly | `prob_per_slot: {low, high}` |
+| `event` | a fixed local date-time range, same for every selected household | `start`, `end` (`'YYYY-MM-DD HH:MM'`, end exclusive) |
+| `late_start` | a run from the start of the period | `length_days` |
+| `early_end` | a run up to the end of the period | `length_days` |
+
+`length_days` is a list of `[min_days, max_days, weight]` bands: a band
+is drawn by weight, then a length uniformly within it.
+
+| `effect` | What happens | Needs `streams` |
+|---|---|---|
+| `drop_row` | row not written: every stream absent | no |
+| `missing` | flag `0` and value empty, as SERL records a missing read | yes |
+| `{type: flag, code: N}` | flag set to `N`; add `null_value: true` to empty the value | yes |
+| `null_value` | value emptied, flag kept | yes |
+| `invalid_time` | `Valid_read_time` FALSE | no |
+| `duplicate` | row written twice | no |
+| `{type: off_grid, minutes: N}` | stamp moved off :00/:30, like the base skew (`HH` NA, `Valid_read_time` FALSE, flags `-5`) | no |
+
+Streams: `elec_imp`, `elec_exp`, `elec_react_imp`, `elec_react_exp`, `gas`.
+
+Patterns run in order; a later pattern only targets rows still on their
+half-hour. The daily data and `rt_summary` follow the planted gaps (see
+[03_generation_model.md](03_generation_model.md#synthetic-missingness)).
+What was planted is written to `mock_internal/`:
+
+- `missingness_ground_truth.csv`: one row per planted run: `pattern`,
+  `type`, `effect`, `streams`, `PUPRN`, `start_utc` / `end_utc` (UTC
+  half-hour **start** times, end exclusive; the file's
+  `Read_date_time_UTC` stamps are 30 minutes later), `n_slots`.
+- `missingness_patterns.csv`: one row per pattern with households,
+  half-hours and its parsed config.
+
+### Tuning a scenario to real data
+
+The values in `serl_mock_edition08_gappy.yaml` are placeholders. To make
+a scenario resemble real SERL data, set each pattern from aggregate
+measures of the real data's gaps (e.g. the missing-data first look in
+serl-loadprofiles-desnz), as rough values:
+
+| Pattern | Parameters | Real-data measure |
+|---|---|---|
+| `long_outages` vs `missing_reads` | which effect real gaps use: `drop_row` (rows absent) or `missing` (flag `0` rows) | share of missing half-hours that are absent rows vs flag `0` |
+| `long_outages` | `share`, `per_household`, `length_days` | gap-length distribution (runs of a day or more); households by missing share |
+| `short_gaps` | `share`, `prob_per_slot` | households by missing share; gaps of 1-5 half-hours |
+| `february_event` (and other events) | dates, `share`, streams/effect | days when many households start a gap at once |
+| `late_start`, `early_end` | `share`, `length_days` | first/last reading vs the expected start/end date |
+| `time_window` on any pattern | clock times | missing share by time of day |
+| `export_flag_failures` | `share` of export households, codes, `time_window`, `prob_per_slot` | import × export status per half-hour; export flag codes |
+| `gas_outages` | `share`, lengths, effect | gas × electricity status per half-hour |
+| `invalid_time`, `duplicates`, `off_grid_stamps`, extra `flag` patterns | rates, codes | share of each status; flag codes |
+
+---
+
 ## Adding a new setting
 
 1. Add the key and a default value to `serl_mock.yaml`.

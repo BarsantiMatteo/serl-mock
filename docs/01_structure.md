@@ -230,7 +230,10 @@ Contains three generators:
 - `generate_month(year, month)` builds the full T × H DataFrame vectorised — unaffected by format/layout
 - Applies Edition 08 timestamp rules (readings stamped at the end of their half-hour, UTC month cut-off, BST/GMT labels, effective date, HH position, `Valid_read_time`)
 - Computes Edition 08-style error flags with `np.where` (no Python loops)
-- `generate_all(outfolder)` asks `self.layout` (see `layout.py`) how to group months into files, then writes each group via `write_table` using `self.format`
+- `generate_all(outfolder, missingness_dir)` asks `self.layout` (see `layout.py`) how to group months into files, then writes each group via `write_table` using `self.format`; with synthetic missingness on, also writes its ground truth to `missingness_dir` (`mock_internal/`)
+
+### `src/serl_mock/missingness.py`
+Optional **synthetic missingness** (`missingness:` in the config, off by default). `parse_patterns` validates the block; `MissingnessPlanner` draws each pattern's households and runs from its own seeded rngs and `apply()` changes one month's HH frame (dropped rows, flag `0` / other codes, emptied values, invalid times, duplicates, off-grid stamps). `ground_truth()` lists every planted run for `mock_internal/missingness_ground_truth.csv`. See [02_configuration.md](02_configuration.md#synthetic-missingness-missingness).
 
 ### `src/serl_mock/generator_contextual_data.py`
 `SERLContextualVariablesGenerator` produces the contextual CSV files: EPC, SERL survey, COVID-19 survey, participant summary, follow-up survey, the MasterSERL harmonised survey, the raw 2025 survey, and the exporter PUPRN list.  It reads household traits from `mock_internal/household_traits.csv` to ensure device-ownership fields (PV, HP, EV, solar thermal) are consistent with the smart-meter outputs, and shares a single England & Wales / Scotland nation assignment between the EPC and participant-summary generators so `epcVersion` and `Region` never contradict each other.

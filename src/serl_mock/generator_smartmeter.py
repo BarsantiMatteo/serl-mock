@@ -51,6 +51,7 @@ from .utils import (
 )
 from .layout import get_layout, get_daily_layout
 from .edition import get_edition
+from .missingness import MissingnessPlanner, parse_patterns
 from .profiles import generate_profiles
 from .patterns import (
     elec_seasonal_mult, elec_daily_mult,
@@ -188,6 +189,16 @@ class HHSmartMeterGenerator:
         self._has_export_meter = np.array(
             [int(traits_df.loc[p, "has_export_meter"]) for p in self.households],
             dtype=float,
+        )
+
+        # Synthetic missingness ('missingness:' in the config; off by
+        # default). Uses its own seeded rngs, never self.rng, so it doesn't
+        # change any other generated value. See missingness.py.
+        patterns = parse_patterns(cfg.get("missingness"), set(traits_df.columns))
+        self.missingness = (
+            MissingnessPlanner(patterns, self.households, traits_df,
+                               self.start_year, self.end_year, self.seed)
+            if patterns else None
         )
 
     # ---------- Timestamp formatting helpers ----------
@@ -375,6 +386,9 @@ class HHSmartMeterGenerator:
         df["Elect_react_exp_flag"] = np.where(invalid, -5, 1)
         df["Gas_flag"]             = _flag_gas(gas_m3)
 
+        if self.missingness is not None:
+            df = self.missingness.apply(df, ts_utc_s, year, month, fmt=self)
+
         df = df.drop(columns=["timestamp_utc"])
         if self.schema == "harmonised":
             df = self._to_harmonised_hh(df)
@@ -421,13 +435,29 @@ class HHSmartMeterGenerator:
             df["filename"] = f"{stem}.{self.format}"
         write_table(df, Path(outfolder) / stem, format=self.format)
 
-    def generate_all(self, outfolder: "Union[str, os.PathLike]"):
+    def generate_all(
+        self,
+        outfolder: "Union[str, os.PathLike]",
+        missingness_dir: "Optional[Union[str, os.PathLike]]" = None,
+    ):
+        """Write every HH file. With missingness on and `missingness_dir`
+        given, also write what was planted there (always CSV, mock-only):
+        missingness_ground_truth.csv and missingness_patterns.csv."""
         outfolder = ensure_output_dir(outfolder)
         for group in self.layout.month_groups(self.start_year, self.end_year):
             print("  " + ", ".join(f"{year}-{month:02d}" for year, month in group) + " ...")
             dfs = [self.generate_month(year, month) for year, month in group]
             chunk_df = dfs[0] if len(dfs) == 1 else pd.concat(dfs, ignore_index=True)
             self.write_chunk(chunk_df, group, outfolder)
+        if self.missingness is not None and missingness_dir is not None:
+            out = ensure_output_dir(missingness_dir)
+            gt = self.missingness.ground_truth()
+            gt.to_csv(Path(out) / "missingness_ground_truth.csv", index=False)
+            summary = self.missingness.pattern_summary()
+            summary.to_csv(Path(out) / "missingness_patterns.csv", index=False)
+            for row in summary.itertuples():
+                print(f"  missingness {row.pattern:24s} {row.effect:20s} "
+                      f"{row.n_households:6d} households {row.n_slots:9d} half-hours")
 
 
 class DailySmartMeterGenerator:
@@ -480,29 +510,41 @@ class DailySmartMeterGenerator:
         df["_date"]  = pd.to_datetime(df["Read_date_effective_local"], format="%d/%m/%Y").dt.date
         df["_valid"] = df["Valid_read_time"].astype(bool)
 
+        # A read counts towards a full day only with a valid time, a
+        # non-missing flag (0 = missing) and a value. Without synthetic
+        # missingness every valid-time read passes, so this equals _valid.
+        gas_hh_col = _SCHEMA_COLUMNS[self.schema]["gas_hh_value_col"]
+        e_val = df["Elec_act_imp_hh_Wh"].astype(float)
+        g_val = df[gas_hh_col].astype(float)
+        df["_e_ok"] = df["_valid"] & (df["Elec_act_imp_flag"] != 0) & e_val.notna()
+        df["_g_ok"] = df["_valid"] & (df["Gas_flag"] != 0) & g_val.notna()
+
         # Energy from valid reads only (invalid skewed timestamps contribute 0).
         # Gas is summed from whichever HH column this schema actually writes —
         # m3 for legacy, Wh for harmonised (edition09 has no Gas_hh_m3 column).
         # Export is only consumed by the harmonised schema's "net" field below;
         # computing it unconditionally here is cheap and keeps the legacy
         # branch's own column selection (and therefore its output) untouched.
-        df["_e_wh"] = np.where(df["_valid"], df["Elec_act_imp_hh_Wh"].astype(float), 0.0)
+        df["_e_wh"] = np.where(df["_e_ok"], e_val, 0.0)
         df["_exp_wh"] = np.where(df["_valid"], df["Elec_act_exp_hh_Wh"].astype(float), 0.0)
-        gas_hh_col = _SCHEMA_COLUMNS[self.schema]["gas_hh_value_col"]
-        df["_g_val"] = np.where(df["_valid"], df[gas_hh_col].astype(float), 0.0)
+        df["_exp_wh"] = df["_exp_wh"].fillna(0.0)
+        df["_g_val"] = np.where(df["_g_ok"], g_val, 0.0)
 
         grp = df.groupby(["PUPRN", "_date"])
         agg = grp.agg(
-            _valid_n=("_valid", "sum"),
+            _e_n=("_e_ok", "sum"),
+            _g_n=("_g_ok", "sum"),
             _e_sum=("_e_wh",  "sum"),
             _exp_sum=("_exp_wh", "sum"),
             _g_sum=("_g_val", "sum"),
         ).reset_index()
 
-        # DST-aware expected HH count (46 / 48 / 50)
+        # DST-aware expected HH count (46 / 48 / 50). Electricity and gas are
+        # complete independently (they only differ under synthetic missingness).
         exp_map = {d: self._expected_hh(d) for d in agg["_date"].unique()}
         agg["_exp"]  = agg["_date"].map(exp_map)
-        agg["_full"] = agg["_valid_n"] >= agg["_exp"]
+        agg["_full"] = agg["_e_n"] >= agg["_exp"]
+        agg["_full_gas"] = agg["_g_n"] >= agg["_exp"]
 
         # HH sums — NA / NaN when day is incomplete
         agg["Elec_act_imp_hh_sum_Wh"] = (
@@ -511,9 +553,9 @@ class DailySmartMeterGenerator:
 
         # Validity and match codes (shared by both schemas)
         agg["Valid_hh_sum_or_daily_elec"] = agg["_full"]
-        agg["Valid_hh_sum_or_daily_gas"]  = agg["_full"]
+        agg["Valid_hh_sum_or_daily_gas"]  = agg["_full_gas"]
         agg["Elec_sum_match"] = np.where(agg["_full"], 1, 0)
-        agg["Gas_sum_match"]  = np.where(agg["_full"], 1, 0)
+        agg["Gas_sum_match"]  = np.where(agg["_full_gas"], 1, 0)
 
         # Date columns — daily read is assumed at UTC midnight → UTC date = eff_date + 1
         eff = pd.to_datetime(agg["_date"])
@@ -538,7 +580,7 @@ class DailySmartMeterGenerator:
             return self._to_harmonised_daily(agg, utc_rollover)
 
         # ---- legacy schema (edition08) — unchanged shape ----
-        agg["Gas_hh_sum_m3"] = agg["_g_sum"].round(4).where(agg["_full"])
+        agg["Gas_hh_sum_m3"] = agg["_g_sum"].round(4).where(agg["_full_gas"])
         agg["Gas_d_m3"] = agg["Gas_hh_sum_m3"]
 
         g_d = agg["Gas_d_m3"].fillna(0.0).to_numpy(dtype=float)
@@ -595,7 +637,7 @@ class DailySmartMeterGenerator:
         exp_sum_raw = agg["_exp_sum"].round().astype("Int64")
         g_sum_raw   = agg["_g_sum"].round().astype("Int64")
 
-        agg["Gas_d_Wh"] = g_sum_raw.where(agg["_full"])
+        agg["Gas_d_Wh"] = g_sum_raw.where(agg["_full_gas"])
         agg["Gas_d_Wh_recommended"] = agg["Gas_d_Wh"].where(agg["Gas_d_Wh"].notna(), g_sum_raw)
 
         exp_sum_gated = exp_sum_raw.where(agg["_full"])
@@ -782,7 +824,11 @@ class ReadTypeDataQualitySummaryGenerator:
         household_max_reads: Optional[dict[str, int]] = None,
         valid_or_hh_col: Optional[str] = None,
         suspicious_zero: bool = False,
+        stamp_col: str = "Read_date_time_UTC",
     ) -> pd.DataFrame:
+        """`missing` = reads flagged 0 plus expected reads absent from the
+        file (max_poss_reads minus the distinct `stamp_col` values present).
+        Without synthetic missingness both are 0."""
         rows = []
         puprn_grp = {k: g for k, g in df.groupby("PUPRN", sort=False)}
 
@@ -805,14 +851,14 @@ class ReadTypeDataQualitySummaryGenerator:
                     "lastValidReadDate": pd.NA,
                     "percValid": 0.0,
                     "percValidOrUnitError": 0.0,
-                    "percMissing": 0.0,
+                    "percMissing": 100.0,
                     "percError": 0.0,
                     "valid": 0,
                     "validOrHHsumValid": 0,
                     "validWrongTime": 0,
                     "wrongUnits": 0,
                     "suspiciousZero": 0,
-                    "missing": 0,
+                    "missing": int(row_max_reads),
                     "maxRead": 0,
                     "highRead": 0,
                     "negative": 0,
@@ -830,7 +876,8 @@ class ReadTypeDataQualitySummaryGenerator:
             valid_mask = (flags == 1) & valid_time
             valid_wrong_time = int(((flags == 1) & (~valid_time)).sum())
             wrong_units = int(((flags == -4) & valid_time).sum())
-            missing = int((flags == 0).sum())
+            absent = max(0, int(row_max_reads) - int(g[stamp_col].nunique()))
+            missing = int((flags == 0).sum()) + absent
             max_read = int((flags == -1).sum())
             high_read = int((flags == -2).sum())
             negative = int((flags == -3).sum())
@@ -958,6 +1005,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 max_poss_reads=max_daily,
                 valid_or_hh_col="Valid_hh_sum_or_daily_elec",
                 suspicious_zero=True,
+                stamp_col="Read_date_effective_local",
             ),
             self._summarise_read_type(
                 daily,
@@ -968,6 +1016,7 @@ class ReadTypeDataQualitySummaryGenerator:
                 max_poss_reads=max_daily,
                 household_max_reads=daily_max_gas,
                 valid_or_hh_col="Valid_hh_sum_or_daily_gas",
+                stamp_col="Read_date_effective_local",
             ),
         ]
 

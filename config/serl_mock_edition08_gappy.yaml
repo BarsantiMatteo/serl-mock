@@ -1,0 +1,228 @@
+# ===================================================
+# SERL Mock Data - Edition08 with synthetic missingness
+# ===================================================
+# config/serl_mock_edition08.yaml plus a `missingness:` block (at the end)
+# that plants realistic gaps in the half-hourly data, for developing
+# missing-data analysis against something other than ~100% complete data:
+#
+#   uv run python scripts/generate_mock_data.py --config config/serl_mock_edition08_gappy.yaml
+#
+# Output goes to data/mock/edition08_gappy/. What was planted is in
+# mock_internal/missingness_ground_truth.csv and missingness_patterns.csv.
+# The pattern values are placeholders, to be tuned to what real data shows.
+# See docs/02_configuration.md (Synthetic missingness).
+#
+# See src/serl_mock/edition.py for what "edition08" fixes (format: csv,
+# hh_smart_meter layout: monthly, dictionary_source_edition: 07) versus what
+# stays free to configure below.
+
+# -------------------------
+# Global
+# -------------------------
+n_households: 1000
+seed: 42  # Random seed for reproducibility of mock data generation
+edition: "08"
+
+# Folder under data/mock/ this run's output lands in. Not set by default —
+# falls back to "edition<N>" (e.g. "edition08").
+output_label: "edition08_gappy"
+
+lsoa_vintage: "2011"
+
+# Regenerate only the survey/contextual data (step 5), reusing the PUPRNs/
+# traits from a previous full run. Mirrors --survey-only. Not set by default;
+# a CLI flag always overrides this when passed.
+# survey_only: true
+
+# Skip any of the pipeline's outputs individually — all true by default.
+# See config/serl_mock.yaml for the full list of generate.<name> keys.
+generate:
+   hh_smart_meter: true       # half-hourly smart-meter data (step 2)
+   daily_smart_meter: true    # daily smart-meter data (step 3)
+   rt_summary: true           # read-type data quality summary (step 3b)
+   weather: true              # ERA5 weather data (step 4)
+   epc: true
+   survey: true
+   covid19_survey: true
+   follow_up_survey: true
+   harmonised_survey: true    # MasterSERL harmonised survey (mock, structural-only —
+                              # see src/serl_mock/generator_contextual_data.py)
+   survey_2025: true          # Raw 2025 SERL Observatory survey (mock —
+                              # see src/serl_mock/generator_contextual_data.py)
+   participant_summary: true
+   exporters_list: true
+
+# -------------------------
+# Time period for smart-meter data
+# -------------------------
+start_year: 2024
+end_year: 2024
+
+# -------------------------
+# Household traits
+# Specify appliance ownership and meter traits that affect generated data.
+# -------------------------
+household_traits:
+  pv_fraction: 0.15  # share of households with PV
+  hp_fraction: 0.07  # share of households with heat-pump in survey data
+  ev_fraction: 0.10  # share of households with EV in survey data
+  gas_meter_fraction: 0.85  # share of households with a gas meter
+  export_meter_fraction: 0.15  # share of households with electricity export meter
+  solar_thermal_fraction: 0.02  # share of households with solar thermal
+
+# -------------------------
+# Household profiles
+# Each PUPRN is assigned baseline consumption parameters drawn once at
+# initialisation.  Adjust these to shift the typical energy level of
+# the synthetic population.
+# -------------------------
+profiles:
+  base_elec_mean_wh: 175      # Mean baseline electricity per HH period (Wh)
+  base_elec_std_wh:   50      # Std of per-household baseline electricity
+  base_gas_mean_wh: 1500      # Mean baseline gas at peak heating demand (Wh)
+  base_gas_std_wh:   300      # Std of per-household baseline gas
+  gas_fraction:     0.85      # Fraction of households with a gas meter
+
+# -------------------------
+# Generation patterns
+# Controls the shape of seasonal and intraday curves and noise behaviour.
+# -------------------------
+patterns:
+  elec_seasonal_amplitude:     0.3   # ±30% swing around annual mean electricity
+  gas_seasonal_amplitude:      2.0   # Winter gas heating multiplier (0 in summer)
+  elec_spike_probability:     0.02   # Per-reading probability of an appliance spike
+  elec_spike_max_wh:        2000.0   # Maximum additional Wh added by a spike
+  summer_hot_water_probability: 0.15  # Chance of non-zero gas outside heating season
+  gas_heating_threshold:       0.1   # gas_seasonal multiplier below which is "summer"
+
+# -------------------------
+# Weather data (CDS / ERA5)
+# Requires CDS credentials in ~/.cdsapirc — pass --skip-weather to omit.
+# -------------------------
+weather:
+  dataset: "reanalysis-era5-single-levels"
+  product_type: "reanalysis"
+  variables:
+    - "2m_temperature"
+    - "surface_solar_radiation_downwards"
+    - "total_precipitation"
+    - "10m_u_component_of_wind"
+    - "10m_v_component_of_wind"
+  area: [52.0, -4.0, 49.0, 2.0]   # [north, west, south, east]
+  grid: [0.25, 0.25]
+  time_step_hours: 1
+  output_format: "netcdf"   # "netcdf" (.nc) or "grib" (.grib) — raw ERA5 download only
+
+# --------------------------
+# Naming of output files
+# --------------------------
+filenames:
+  epc: "serl_epc_data"
+  covid19_survey: "serl_covid19_survey_data"
+  survey: "serl_survey_data"
+  followup_survey: "serl_2023_follow_up_survey_data"
+  summary: "serl_participant_summary"
+  tariff_data: "serl_tariff_data"
+
+# --------------------------
+# Synthetic missingness (src/serl_mock/missingness.py)
+# --------------------------
+# Plants gaps in the half-hourly data; the daily data and rt_summary follow.
+# Off unless enabled: true. Patterns run in order; a later one only targets
+# rows an earlier one left on their half-hour. Placeholder values.
+#
+# Each pattern:
+#   name         unique; used in the ground truth
+#   type         outage | scattered | event | late_start | early_end
+#   enabled      default true
+#   households   share (0-1) of the households passing `traits`
+#                (household_traits.csv columns: has_pv, has_hp, has_ev,
+#                has_solar_thermal, has_gas_meter, has_export_meter)
+#   time_window  optional {start, end} local clock times (HH:00/HH:30),
+#                half-open, on the half-hour's start
+#   streams      for per-stream effects: elec_imp, elec_exp,
+#                elec_react_imp, elec_react_exp, gas
+#   effect       drop_row | missing | {type: flag, code: N[, null_value: true]}
+#                | null_value | invalid_time | duplicate
+#                | {type: off_grid, minutes: N}
+#   length_days  (outage, late_start, early_end) [[min, max, weight], ...]
+#   per_household (outage) [min, max] outages per household
+#   prob_per_slot (scattered) {low, high}: each household's rate is drawn
+#                log-uniformly in [low, high]
+#   start, end   (event) local 'YYYY-MM-DD HH:MM', end exclusive
+missingness:
+  enabled: true
+  patterns:
+    - name: long_outages             # meter stops reporting: rows absent
+      type: outage
+      households: {share: 0.10}
+      per_household: [1, 2]
+      length_days: [[1, 7, 0.6], [7, 30, 0.3], [30, 90, 0.1]]
+      effect: drop_row
+
+    - name: missing_reads            # SERL-style missing reads: flag 0, no value
+      type: outage
+      households: {share: 0.10}
+      per_household: [1, 3]
+      length_days: [[0.1, 1, 0.8], [1, 5, 0.2]]
+      streams: [elec_imp, elec_exp, elec_react_imp, elec_react_exp, gas]
+      effect: missing
+
+    - name: short_gaps
+      type: scattered
+      households: {share: 0.6}
+      prob_per_slot: {low: 0.0005, high: 0.02}
+      effect: drop_row
+
+    - name: february_event           # many households drop out at once
+      type: event
+      households: {share: 0.5}
+      start: "2024-02-01 00:00"
+      end: "2024-02-15 00:00"
+      effect: drop_row
+
+    - name: late_start
+      type: late_start
+      households: {share: 0.08}
+      length_days: [[1, 30, 0.7], [30, 120, 0.3]]
+      effect: drop_row
+
+    - name: early_end
+      type: early_end
+      households: {share: 0.05}
+      length_days: [[7, 60, 1.0]]
+      effect: drop_row
+
+    - name: export_flag_failures     # export fails, import fine
+      type: scattered
+      households: {share: 0.3, traits: {has_export_meter: true}}
+      time_window: {start: "08:00", end: "18:00"}
+      prob_per_slot: {low: 0.05, high: 0.4}
+      streams: [elec_exp]
+      effect: {type: flag, code: -1}
+
+    - name: gas_outages              # gas fails, electricity fine
+      type: outage
+      households: {share: 0.15, traits: {has_gas_meter: true}}
+      per_household: [1, 3]
+      length_days: [[0.25, 2, 0.7], [2, 14, 0.3]]
+      streams: [gas]
+      effect: missing
+
+    - name: invalid_time
+      type: scattered
+      households: {share: 0.05}
+      prob_per_slot: {low: 0.0005, high: 0.002}
+      effect: invalid_time
+
+    - name: duplicates
+      type: scattered
+      households: {share: 0.02}
+      prob_per_slot: {low: 0.0001, high: 0.0005}
+      effect: duplicate
+
+    - name: off_grid_stamps
+      type: scattered
+      households: {share: 0.05}
+      prob_per_slot: {low: 0.0002, high: 0.001}
+      effect: {type: off_grid, minutes: 7}

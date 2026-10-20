@@ -296,7 +296,11 @@ def run_all(
                 puprn_list_path=str(puprn_csv),
                 traits_path=str(traits_csv),
             )
-            gen_sm.generate_all(outfolder=mock_hh_dir)
+            # Ground truth of planted gaps (only written with missingness on);
+            # drop a previous run's copy so it can't be mistaken for this one's.
+            for stale in ("missingness_ground_truth.csv", "missingness_patterns.csv"):
+                (mock_internal_dir / stale).unlink(missing_ok=True)
+            gen_sm.generate_all(outfolder=mock_hh_dir, missingness_dir=mock_internal_dir)
         else:
             print("\nStep 2: Skipped (generate.hh_smart_meter: false).")
 
