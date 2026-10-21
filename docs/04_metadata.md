@@ -483,4 +483,4 @@ All flag columns use the same integer coding:
 
 > `-3` (negative reading) and `-4` (unit error) are recognised by the read-type data quality summary generator (`ReadTypeDataQualitySummaryGenerator`) but are never emitted by the half-hourly or daily generators — `negative` and `wrongUnits` counts in `serl_smart_meter_rt_summary_edition08.csv` are always `0` in the current mock data.
 >
-> `0` (missing), and any code a pattern sets, only appear with synthetic missingness on (`missingness:`, see [02_configuration.md](02_configuration.md#synthetic-missingness-missingness)). A missing read then has an empty value, so value columns can be empty; without missingness they never are.
+> `0` (missing), and any code a pattern sets, only appear with synthetic missingness on (`missingness:`, see [02_configuration.md](02_configuration.md#synthetic-missingness-missingness)). A missing read then has an empty value, so value columns can be empty; without missingness they never are. A `max_read` pattern sets `-1` with the meter-max value (`16777215` Wh, `16777.215` m³), as real SERL max reads look.

@@ -286,13 +286,13 @@ whose header documents every key.
 missingness:
   enabled: true
   patterns:
-    - name: export_flag_failures         # unique; used in the ground truth
+    - name: export_failures              # unique; used in the ground truth
       type: scattered                    # outage | scattered | event | late_start | early_end
       households: {share: 0.3, traits: {has_export_meter: true}}
       time_window: {start: "08:00", end: "18:00"}   # optional, local, half-open
       prob_per_slot: {low: 0.05, high: 0.4}
-      streams: [elec_exp]
-      effect: {type: flag, code: -1}
+      streams: [elec_exp, elec_react_exp]
+      effect: missing
 ```
 
 Each pattern chooses households (a `share` of those matching `traits`
@@ -316,6 +316,7 @@ is drawn by weight, then a length uniformly within it.
 | `missing` | flag `0` and value empty, as SERL records a missing read | yes |
 | `{type: flag, code: N}` | flag set to `N`; add `null_value: true` to empty the value | yes |
 | `null_value` | value emptied, flag kept | yes |
+| `max_read` | flag `-1` and value the meter maximum (`16777215` Wh/varh, `16777.215` m³), as SERL records a 'max read' | yes |
 | `invalid_time` | `Valid_read_time` FALSE | no |
 | `duplicate` | row written twice | no |
 | `{type: off_grid, minutes: N}` | stamp moved off :00/:30, like the base skew (`HH` NA, `Valid_read_time` FALSE, flags `-5`) | no |
@@ -334,24 +335,54 @@ What was planted is written to `mock_internal/`:
 - `missingness_patterns.csv`: one row per pattern with households,
   half-hours and its parsed config.
 
-### Tuning a scenario to real data
+### Calibration of the gappy scenario
 
-The values in `serl_mock_edition08_gappy.yaml` are placeholders. To make
-a scenario resemble real SERL data, set each pattern from aggregate
-measures of the real data's gaps (e.g. the missing-data first look in
-serl-loadprofiles-desnz), as rough values:
+`serl_mock_edition08_gappy.yaml` is calibrated against the SERL edition07
+smart-meter data quality report
+(`docs/documentation/SERL/edition07/8666_serl_smart_meter_data_quality_report_edition07.pdf`).
+It keeps the report's **shape** (most households nearly complete, a long
+tail missing months) at about **half its level**, so a small local sample
+still has enough valid data. The SERL column is the recommended value for
+a fully realistic run; "used" was measured on a 400-household run of the
+config (rt_summary).
 
-| Pattern | Parameters | Real-data measure |
-|---|---|---|
-| `long_outages` vs `missing_reads` | which effect real gaps use: `drop_row` (rows absent) or `missing` (flag `0` rows) | share of missing half-hours that are absent rows vs flag `0` |
-| `long_outages` | `share`, `per_household`, `length_days` | gap-length distribution (runs of a day or more); households by missing share |
-| `short_gaps` | `share`, `prob_per_slot` | households by missing share; gaps of 1-5 half-hours |
-| `february_event` (and other events) | dates, `share`, streams/effect | days when many households start a gap at once |
-| `late_start`, `early_end` | `share`, `length_days` | first/last reading vs the expected start/end date |
-| `time_window` on any pattern | clock times | missing share by time of day |
-| `export_flag_failures` | `share` of export households, codes, `time_window`, `prob_per_slot` | import × export status per half-hour; export flag codes |
-| `gas_outages` | `share`, lengths, effect | gas × electricity status per half-hour |
-| `invalid_time`, `duplicates`, `off_grid_stamps`, extra `flag` patterns | rates, codes | share of each status; flag codes |
+Households with at least X% of HH electricity active import reads valid
+(report Table 2):
+
+| X | 100 | 99 | 98 | 95 | 90 | 75 | 50 | 25 |
+|---|---|---|---|---|---|---|---|---|
+| SERL (%) | 20.9 | 42.8 | 52.7 | 60.5 | 64.6 | 68.8 | 86.0 | 95.0 |
+| used (%) | 0 | 46 | 63 | 70 | 77 | 87 | 96 | 100 |
+
+100% is never reached because the base generator skews ~0.05% of stamps
+for every household (see [03_generation_model.md](03_generation_model.md)).
+
+Reads missing (flag `0` or absent) and max reads, by stream (Tables 3-5):
+
+| Stream | SERL missing | used missing | SERL max read (`-1`) | used max read |
+|---|---|---|---|---|
+| Electricity active import | 17.2% | ~9% | ~0.0001% | ~0.001% |
+| Electricity active export | 15.1% | ~11% | ~0% | 0 |
+| Electricity reactive import | 22.5% | ~12% | ~0% | 0 |
+| Gas | 16.4% | ~10% | 0.4% | ~0.2% |
+
+What the report says, and the pattern that follows it:
+
+| Report finding | Pattern(s) |
+|---|---|
+| Missing data is the main issue for every stream; a row is absent only when no stream returned data (smart-meter documentation) | `drop_row` for whole-meter gaps, `missing` (flag `0`) for per-stream ones |
+| Long tail: 14% of households under 50% valid, 5% under 25% | `long_outages`, `extended_outages`, `late_start`, `early_end` |
+| Historic data goes back 12 months for active import but only 3 for export and reactive | `short_history_streams` (later start on those streams) |
+| Export and reactive export have identical figures | `export_failures` on both streams together |
+| Reactive import misses more than active import | `reactive_import_gaps` |
+| Gas meter is a separate device, with its own gaps | `gas_outages` |
+| Gas max reads (16777.215 m³) are the main non-missing error | `gas_max_reads` |
+| Electricity max reads and invalid read times are extremely rare | `elec_max_reads`, `invalid_time`, set above SERL so a small sample still contains some |
+
+`duplicates` and `off_grid_stamps` are not in the report; they are kept to
+test pipeline robustness. The report's daily-only errors (kWh units,
+suspicious zeros, invalid daily read times) and its system-migration gaps
+(2022-23) are not modelled.
 
 ---
 

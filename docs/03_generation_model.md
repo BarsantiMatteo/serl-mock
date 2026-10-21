@@ -152,10 +152,11 @@ implemented in `missingness.py`.
   alone is identical to a run without it (tested). Outage, event and
   late/early runs are drawn once per household for the whole period;
   scattered half-hours per month.
-- **Daily data.** A half-hour counts towards a full day only with a valid
-  time, a flag other than `0` and a value; electricity and gas are judged
-  separately (`Valid_hh_sum_or_daily_elec` / `_gas`, the HH sums). Without
-  missingness this is the same as before.
+- **Daily data.** As in SERL, the HH sum needs a full day of valid reads:
+  a half-hour counts only with a valid time, flag `1` (so not missing nor a
+  max read) and a value, and a duplicated stamp counts once. Electricity
+  and gas are judged separately (`Valid_hh_sum_or_daily_elec` / `_gas`,
+  the HH sums). Without missingness this is the same as before.
 - **rt_summary.** `missing` = reads flagged `0` plus expected reads absent
   from the file (`maxPossReads` minus distinct stamps present);
   `percMissing` follows. Both stay `0` without missingness.

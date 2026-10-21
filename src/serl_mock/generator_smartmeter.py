@@ -504,20 +504,22 @@ class DailySmartMeterGenerator:
         return int((ts_next.tz_convert("UTC") - ts.tz_convert("UTC")).total_seconds() / 1800)
 
     def _aggregate_to_daily(self, hh_df: pd.DataFrame) -> pd.DataFrame:
-        df = hh_df.copy()
+        # A duplicated stamp (synthetic missingness) is one read, counted once.
+        df = hh_df.drop_duplicates(["PUPRN", "Read_date_time_UTC"]).copy()
 
         # Parse local effective date (HH format is dd/mm/yyyy)
         df["_date"]  = pd.to_datetime(df["Read_date_effective_local"], format="%d/%m/%Y").dt.date
         df["_valid"] = df["Valid_read_time"].astype(bool)
 
-        # A read counts towards a full day only with a valid time, a
-        # non-missing flag (0 = missing) and a value. Without synthetic
-        # missingness every valid-time read passes, so this equals _valid.
+        # A read counts towards a full day only if valid, as SERL's HH sum
+        # needs 48 valid reads: valid time, flag 1 (not missing, max read,
+        # ...) and a value. Without synthetic missingness every valid-time
+        # read passes, so this equals _valid.
         gas_hh_col = _SCHEMA_COLUMNS[self.schema]["gas_hh_value_col"]
         e_val = df["Elec_act_imp_hh_Wh"].astype(float)
         g_val = df[gas_hh_col].astype(float)
-        df["_e_ok"] = df["_valid"] & (df["Elec_act_imp_flag"] != 0) & e_val.notna()
-        df["_g_ok"] = df["_valid"] & (df["Gas_flag"] != 0) & g_val.notna()
+        df["_e_ok"] = df["_valid"] & (df["Elec_act_imp_flag"] == 1) & e_val.notna()
+        df["_g_ok"] = df["_valid"] & (df["Gas_flag"] == 1) & g_val.notna()
 
         # Energy from valid reads only (invalid skewed timestamps contribute 0).
         # Gas is summed from whichever HH column this schema actually writes —
@@ -526,7 +528,8 @@ class DailySmartMeterGenerator:
         # computing it unconditionally here is cheap and keeps the legacy
         # branch's own column selection (and therefore its output) untouched.
         df["_e_wh"] = np.where(df["_e_ok"], e_val, 0.0)
-        df["_exp_wh"] = np.where(df["_valid"], df["Elec_act_exp_hh_Wh"].astype(float), 0.0)
+        df["_exp_wh"] = np.where(df["_valid"] & (df["Elec_act_exp_flag"] == 1),
+                                 df["Elec_act_exp_hh_Wh"].astype(float), 0.0)
         df["_exp_wh"] = df["_exp_wh"].fillna(0.0)
         df["_g_val"] = np.where(df["_g_ok"], g_val, 0.0)
 

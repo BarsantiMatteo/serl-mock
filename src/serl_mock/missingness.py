@@ -48,6 +48,9 @@ then changes the affected rows (`effect`):
               flag          the streams' flag set to `code` (optionally
                             `null_value: true` empties the value too)
               null_value    the streams' value emptied, flag kept
+              max_read      the streams' flag -1 and value the meter's
+                            maximum (16777215 Wh, 16777.215 m3), as SERL
+                            records a 'max read'
               invalid_time  Valid_read_time FALSE
               duplicate     the row written twice
               off_grid      the stamp moved `minutes` off :00/:30, handled
@@ -81,7 +84,7 @@ import pandas as pd
 
 PATTERN_TYPES = ("outage", "scattered", "event", "late_start", "early_end")
 ROW_EFFECTS = ("drop_row", "invalid_time", "duplicate", "off_grid")
-STREAM_EFFECTS = ("missing", "flag", "null_value")
+STREAM_EFFECTS = ("missing", "flag", "null_value", "max_read")
 
 # Logical stream -> (flag column, value columns), in the legacy column names
 # generate_month() builds before any edition09 reshape.
@@ -394,6 +397,17 @@ class MissingnessPlanner:
                 df[c] = df[c].astype("Int64")
             df.loc[mask, c] = pd.NA if isinstance(df[c].dtype, pd.Int64Dtype) else np.nan
 
+    @staticmethod
+    def _max_value(col: str, fmt) -> float:
+        """The meter-max read (all 1s in 32 bits) in `col`'s units, from the
+        generator's own flag thresholds."""
+        v = fmt.FLAG_THRESHOLDS
+        if col == "Gas_hh_m3":
+            return v["gas_meter_max_m3"]
+        if col == "Gas_hh_Wh":
+            return round(v["gas_meter_max_m3"] * fmt.GAS_WH_PER_M3)
+        return v["elec_meter_max_Wh"]
+
     def _apply_effect(self, df: pd.DataFrame, p: Pattern, mask: np.ndarray, fmt) -> pd.DataFrame:
         e = p.effect
         if e.type in STREAM_EFFECTS:
@@ -403,6 +417,10 @@ class MissingnessPlanner:
                     df.loc[mask, flag_col] = 0
                 elif e.type == "flag":
                     df.loc[mask, flag_col] = e.code
+                elif e.type == "max_read":
+                    df.loc[mask, flag_col] = -1
+                    for c in value_cols:
+                        df.loc[mask, c] = self._max_value(c, fmt)
                 if e.type in ("missing", "null_value") or e.null_value:
                     self._null(df, value_cols, mask)
         elif e.type == "invalid_time":

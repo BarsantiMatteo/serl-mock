@@ -36,9 +36,14 @@ MISSINGNESS = {
          "length_days": [[3, 3, 1]], "effect": "drop_row"},
         {"name": "export_fail", "type": "scattered", "households": {"traits": {"has_export_meter": True}},
          "time_window": {"start": "10:00", "end": "14:00"}, "prob_per_slot": {"low": 0.5, "high": 0.5},
-         "streams": ["elec_exp"], "effect": {"type": "flag", "code": -1}},
+         "streams": ["elec_exp", "elec_react_exp"], "effect": "missing"},
         {"name": "gas_missing", "type": "outage", "households": {"traits": {"has_gas_meter": True}},
          "per_household": [1, 1], "length_days": [[1, 1, 1]], "streams": ["gas"], "effect": "missing"},
+        {"name": "gas_max", "type": "scattered", "households": {"traits": {"has_gas_meter": True}},
+         "prob_per_slot": {"low": 0.01, "high": 0.01}, "streams": ["gas"], "effect": "max_read"},
+        {"name": "react_flag", "type": "scattered", "households": {"share": 1.0},
+         "prob_per_slot": {"low": 0.01, "high": 0.01}, "streams": ["elec_react_imp"],
+         "effect": {"type": "flag", "code": -2}},
         {"name": "dups", "type": "scattered", "households": {"share": 1.0},
          "prob_per_slot": {"low": 0.001, "high": 0.001}, "effect": "duplicate"},
         {"name": "offgrid", "type": "scattered", "households": {"share": 1.0},
@@ -97,7 +102,8 @@ def _planted_stamps(gt: pd.DataFrame, pattern: str) -> pd.DataFrame:
 def test_ground_truth_written(gappy: Path):
     gt = _truth(gappy)
     summary = pd.read_csv(gappy / "mock_internal" / "missingness_patterns.csv")
-    assert list(summary["pattern"]) == ["outage", "event", "late", "export_fail", "gas_missing", "dups", "offgrid"]
+    assert list(summary["pattern"]) == ["outage", "event", "late", "export_fail", "gas_missing",
+                                        "gas_max", "react_flag", "dups", "offgrid"]
     assert set(gt["pattern"]) <= set(summary["pattern"])
     assert (gt["end_utc"] - gt["start_utc"] == gt["n_slots"] * pd.Timedelta(minutes=30)).all()
 
@@ -123,16 +129,39 @@ def test_event_and_late_start_shape(gappy: Path):
     assert (late["n_slots"] == 3 * 48).all()
 
 
-def test_export_flag_failures_respect_traits_and_window(gappy: Path):
+def test_export_failures_respect_traits_and_window(gappy: Path):
     hh = _hh(gappy)
     traits = pd.read_csv(gappy / "mock_internal" / "household_traits.csv").set_index("PUPRN")
     exporters = set(traits.index[traits["has_export_meter"] == 1])
-    bad = hh[hh["Elec_act_exp_flag"] == -1]
+    bad = hh[hh["Elec_act_exp_flag"] == 0]
     assert len(bad) > 0 and set(bad["PUPRN"]) <= exporters
     start_local = (_end_stamps(bad) - pd.Timedelta(minutes=30)).dt.tz_convert("Europe/London").dt.strftime("%H:%M")
     assert ((start_local >= "10:00") & (start_local < "14:00")).all()
-    # import untouched on those rows
+    # both export streams fail together; import untouched on those rows
+    assert (bad["Elect_react_exp_flag"] == 0).all()
+    assert bad["Elec_act_exp_hh_Wh"].isna().all() and bad["Elec_react_exp_hh_varh"].isna().all()
     assert (bad["Elec_act_imp_flag"] == 1).all()
+
+
+def test_max_read_and_flag_effects(gappy: Path):
+    hh = _hh(gappy)
+    maxed = hh[hh["Gas_flag"] == -1]
+    assert len(maxed) > 0
+    assert (maxed["Gas_hh_m3"] == 16777.215).all()
+    assert (maxed["Gas_hh_Wh"] == round(16777.215 * 39.5 * 1000 / 3.6)).all()
+    flagged = hh[hh["Elect_react_imp_flag"] == -2]
+    assert len(flagged) > 0 and flagged["Elec_react_imp_hh_varh"].notna().all()
+    # a max read is not valid, so its day has no gas HH sum
+    daily = _daily(gappy)
+    eff = (_end_stamps(maxed) - pd.Timedelta(minutes=1)).dt.tz_convert("Europe/London").dt.strftime("%Y-%m-%d")
+    days = set(zip(maxed["PUPRN"], eff))
+    rows = daily[[(p, d) in days for p, d in zip(daily["PUPRN"], daily["Read_date_effective_local"])]]
+    assert len(rows) > 0
+    assert not rows["Valid_hh_sum_or_daily_gas"].astype(bool).any()
+    assert rows["Gas_hh_sum_m3"].isna().all()
+    rt = pd.read_csv(gappy / "serl_smart_meter_rt_summary_edition08.csv")
+    gpf = rt[(rt["deviceType"] == "GPF") & (rt["readType"] == "AI")]
+    assert gpf["maxRead"].sum() == len(maxed)
 
 
 def test_gas_missing_reads(gappy: Path):

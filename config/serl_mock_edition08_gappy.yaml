@@ -9,8 +9,9 @@
 #
 # Output goes to data/mock/edition08_gappy/. What was planted is in
 # mock_internal/missingness_ground_truth.csv and missingness_patterns.csv.
-# The pattern values are placeholders, to be tuned to what real data shows.
-# See docs/02_configuration.md (Synthetic missingness).
+# The pattern values are calibrated to about half the missingness of real
+# SERL data (see the block's comments and docs/02_configuration.md,
+# Synthetic missingness).
 #
 # See src/serl_mock/edition.py for what "edition08" fixes (format: csv,
 # hh_smart_meter layout: monthly, dictionary_source_edition: 07) versus what
@@ -129,7 +130,15 @@ filenames:
 # --------------------------
 # Plants gaps in the half-hourly data; the daily data and rt_summary follow.
 # Off unless enabled: true. Patterns run in order; a later one only targets
-# rows an earlier one left on their half-hour. Placeholder values.
+# rows an earlier one left on their half-hour.
+#
+# Calibrated against the SERL edition07 smart-meter data quality report
+# (docs/documentation/SERL/edition07/), keeping its SHAPE (most households
+# nearly complete, a long tail with months missing) but at roughly HALF its
+# LEVEL, so small local samples keep enough valid data. Each pattern notes
+# "SERL:" (the report's figure, the recommended value for a fully realistic
+# run) and "used:" (this file). Real vs used vs achieved is tabulated in
+# docs/02_configuration.md (Synthetic missingness).
 #
 # Each pattern:
 #   name         unique; used in the ground truth
@@ -143,78 +152,129 @@ filenames:
 #   streams      for per-stream effects: elec_imp, elec_exp,
 #                elec_react_imp, elec_react_exp, gas
 #   effect       drop_row | missing | {type: flag, code: N[, null_value: true]}
-#                | null_value | invalid_time | duplicate
+#                | null_value | max_read | invalid_time | duplicate
 #                | {type: off_grid, minutes: N}
 #   length_days  (outage, late_start, early_end) [[min, max, weight], ...]
 #   per_household (outage) [min, max] outages per household
 #   prob_per_slot (scattered) {low, high}: each household's rate is drawn
 #                log-uniformly in [low, high]
 #   start, end   (event) local 'YYYY-MM-DD HH:MM', end exclusive
+#
+# HH electricity active import, % of households with at least X% of reads
+# valid (report Table 2; "used" measured on a 400-household run):
+#   X       100   99   98   95   90   75   50   25
+#   SERL   20.9 42.8 52.7 60.5 64.6 68.8 86.0 95.0
+#   used      0   46   63   70   77   87   96  100
+# (100% is never reached: the base generator skews ~0.05% of stamps for
+# every household.) Share of reads missing, flag 0 or absent (Tables 3-5):
+#   elec import 17.2% (used ~9%), gas 16.4% (~10%), export 15.1% (~11%),
+#   reactive import 22.5% (~12%).
 missingness:
   enabled: true
   patterns:
-    - name: long_outages             # meter stops reporting: rows absent
-      type: outage
+    # --- whole-meter gaps: rows absent (SERL omits a row when no stream
+    #     returned data at that time) ---
+    - name: late_start               # data starts after the period start (meter
+      type: late_start               # installed / household joined later)
       households: {share: 0.10}
-      per_household: [1, 2]
-      length_days: [[1, 7, 0.6], [7, 30, 0.3], [30, 90, 0.1]]
+      length_days: [[7, 60, 0.6], [60, 180, 0.4]]
       effect: drop_row
 
-    - name: missing_reads            # SERL-style missing reads: flag 0, no value
-      type: outage
-      households: {share: 0.10}
-      per_household: [1, 3]
-      length_days: [[0.1, 1, 0.8], [1, 5, 0.2]]
-      streams: [elec_imp, elec_exp, elec_react_imp, elec_react_exp, gas]
-      effect: missing
+    - name: early_end                # moved away / withdrew consent
+      type: early_end
+      households: {share: 0.06}
+      length_days: [[30, 270, 1.0]]
+      effect: drop_row
 
-    - name: short_gaps
+    - name: long_outages             # meter stops reporting for days to months
+      type: outage
+      households: {share: 0.20}
+      per_household: [1, 2]
+      length_days: [[1, 7, 0.5], [7, 30, 0.3], [30, 120, 0.2]]
+      effect: drop_row
+
+    - name: extended_outages         # the long tail: SERL has 14% of households
+      type: outage                   # under 50% valid (used: ~4%)
+      households: {share: 0.04}
+      per_household: [1, 1]
+      length_days: [[120, 240, 1.0]]
+      effect: drop_row
+
+    - name: short_gaps               # scattered single missing half-hours
       type: scattered
-      households: {share: 0.6}
+      households: {share: 0.5}
       prob_per_slot: {low: 0.0005, high: 0.02}
       effect: drop_row
 
     - name: february_event           # many households drop out at once
       type: event
-      households: {share: 0.5}
+      households: {share: 0.3}
       start: "2024-02-01 00:00"
-      end: "2024-02-15 00:00"
+      end: "2024-02-04 00:00"
       effect: drop_row
 
-    - name: late_start
-      type: late_start
-      households: {share: 0.08}
-      length_days: [[1, 30, 0.7], [30, 120, 0.3]]
-      effect: drop_row
-
-    - name: early_end
-      type: early_end
-      households: {share: 0.05}
-      length_days: [[7, 60, 1.0]]
-      effect: drop_row
-
-    - name: export_flag_failures     # export fails, import fine
-      type: scattered
-      households: {share: 0.3, traits: {has_export_meter: true}}
-      time_window: {start: "08:00", end: "18:00"}
-      prob_per_slot: {low: 0.05, high: 0.4}
-      streams: [elec_exp]
-      effect: {type: flag, code: -1}
-
-    - name: gas_outages              # gas fails, electricity fine
+    # --- per-stream gaps: row kept, failed streams flag 0 and no value ---
+    - name: missing_reads            # every stream flag 0 for a while
       type: outage
-      households: {share: 0.15, traits: {has_gas_meter: true}}
+      households: {share: 0.15}
       per_household: [1, 3]
-      length_days: [[0.25, 2, 0.7], [2, 14, 0.3]]
+      length_days: [[0.1, 1, 0.8], [1, 5, 0.2]]
+      streams: [elec_imp, elec_exp, elec_react_imp, elec_react_exp, gas]
+      effect: missing
+
+    - name: short_history_streams    # export and reactive are kept on the meter
+      type: late_start               # 3 months, not 12, so historic data starts
+      households: {share: 0.25}      # later (SERL: reactive import 22.5% missing
+      length_days: [[14, 60, 1.0]]   # vs 17.2% active; used ~12% vs ~9%)
+      streams: [elec_exp, elec_react_imp, elec_react_exp]
+      effect: missing
+
+    - name: export_failures          # export fails, import fine; export and
+      type: outage                   # reactive export fail together (identical
+      households: {share: 0.25, traits: {has_export_meter: true}}  # SERL figures)
+      per_household: [1, 2]
+      length_days: [[1, 7, 0.7], [7, 30, 0.3]]
+      streams: [elec_exp, elec_react_exp]
+      effect: missing
+
+    - name: reactive_import_gaps     # reactive import fails, active import fine
+      type: outage
+      households: {share: 0.20}
+      per_household: [1, 2]
+      length_days: [[3, 30, 1.0]]
+      streams: [elec_react_imp]
+      effect: missing
+
+    - name: gas_outages              # gas meter is a separate device: fails on
+      type: outage                   # its own (SERL 16.4% missing; used ~10%)
+      households: {share: 0.25, traits: {has_gas_meter: true}}
+      per_household: [1, 3]
+      length_days: [[0.25, 2, 0.5], [2, 14, 0.35], [14, 60, 0.15]]
       streams: [gas]
       effect: missing
 
-    - name: invalid_time
-      type: scattered
-      households: {share: 0.05}
+    # --- error flags ---
+    - name: gas_max_reads            # 16777.215 m3, flag -1: the main non-missing
+      type: scattered                # error (SERL 0.4% of HH gas reads, from a
+      households: {share: 0.05, traits: {has_gas_meter: true}}   # few meters; used ~0.2%)
+      prob_per_slot: {low: 0.01, high: 0.1}
+      streams: [gas]
+      effect: max_read
+
+    - name: elec_max_reads           # 16777215 Wh, flag -1 (SERL ~0.0001%; used
+      type: scattered                # ~0.001%, above SERL so a small sample
+      households: {share: 0.01}      # still contains some)
+      prob_per_slot: {low: 0.0005, high: 0.002}
+      streams: [elec_imp]
+      effect: max_read
+
+    - name: invalid_time             # SERL: elec ~0.00003%, gas 0.009%; used
+      type: scattered                # ~0.002%, above SERL for the same reason
+      households: {share: 0.02}
       prob_per_slot: {low: 0.0005, high: 0.002}
       effect: invalid_time
 
+    # --- not in the SERL report; kept to exercise robustness of pipelines ---
     - name: duplicates
       type: scattered
       households: {share: 0.02}
