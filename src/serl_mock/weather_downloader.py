@@ -165,13 +165,48 @@ class WeatherDownloader:
         fname = f"serl_climate_data_{year}_{month:02d}_edition{self.edition}.csv"
         return self.output_dir / fname
 
+    def _unbundle_zip(self, path: Path) -> None:
+        """Replace a CDS ZIP bundle saved at *path* with a single merged NetCDF.
+
+        When a request mixes instantaneous and accumulated variables, the CDS
+        API v2 returns a ZIP containing two NetCDF files (``stepType-instant``
+        and ``stepType-accum``) even with ``download_format="unarchived"``.
+        Saved under a ``.nc`` name, that ZIP cannot be opened by NetCDF tools
+        such as Panoply or QGIS, so it is merged into one genuine NetCDF file
+        written back to the same path.  No-op for plain NetCDF or GRIB files.
+        """
+        import shutil
+        import tempfile
+        import zipfile
+        import xarray as xr
+
+        if self.output_format != "netcdf" or not zipfile.is_zipfile(path):
+            return
+
+        logger.info("Unbundling CDS ZIP archive %s into a single NetCDF", path.name)
+        tmp_dir = Path(tempfile.mkdtemp())
+        try:
+            with zipfile.ZipFile(path) as zf:
+                zf.extractall(tmp_dir)
+                inner_files = [tmp_dir / name for name in zf.namelist()]
+
+            # Load everything into memory before closing handles to allow
+            # temp-dir cleanup on Windows.
+            datasets = []
+            for inner in inner_files:
+                _ds = xr.open_dataset(inner, engine="netcdf4")
+                _ds.load()
+                _ds.close()
+                datasets.append(_ds)
+
+            merged_path = tmp_dir / "merged.nc"
+            xr.merge(datasets, compat="no_conflicts").to_netcdf(merged_path, engine="netcdf4")
+            shutil.move(str(merged_path), str(path))
+        finally:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+
     def _nc_to_csv(self, nc_path: Path, csv_path: Path) -> None:
         """Convert a downloaded ERA5 NetCDF file to the SERL climate CSV format.
-
-        The CDS API v2 may deliver the download as a ZIP archive containing
-        two NetCDF files (one for instantaneous variables, one for accumulated
-        variables).  This method handles both the plain NetCDF case and the
-        ZIP case transparently.
 
         Output is hourly (one row per grid cell per UTC hour), matching the
         ERA5 native resolution.  No half-hourly interpolation is performed.
@@ -179,37 +214,14 @@ class WeatherDownloader:
         The ``PUPRN`` column is intentionally omitted; it is added downstream
         when grid cells are linked to households.
         """
-        import tempfile
-        import zipfile
         import xarray as xr
 
         logger.info("Converting %s → CSV", nc_path.name)
 
-        # --- Open dataset: handle plain NetCDF and CDS-v2 ZIP bundles ------
-        if zipfile.is_zipfile(nc_path):
-            # CDS API v2 bundles instant and accum variables in separate files
-            # inside a ZIP.  Load everything into memory before closing handles
-            # to allow temp-dir cleanup on Windows.
-            logger.debug("Detected ZIP bundle; extracting inner NetCDF files.")
-            tmp_dir = tempfile.mkdtemp()
-            try:
-                with zipfile.ZipFile(nc_path) as zf:
-                    zf.extractall(tmp_dir)
-                    inner_files = [Path(tmp_dir) / name for name in zf.namelist()]
-
-                datasets = []
-                for inner in inner_files:
-                    _ds = xr.open_dataset(inner, engine="netcdf4")
-                    _ds.load()   # pull all data into memory
-                    _ds.close()  # release the file handle before temp cleanup
-                    datasets.append(_ds)
-
-                ds = xr.merge(datasets)
-            finally:
-                import shutil
-                shutil.rmtree(tmp_dir, ignore_errors=True)
-        else:
-            ds = xr.open_dataset(nc_path, engine="netcdf4")
+        # Older downloads may still be CDS ZIP bundles saved as .nc
+        self._unbundle_zip(nc_path)
+        with xr.open_dataset(nc_path, engine="netcdf4") as _ds:
+            ds = _ds.load()
 
         # ERA5 short name → SERL column name
         _VAR_RENAME: Dict[str, str] = {
@@ -299,6 +311,8 @@ class WeatherDownloader:
 
         if target.exists() and not overwrite:
             logger.info("Skipping %s (already exists)", target.name)
+            # Repair files downloaded before ZIP bundles were unpacked
+            self._unbundle_zip(target)
             return target
 
         request: Dict[str, Any] = {
@@ -317,6 +331,7 @@ class WeatherDownloader:
         logger.info("Requesting CDS data: %s %04d-%02d", self.dataset, year, month)
         client = self._get_client()
         client.retrieve(self.dataset, request, str(target))
+        self._unbundle_zip(target)
         logger.info("Saved to %s", target)
         return target
 

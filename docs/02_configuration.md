@@ -440,6 +440,6 @@ weather:
 
 ### Idempotent execution
 
-- If a `.nc` file already exists for a month, it is **not re-downloaded**.
+- If a `.nc` file already exists for a month, it is **not re-downloaded**. If it is a ZIP bundle from an earlier run (the CDS API packs instantaneous and accumulated variables as two NetCDF files in a ZIP), it is merged in place into a single NetCDF file.
 - If a `.csv` file already exists for a month, it is **not re-converted**.
 - Re-running the pipeline is safe; only missing files are produced.

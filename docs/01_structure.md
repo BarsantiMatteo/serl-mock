@@ -268,7 +268,7 @@ reused raw cell or skip rule gives for free — no cross-field *value*-consisten
 
 ### `src/serl_mock/weather_downloader.py`
 `WeatherDownloader` retrieves and converts ERA5 reanalysis data:
-- `download_month(year, month)` — downloads a single month from the CDS API; skips if the NetCDF file already exists
+- `download_month(year, month)` — downloads a single month from the CDS API; skips if the NetCDF file already exists. When CDS returns a ZIP bundle (separate `instant`/`accum` NetCDF files), it is merged into a single genuine `.nc` file so it opens in tools like Panoply or QGIS; existing ZIP-bundled `.nc` files are repaired the same way
 - `convert_month_to_csv(year, month)` — converts the NetCDF to a SERL-format hourly CSV; skips if the CSV already exists
 - `ensure_month(year, month)` — combines both steps in one call
 - `ensure_all()` — runs `ensure_month` for every month in the configured date range
