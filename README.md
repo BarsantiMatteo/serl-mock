@@ -192,6 +192,7 @@ See [docs/02_configuration.md](docs/02_configuration.md) for a full description 
 
 If you also want weather data, the same generator can download ERA5 hourly reanalysis data from the
 [Copernicus Climate Data Store](https://cds.climate.copernicus.eu/how-to-api) and convert it to SERL-style monthly CSV files.
+As in SERL, this uses ERA5 single levels (`reanalysis-era5-single-levels`, 0.25° grid), not ERA5-Land.
 
 Before running with weather enabled, complete these one-time steps:
 

@@ -460,6 +460,23 @@ def sample_field_independent(rnd: random.Random, master_var_name: str) -> object
     return _sample_value(rnd, codes)
 
 
+# ---------- 2023 survey: column names in the data vs the dictionary ----------
+# The 2023 follow-up survey's data dictionary has typos in the D2 age-band
+# names; the real data file uses different ones. SERL's master mapping notes
+# them ("For 2023 Survey the column is: ... Dictionary has typo"), and the
+# names below were checked against the real file on the TRE (2026-10-23),
+# which has D2_5_15 where the mapping note says D2_6_15. The generator keeps
+# the dictionary's names internally (they key the harmonised survey) and
+# write_all() renames on output, so the file matches the real one.
+FOLLOWUP_2023_DATA_COLUMNS: Dict[str, str] = {
+    "D2_6-15": "D2_5_15",
+    "D2_16-24": "D2_16_24",
+    "D2_24_44": "D2_25_44",
+    "D2_45-64": "D2_45_64",
+    "D2_75_85": "D2_75_84",
+}
+
+
 # ---------- Value meanings (for recoding the 2023 survey's text answers) ----------
 # generate_follow_up_survey() (the 2023 survey) stores real answer TEXT, not numeric
 # codes (matching the real 2023 survey's own format — see the harmonisation doc's
@@ -673,7 +690,7 @@ VAR_MEANING_OVERRIDES: Dict[str, Dict[object, str]] = {
     },
     "WFH_situation": {
         1: "Always work from home", 2: "Sometimes work from home", 3: "Never work from home",
-        4: "Not applicable /prefer not to say", 5: "No response",
+        4: "Not applicable / prefer not to say", 5: "No response",
     },
     "weekday_occupancy": {1: "Yes", 2: "No", 3: "It varies a lot"},
     "weekday_occ_frequency": {
@@ -2001,8 +2018,8 @@ class SERLContextualVariablesGenerator:
         # self._nation, shared with EPC generation) is "England and Wales" —
         # keeps Region consistent with epcVersion for the same household.
         regions_ew = [
-            'NORTH EAST','NORTH WEST','YORKSHIRE AND THE HUMBER','EAST MIDLANDS',
-            'WEST MIDLANDS','EAST OF ENGLAND','LONDON','SOUTH EAST','SOUTH WEST',
+            'NORTH EAST','NORTH WEST','YORKSHIRE','EAST MIDLANDS',
+            'WEST MIDLANDS','EAST OF ENGLAND','GREATER LONDON','SOUTH EAST','SOUTH WEST',
             'WALES'
         ]
         # LSOA prefix by nation; all other regions are in England (E01)
@@ -2070,7 +2087,7 @@ class SERLContextualVariablesGenerator:
                       'Fairly difficult', 'Very difficult', "Don't know"]
         C6_OPTS    = ['Daily', 'Most days', 'Rarely', 'never', "Don't know", 'Prefer not to say']
         WFH        = ['Always work from home', 'Sometimes work from home',
-                      'Never work from home', 'Not applicable /prefer not to say']
+                      'Never work from home', 'Not applicable / prefer not to say']
         E1_OPTS    = ['Living comfortably', 'Doing alright', 'Just about getting by',
                       'Finding it quite difficult', 'Finding it very difficult',
                       "Don't know", 'Prefer not to say']
@@ -2413,7 +2430,7 @@ class SERLContextualVariablesGenerator:
 
         if follow_up_survey:
             # encoding only applies when format="csv"
-            followup_df = self.generate_follow_up_survey()
+            followup_df = self.generate_follow_up_survey().rename(columns=FOLLOWUP_2023_DATA_COLUMNS)
             write_table(
                 followup_df, Path(outfolder) / self._fname(self.names.followup_survey),
                 format=self.format, encoding="latin-1",

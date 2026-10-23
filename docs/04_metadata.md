@@ -347,7 +347,7 @@ no `serl_` prefix for the moment)
 | Column | Type | Description |
 |---|---|---|
 | PUPRN | text | Pseudonymised household identifier |
-| Region | text | Government Office Region (e.g. LONDON, NORTH WEST, WALES) or `SCOTLAND`; consistent with the household's EPC `epcVersion` (a Scotland EPC always pairs with `Region = SCOTLAND`, and vice versa) |
+| Region | text | Government Office Region (e.g. GREATER LONDON, NORTH WEST, WALES) or `SCOTLAND`; consistent with the household's EPC `epcVersion` (a Scotland EPC always pairs with `Region = SCOTLAND`, and vice versa) |
 | LSOA | text | Real ONS LSOA / NRS Data Zone code, sampled from `data/reference/lsoa_codes_england_wales_scotland.csv` by nation prefix (`W01` Wales, `S01` Scotland, `E01` elsewhere); the code is genuine but not tied to the household's actual location. England/Wales vintage (2011 or 2021) set via `lsoa_vintage` — see [02_configuration.md](02_configuration.md) |
 | grid_cell | text | ERA5 grid-cell identifier assigned to the household; sampled from cells present in the downloaded climate CSVs when available, otherwise assigned geometrically over the configured weather bounding box |
 | IMD_quintile | int | Index of Multiple Deprivation quintile (1 = most deprived, 5 = least deprived) |
@@ -377,7 +377,7 @@ no `serl_` prefix for the moment)
 | C3 / C4_* | text | Whether the household has struggled to pay energy bills (C3), and the routed reason (C4_*, populated only when `C3 = No`) |
 | C5 / C6 | text | Ease of keeping the home warm (C5), and frequency of checking energy usage (C6) |
 | D1 / D1_flag | int/boolean | Number of household occupants, and a flag raised when it disagrees with the sum of the D2 age-band answers |
-| D2_* / D2_ignored / D2_min_total | text/boolean/int | Household occupant counts by age band (0-5, 6-15, 16-24, 24-44, 45-64, 65-74, 75-85, 85+), answered all-or-nothing; distributed to sum to `D1` when both are answered |
+| D2_* / D2_ignored / D2_min_total | text/boolean/int | Household occupant counts by age band, answered all-or-nothing; distributed to sum to `D1` when both are answered. Columns as in the real 2023 data file: `D2_0_5`, `D2_5_15`, `D2_16_24`, `D2_25_44`, `D2_45_64`, `D2_65_74`, `D2_75_84`, `D2_85plus`. SERL's data dictionary spells five of them differently (`D2_6-15`, `D2_16-24`, `D2_24_44`, `D2_45-64`, `D2_75_85`, typos noted in the master mapping); the generator uses the dictionary's names internally and renames on write (`FOLLOWUP_2023_DATA_COLUMNS`) |
 | D3_1–D3_6 / D3_flag_high / D3_flag_low / D3_ignored / D3_total_over16 | text/boolean/int | Occupant counts by working situation, answered all-or-nothing and distributed over the household's over-16 occupants |
 | D4 / D4_flag | text/boolean | Work-from-home pattern (Always / Sometimes / Never / Not applicable), and a flag raised when nobody is working (per D3) yet D4 was still answered |
 | D5 / D6 / D6_err | text | Number of plug-in electric vehicles in the household (D5; aligned with `has_ev`) and how many are typically charged at home (D6, `≤ D5`) |

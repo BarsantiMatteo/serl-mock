@@ -106,7 +106,7 @@ patterns:
 # CDSAPI_URL and CDSAPI_KEY before running the downloader.
 # -------------------------
 weather:
-  # CDS dataset identifier
+  # CDS dataset identifier. SERL uses ERA5 single levels (0.25°), not ERA5-Land.
   dataset: "reanalysis-era5-single-levels"
 
   # ERA5 product type
