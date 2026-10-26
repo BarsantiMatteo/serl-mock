@@ -464,12 +464,12 @@ def sample_field_independent(rnd: random.Random, master_var_name: str) -> object
 # The 2023 follow-up survey's data dictionary has typos in the D2 age-band
 # names; the real data file uses different ones. SERL's master mapping notes
 # them ("For 2023 Survey the column is: ... Dictionary has typo"), and the
-# names below were checked against the real file on the TRE (2026-10-23),
-# which has D2_5_15 where the mapping note says D2_6_15. The generator keeps
+# names below were checked against the real file on the TRE (2026-10-26),
+# which has D2_6_15 as the mapping note says. The generator keeps
 # the dictionary's names internally (they key the harmonised survey) and
 # write_all() renames on output, so the file matches the real one.
 FOLLOWUP_2023_DATA_COLUMNS: Dict[str, str] = {
-    "D2_6-15": "D2_5_15",
+    "D2_6-15": "D2_6_15",
     "D2_16-24": "D2_16_24",
     "D2_24_44": "D2_25_44",
     "D2_45-64": "D2_45_64",
