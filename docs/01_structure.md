@@ -7,8 +7,11 @@ serl-mock/
 │   ├── serl_mock.yaml               # Default config (edition08) — select a different one
 │   │                                # with --config (see 02_configuration.md)
 │   ├── serl_mock_edition08.yaml     # Example: explicit edition08 config
-│   └── serl_mock_edition09.yaml     # Example: edition09 config (format/layout differ
-│                                    # automatically — see src/serl_mock/edition.py)
+│   ├── serl_mock_edition09.yaml     # Example: edition09 config (format/layout differ
+│   │                                # automatically — see src/serl_mock/edition.py)
+│   └── raw/                         # Raw-delivery configs for scripts/generate_raw_data.py
+│       ├── raw_from_edition08.yaml
+│       └── raw_from_edition08_gappy.yaml
 │
 ├── data/
 │   ├── reference/                  # Tracked input files (data dictionaries, BST dates, bank holidays)
@@ -80,7 +83,7 @@ serl-mock/
 ├── scripts/
 │   ├── generate_mock_data.py       # Entry point: runs the full pipeline
 │   ├── generate_bank_holidays_csv.py  # One-off: fetches UK bank holidays from gov.uk
-│   ├── make_raw_from_edition08.py  # Mock raw HH deliveries from a mock Edition08 run, with planted differences
+│   ├── generate_raw_data.py        # Mock raw HH deliveries from a mock Edition08 run (config/raw/*.yaml)
 │   └── update_golden_manifest.py   # Regenerates tests/golden/*.json baselines (manual only)
 │
 ├── src/
@@ -146,8 +149,8 @@ The pipeline runs these steps in order:
 
 Skipping steps 1–4 with `--survey-only` requires `mock_internal/puprn_master.csv` and `mock_internal/household_traits.csv` to already exist from a prior full run.
 
-### `scripts/make_raw_from_edition08.py`
-Makes **mock raw half-hourly deliveries** (SERL's readings before they are wrapped into an edition) from a finished mock Edition08 run: `uv run python scripts/make_raw_from_edition08.py` reads `data/mock/edition08_with_2025survey/` and writes `data/mock/raw_from_edition08/` (`--source`, `--out`, `--seed` and the per-month plant counts are options). Output: `SERL_half_hourly_YYYY_MM.csv`, a copy of `bst_dates_to_2030.csv`, and the ground truth `mock_internal/raw_planted_manifest.json` / `raw_planted_readings.csv`. Used by serl-dq's raw-vs-edition comparison (data version `mock_raw_from_edition08`). See `raw_from_edition.py` below.
+### `scripts/generate_raw_data.py`
+Makes **mock raw half-hourly deliveries** (SERL's readings before they are wrapped into an edition) from a finished mock Edition08 run, separately from `generate_mock_data.py`: `uv run python scripts/generate_raw_data.py --config config/raw/<name>.yaml` (`--output-dir` overrides `data/mock/<output_label>/`). Output: `SERL_half_hourly_YYYY_MM.csv`, a copy of `bst_dates_to_2030.csv`, and the ground truth `mock_internal/raw_planted_manifest.json` / `raw_planted_readings.csv`. Used by serl-dq's raw-vs-edition comparison (data versions `mock_raw_from_edition08`, `mock_raw_from_edition08_gappy`). See [02_configuration.md](02_configuration.md#raw-half-hourly-deliveries-configraw) and `raw_from_edition.py` below.
 
 ### `scripts/generate_bank_holidays_csv.py`
 A one-off utility that fetches the official UK bank holidays JSON from gov.uk and writes `data/reference/uk_bank_holidays_england_wales_scotland.csv`.  Run this locally if the reference file needs updating; the output is committed to the repo.
@@ -242,7 +245,7 @@ Contains three generators:
 Optional **synthetic missingness** (`missingness:` in the config, off by default). `parse_patterns` validates the block; `MissingnessPlanner` draws each pattern's households and runs from its own seeded rngs and `apply()` changes one month's HH frame (dropped rows, flag `0` / other codes, emptied values, invalid times, duplicates, off-grid stamps). `ground_truth()` lists every planted run for `mock_internal/missingness_ground_truth.csv`. See [02_configuration.md](02_configuration.md#synthetic-missingness-missingness).
 
 ### `src/serl_mock/raw_from_edition.py`
-`convert(source_dir, out_dir, seed, counts)` rewrites a mock Edition08 run's half-hourly files into the raw format and plants deterministic differences. Format changes:
+`load_config` / `parse_config` read and validate a `config/raw/*.yaml` file into a `RawConfig`; `convert(cfg, source_dir=None, out_dir=None)` rewrites the source run's half-hourly files into the raw format and plants deterministic differences (kinds, categories and the ground truth: [02_configuration.md](02_configuration.md#raw-half-hourly-deliveries-configraw)). Format changes:
 
 | Raw column | From Edition08 |
 |---|---|
@@ -257,7 +260,7 @@ Optional **synthetic missingness** (`missingness:` in the config, off by default
 | `Read_date_effective` | `Read_date_effective_local` |
 | `Read_date_time_effective` | `Read_date_time_UTC` − 1 s |
 
-Dropped: `Read_date_time_local`, `Valid_read_time`, `Gas_hh_Wh` and the five flag columns. Planted per month (counts in `PlantCounts`): one whole household-day removed, scattered readings removed, single values changed, single values emptied, readings duplicated (exact copies). Across all months: one household left out, one extra household (a copy of another household's readings under a new PUPRN). Plants are disjoint, never touch the extra household's donor, only target readings whose (PUPRN, timestamp) is unique, and each month uses its own rng (seed, year, month). Row order follows the edition file. `raw_planted_readings.csv` has one row per planted reading (`kind`, `file`, `PUPRN`, `Read_date_time`, `raw_column`, `edition_column`, `edition_value`, `raw_value`, `raw_value_in_edition_units`); the two households are in the manifest only.
+Dropped: `Read_date_time_local`, `Valid_read_time`, `Gas_hh_Wh` and the five flag columns. Planting is done month by month by `_Month.plant()`: first the anomaly kinds and changed values (one rng per (seed, year, month), drawn in a fixed order), then the realistic kinds `edition_blanked` / `edition_removed` (their own rngs, so turning them on or off never moves the others). A reading the edition lacks gets a full raw row from `raw_row_for` (HH and effective date derived with `HHSmartMeterGenerator`'s own helpers). Row order follows the edition file.
 
 ### `src/serl_mock/generator_contextual_data.py`
 `SERLContextualVariablesGenerator` produces the contextual CSV files: EPC, SERL survey, COVID-19 survey, participant summary, follow-up survey, the MasterSERL harmonised survey, the raw 2025 survey, and the exporter PUPRN list.  It reads household traits from `mock_internal/household_traits.csv` to ensure device-ownership fields (PV, HP, EV, solar thermal) are consistent with the smart-meter outputs, and shares a single England & Wales / Scotland nation assignment between the EPC and participant-summary generators so `epcVersion` and `Region` never contradict each other.

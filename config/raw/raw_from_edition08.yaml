@@ -1,0 +1,24 @@
+# Mock raw half-hourly deliveries from the complete mock Edition08 run.
+#
+#   uv run python scripts/generate_raw_data.py --config config/raw/raw_from_edition08.yaml
+#
+# The source has no gaps or NULLs, so the realistic kinds (edition_blanked,
+# edition_removed) have nothing to fill and are off. Reproduces the first
+# raw mock (serl-mock ebc9da8) byte for byte in the SERL_half_hourly_* files.
+# Used by serl-dq's data version mock_raw_from_edition08.
+# Keys: docs/02_configuration.md#raw-half-hourly-deliveries-configraw.
+
+source: edition08_with_2025survey       # data/mock/<source>/, an existing Edition08 mock
+output_label: raw_from_edition08        # data/mock/<label>/
+seed: 42
+months: {start: null, end: null}        # YYYY-MM; null = the source's range
+plants_per_month:                       # 0 = off
+  changed_values: 25
+  edition_blanked: 0         # raw has a value, edition NULL       (realistic)
+  edition_removed: 0         # raw has a reading, edition has none  (realistic)
+  raw_missing_readings: 25   # edition has it, raw doesn't         (reverse, anomaly)
+  raw_emptied_values: 25     # raw NULL, edition has a value       (reverse, anomaly)
+  raw_duplicates: 5          # reading written twice in raw (exact copy)
+  raw_missing_household_days: 1
+extra_households: 1          # only in raw (copy of another household under a new PUPRN; e.g. withdrawn)
+missing_households: 1        # only in the edition

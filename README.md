@@ -190,12 +190,13 @@ See [docs/02_configuration.md](docs/02_configuration.md) for a full description 
 
 ### Mock raw half-hourly deliveries
 
-`uv run python scripts/make_raw_from_edition08.py` turns a mock Edition08 run
-(`data/mock/edition08_with_2025survey/` by default) into SERL's raw half-hourly
-format (`SERL_half_hourly_YYYY_MM.csv`) in `data/mock/raw_from_edition08/`,
-with known differences planted (removed, changed, emptied and duplicated
-readings; one household missing, one extra) and listed in its
-`mock_internal/`. See [docs/01_structure.md](docs/01_structure.md#srcserl_mockraw_from_editionpy).
+`uv run python scripts/generate_raw_data.py --config config/raw/raw_from_edition08_gappy.yaml`
+turns an existing mock Edition08 run into SERL's raw half-hourly format
+(`SERL_half_hourly_YYYY_MM.csv`) in `data/mock/<output_label>/`, with known
+differences between raw and edition planted (readings or values the edition
+dropped, changed values, duplicates, households on one side only) and listed
+in its `mock_internal/`. See
+[docs/02_configuration.md](docs/02_configuration.md#raw-half-hourly-deliveries-configraw).
 
 ### Weather data (ERA5 via CDS API)
 

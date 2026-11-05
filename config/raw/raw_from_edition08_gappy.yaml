@@ -1,0 +1,25 @@
+# Mock raw half-hourly deliveries from the gappy mock Edition08 run
+# (config/serl_mock_edition08_gappy.yaml: dropped rows, NULL values with
+# flag 0, off-grid stamps, duplicates), all kinds on.
+#
+#   uv run python scripts/generate_raw_data.py --config config/raw/raw_from_edition08_gappy.yaml
+#
+# The edition's own gaps and NULLs are copied to raw unchanged; the realistic
+# kinds fill some of them in raw only. Used by serl-dq's data version
+# mock_raw_from_edition08_gappy.
+# Keys: docs/02_configuration.md#raw-half-hourly-deliveries-configraw.
+
+source: edition08_gappy                 # data/mock/<source>/, an existing Edition08 mock
+output_label: raw_from_edition08_gappy  # data/mock/<label>/
+seed: 42
+months: {start: null, end: null}        # YYYY-MM; null = the source's range
+plants_per_month:                       # 0 = off
+  changed_values: 25
+  edition_blanked: 25        # raw has a value, edition NULL       (realistic)
+  edition_removed: 25        # raw has a reading, edition has none  (realistic)
+  raw_missing_readings: 25   # edition has it, raw doesn't         (reverse, anomaly)
+  raw_emptied_values: 25     # raw NULL, edition has a value       (reverse, anomaly)
+  raw_duplicates: 5          # reading written twice in raw (exact copy)
+  raw_missing_household_days: 1
+extra_households: 1          # only in raw (copy of another household under a new PUPRN; e.g. withdrawn)
+missing_households: 1        # only in the edition

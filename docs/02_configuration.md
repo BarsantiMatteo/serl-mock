@@ -386,6 +386,103 @@ suspicious zeros, invalid daily read times) and its system-migration gaps
 
 ---
 
+## Raw half-hourly deliveries (`config/raw/`)
+
+SERL's raw half-hourly readings, before they are wrapped into an edition,
+come as monthly `SERL_half_hourly_YYYY_MM.csv` files with different column
+names (table in [01_structure.md](01_structure.md#srcserl_mockraw_from_editionpy)).
+`scripts/generate_raw_data.py` makes mock ones from an **existing** mock
+Edition08 run and plants known differences between raw and edition, so a
+raw-vs-edition comparison (serl-dq) has a ground truth. It has its own
+config files, separate from `serl_mock.yaml`:
+
+```bash
+uv run python scripts/generate_raw_data.py --config config/raw/raw_from_edition08_gappy.yaml
+```
+
+```yaml
+source: edition08_gappy                 # data/mock/<source>/, an existing Edition08 mock (HH files read)
+output_label: raw_from_edition08_gappy  # data/mock/<label>/ (default raw_from_<source>)
+seed: 42
+months: {start: null, end: null}        # YYYY-MM, inclusive; null = the source's range
+plants_per_month:                       # per month; 0 = off
+  changed_values: 25
+  edition_blanked: 25        # raw has a value, edition NULL       (realistic)
+  edition_removed: 25        # raw has a reading, edition has none  (realistic)
+  raw_missing_readings: 25   # edition has it, raw doesn't         (reverse, anomaly)
+  raw_emptied_values: 25     # raw NULL, edition has a value       (reverse, anomaly)
+  raw_duplicates: 5          # reading written twice in raw (exact copy)
+  raw_missing_household_days: 1
+extra_households: 1          # only in raw (copy of another household under a new PUPRN)
+missing_households: 1        # only in the edition
+```
+
+Unknown keys, negative or non-integer counts and malformed months raise.
+Omitted plant counts take the values above.
+
+| Config | Source | Notes |
+|---|---|---|
+| `raw_from_edition08.yaml` | `edition08_with_2025survey` (complete) | realistic kinds off |
+| `raw_from_edition08_gappy.yaml` | `edition08_gappy` | all kinds |
+
+**Directions.** Real processing goes raw → edition, so the realistic
+differences are a reading or value the edition dropped:
+
+- `edition_blanked` picks an edition NULL (only in households that have
+  some value in that column that month), and raw gets a value there.
+- `edition_removed` picks a half-hour inside a household's covered range
+  that the edition doesn't have (and no off-grid reading within 30 min of),
+  and raw gets a full row there, its `HH_segment` and dates derived as the
+  edition derives them.
+- Both fill in a value from the same household's same half-hour a week
+  earlier, if the edition has it, else from the household's median for the
+  column that month.
+
+Both kinds need gaps in the source. If there are fewer candidates than
+requested (e.g. a complete source), what exists is planted. The rest is
+printed as a warning and recorded under `shortfall` in the manifest.
+
+The `raw_*` kinds go the other way (raw lacks something the edition has)
+and stand for anomalies.
+
+**Selection rules.**
+
+- Plants never overlap.
+- Plants never touch an extra household's donor.
+- Plants only target readings whose (PUPRN, timestamp) is unique and that
+  have a value.
+- The edition's own gaps and NULLs are copied to raw as they are, so they
+  are never differences.
+- Each month has its own rngs (seed, year, month), so one month's output
+  doesn't depend on which months are converted.
+
+**Ground truth** in `<output>/mock_internal/`:
+
+- `raw_planted_readings.csv` has one row per planted reading. For the
+  value kinds, a row is one reading and one column. Columns: `category`,
+  `kind`, `file`, `PUPRN`, `Read_date_time`, `raw_column`,
+  `edition_column`, `edition_value`, `raw_value`,
+  `raw_value_in_edition_units` (gas in m3).
+- `raw_planted_manifest.json` has the households on one side only, any
+  `shortfall`, and the settings. It also has `expected_counts`: per
+  category × month × edition column, where a whole-reading kind counts
+  once under every value column.
+
+`category` is the comparison category in serl-dq (A = raw, B = edition):
+
+| Kind | Category |
+|---|---|
+| `changed_values` | `changed` |
+| `edition_blanked` | `emptied_in_edition` |
+| `edition_removed` | `removed_in_edition` |
+| `raw_missing_readings`, `raw_missing_household_days` | `only_in_edition` |
+| `raw_emptied_values` | `emptied_in_raw` |
+| `raw_duplicates` | `duplicate_in_raw` |
+| `extra_households` (manifest) | `household_not_in_edition` |
+| `missing_households` (manifest) | `household_not_in_raw` |
+
+---
+
 ## Adding a new setting
 
 1. Add the key and a default value to `serl_mock.yaml`.
