@@ -20,6 +20,14 @@ Planted kinds (`plants_per_month`; counts per month, 0 = off):
   raw_missing_household_days ditto, a whole household-day                  (anomaly)
   raw_emptied_values         raw NULL where the edition has a value        (anomaly)
   raw_duplicates             a reading written twice in raw (exact copy)
+  off_grid_edition_empty     raw has a reading 1-14 min off its half-hour; the
+                             edition dropped it and has an empty row (every
+                             value NULL) at the half-hour                  (realistic)
+  off_grid_edition_skip      ditto, the edition has no row at the half-hour (realistic)
+
+A third way an edition can treat an off-grid raw reading — keep it at its
+stamp — is in the source already (mock editions have off-grid stamps);
+those are copied to raw and listed in `mock_internal/raw_off_grid_in_both.csv`.
 
 plus, over the whole run, `missing_households` (only in the edition) and
 `extra_households` (only in raw: a copy of another household's readings
@@ -27,7 +35,9 @@ under a new PUPRN, e.g. a withdrawn household).
 
 The realistic kinds go the way real processing does (raw -> edition drops
 or blanks a reading); they need gaps in the source edition: edition_blanked
-fills an edition NULL, edition_removed fills a half-hour the edition lacks.
+fills an edition NULL, edition_removed and off_grid_edition_skip fill a
+half-hour the edition lacks, off_grid_edition_empty replaces an all-NULL
+edition row.
 A source with fewer candidates than requested gets what exists; the
 shortfall is printed and recorded in the manifest.
 
@@ -42,9 +52,12 @@ copied as they are, so they are identical on both sides.
 
 Each month draws from its own rngs (seed, year, month[, kind]), so a
 month's plants don't depend on which other months are converted. The kinds
-step 2 of serl-dq's plan had (all but the two realistic ones) use the same
+step 2 of serl-dq's plan had (all but the realistic ones) use the same
 draws in the same order as then, so a config with the realistic kinds off
-reproduces that output byte for byte.
+reproduces that output byte for byte. The realistic kinds run after them,
+in a fixed order, each on its own rng and never on what an earlier kind
+took, so turning a later kind on leaves the earlier kinds' plants as they
+were.
 """
 from __future__ import annotations
 
@@ -88,10 +101,15 @@ EDITION_FILE_RE = re.compile(r"^serl_half_hourly_(\d{4})_(\d{2})_edition08\.csv$
 BST_FILE = "bst_dates_to_2030.csv"
 READINGS_FILE = "raw_planted_readings.csv"
 MANIFEST_FILE = "raw_planted_manifest.json"
+OFF_GRID_FILE = "raw_off_grid_in_both.csv"
+OFF_GRID_MAX_MINUTES = 14   # off-grid plants stay nearest to their own half-hour
 
+# edition_read_date_time: the edition's timestamp for the reading when it
+# differs from raw's (the off-grid kinds: the half-hour the edition has
+# empty or lacks); empty otherwise.
 READINGS_COLUMNS = [
     "category", "kind", "file", "PUPRN", "Read_date_time", "raw_column", "edition_column",
-    "edition_value", "raw_value", "raw_value_in_edition_units",
+    "edition_value", "raw_value", "raw_value_in_edition_units", "edition_read_date_time",
 ]
 
 # Planted kind -> serl-dq comparison category (A = raw, B = edition).
@@ -103,6 +121,8 @@ CATEGORY = {
     "raw_missing_household_days": "only_in_edition",
     "raw_emptied_values": "emptied_in_raw",
     "raw_duplicates": "duplicate_in_raw",
+    "off_grid_edition_empty": "off_grid_in_raw_empty_in_edition",
+    "off_grid_edition_skip": "off_grid_in_raw_not_in_edition",
 }
 # Kinds planted on one value of a reading; the others are whole readings.
 VALUE_KINDS = {"changed_values", "edition_blanked", "raw_emptied_values"}
@@ -123,6 +143,8 @@ class PlantCounts:
     raw_emptied_values: int = 25
     raw_duplicates: int = 5
     raw_missing_household_days: int = 1
+    off_grid_edition_empty: int = 25
+    off_grid_edition_skip: int = 25
 
 
 @dataclass(frozen=True)
@@ -356,7 +378,7 @@ class _Month:
         self.donors = {d for _, d in households.extra}
 
     def record(self, kind: str, row, column: Optional[str] = None, raw_value: Optional[str] = None,
-               edition_value: Optional[str] = None) -> None:
+               edition_value: Optional[str] = None, edition_time: Optional[str] = None) -> None:
         if column and edition_value is None:
             edition_value = _edition_units(column, row[column])
         self.records.append({
@@ -365,6 +387,7 @@ class _Month:
             "edition_column": RAW_TO_EDITION[column] if column else None,
             "edition_value": edition_value, "raw_value": raw_value,
             "raw_value_in_edition_units": _edition_units(column, raw_value) if column else None,
+            "edition_read_date_time": edition_time,
         })
         self.planted[kind] += 1
 
@@ -435,13 +458,19 @@ class _Month:
         used = np.zeros(len(raw), dtype=bool)
         used[take] = True
 
-        # -- realistic kinds, own rngs --------------------------------------
-        self._edition_blanked(eligible_rows=~key_dup & ~raw["PUPRN"].isin(self.donors) & ~remove & ~used,
-                              edition_values=values)
+        # -- realistic kinds, own rngs, in this order -------------------------
+        self._stamp_text = raw["Read_date_time"].to_numpy(dtype=object)
+        free = (~key_dup & ~raw["PUPRN"].isin(self.donors)).to_numpy() & ~remove & ~used
+        self.blanked_rows: set = set()
+        self._edition_blanked(eligible_rows=pd.Series(free), edition_values=values)
+        free[list(self.blanked_rows)] = False
         added = self._edition_removed()
+        dropped, off_empty = self._off_grid_edition_empty(eligible_rows=free)
+        remove[dropped] = True
+        off_skip = self._off_grid_edition_skip()
 
-        out = pd.concat([raw[~remove], raw.iloc[groups["raw_duplicates"]], self.extra_rows, added],
-                        ignore_index=True)
+        out = pd.concat([raw[~remove], raw.iloc[groups["raw_duplicates"]], self.extra_rows, added,
+                         off_empty, off_skip], ignore_index=True)
         out = out.sort_values("_pos", kind="stable").drop(columns="_pos")
         return out.reset_index(drop=True)
 
@@ -493,29 +522,34 @@ class _Month:
             new = self._fill(row["PUPRN"], stamp, col, self._household_rows(row["PUPRN"]))
             self.record("edition_blanked", row, col, new, edition_value="")
             raw.iat[i, raw.columns.get_loc(col)] = new
+            self.blanked_rows.add(i)
 
-    def _edition_removed(self) -> pd.DataFrame:
-        n = self.counts.edition_removed
+    def _slots(self) -> pd.DataFrame:
+        """Each edition reading's household and (floor, ceil) half-hour
+        slot, as minutes since the epoch / 30 (equal for an on-grid stamp),
+        with its row index; not the missing households or donors."""
+        if hasattr(self, "_slots_cache"):
+            return self._slots_cache
         raw = self.raw
-        empty = raw.iloc[:0]
-        if n == 0:
-            return empty
-        rng = np.random.default_rng([self.seed, self.year, self.month, 2])
-        # Half-hour slots (UTC interval ends, on :00/:30) inside each
-        # household's covered range this month where the edition has no
-        # reading — nor an off-grid one within 30 min of it, nor one with a
-        # duplicated key.
         stamps = pd.to_datetime(raw["Read_date_time"], format=STAMP_FMT, errors="coerce", utc=True)
         ok = stamps.notna()
         epoch = pd.Timestamp("1970-01-01", tz="UTC")
         minutes = ((stamps[ok] - epoch) // pd.Timedelta(minutes=1)).to_numpy(dtype=np.int64)
-        lo, hi = minutes // 30, -(-minutes // 30)            # floor / ceil slot
-        occ = pd.DataFrame({"PUPRN": raw.loc[ok, "PUPRN"].to_numpy(), "lo": lo, "hi": hi})
+        occ = pd.DataFrame({"PUPRN": raw.loc[ok, "PUPRN"].to_numpy(), "lo": minutes // 30,
+                            "hi": -(-minutes // 30), "row": np.flatnonzero(ok.to_numpy())})
         excluded = set(self.households.missing) | self.donors
-        occ = occ[~occ["PUPRN"].isin(excluded)]
-        if occ.empty:
-            self.short("edition_removed", n, 0)
-            return empty
+        self._slots_cache = occ[~occ["PUPRN"].isin(excluded)].reset_index(drop=True)
+        return self._slots_cache
+
+    def _gap_slots(self) -> Tuple[pd.DataFrame, pd.Series]:
+        """Half-hour slots (UTC interval ends, on :00/:30) inside each
+        household's covered range this month where the edition has no
+        reading, nor an off-grid one within 30 min of it, and not inside a
+        household-day removed from raw: (PUPRN, slot) and the slots'
+        stamps, in a fixed order."""
+        if hasattr(self, "_gap_cache"):
+            return self._gap_cache
+        occ = self._slots()
         occupied = pd.concat([occ[["PUPRN", "lo"]].rename(columns={"lo": "slot"}),
                               occ[["PUPRN", "hi"]].rename(columns={"hi": "slot"})]).drop_duplicates()
         on_grid = occ[occ["lo"] == occ["hi"]]
@@ -530,29 +564,126 @@ class _Month:
         cand = cand.reset_index(drop=True)
         new_stamps = pd.to_datetime(cand["slot"] * 30, unit="m", utc=True)
         if len(self.removed_days) and len(cand):
-            # Not inside a household-day removed from raw.
             eff = [HHSmartMeterGenerator._effective_date_local(t.tz_convert("Europe/London"))
                    for t in new_stamps]
             days = pd.MultiIndex.from_arrays([cand["PUPRN"], eff])
             keep = ~days.isin(pd.MultiIndex.from_frame(self.removed_days))
             cand, new_stamps = cand[keep].reset_index(drop=True), new_stamps[keep].reset_index(drop=True)
+        self._gap_cache = (cand, new_stamps)
+        return self._gap_cache
+
+    def _new_row(self, puprn: str, stamp: pd.Timestamp, slot_stamp: pd.Timestamp, r: int) -> dict:
+        """A raw row at `stamp` (on- or off-grid), values filled for the
+        half-hour ending `slot_stamp`, positioned in the edition's order."""
+        hh_rows = self._household_rows(puprn)
+        vals = {c: self._fill(puprn, slot_stamp, c, hh_rows) for c in VALUE_COLUMNS}
+        row = raw_row_for(puprn, stamp, vals)
+        later = np.flatnonzero(self._stamp_text > row["Read_date_time"])
+        row["_pos"] = (later[0] if len(later) else len(self.raw)) - 0.5 + r * 1e-6
+        return row
+
+    def _off_grid_stamp(self, rng: np.random.Generator, slot_stamp: pd.Timestamp) -> pd.Timestamp:
+        """`slot_stamp` moved 1-14 min either way (so its nearest half-hour
+        is still the slot), kept inside this month's file (stamps after
+        00:00 on the 1st, up to 00:00 on the next 1st)."""
+        k = int(rng.integers(1, OFF_GRID_MAX_MINUTES + 1)) * int(rng.choice([-1, 1]))
+        start = pd.Timestamp(year=self.year, month=self.month, day=1, tz="UTC")
+        end = start + pd.offsets.MonthBegin(1)
+        stamp = slot_stamp + pd.Timedelta(minutes=k)
+        if not (start < stamp <= end):
+            stamp = slot_stamp - pd.Timedelta(minutes=k)
+        return stamp
+
+    def _edition_removed(self) -> pd.DataFrame:
+        n = self.counts.edition_removed
+        raw = self.raw
+        empty = raw.iloc[:0]
+        self.removed_slots: set = set()
+        if n == 0:
+            return empty
+        rng = np.random.default_rng([self.seed, self.year, self.month, 2])
+        cand, new_stamps = self._gap_slots()
         k = min(n, len(cand))
         self.short("edition_removed", n, k)
         if not k:
             return empty
         picked = np.sort(rng.choice(len(cand), k, replace=False))
-        text = raw["Read_date_time"].to_numpy(dtype=object)
         rows = []
         for r, i in enumerate(picked):
             puprn, stamp = cand.at[i, "PUPRN"], new_stamps[i]
-            hh_rows = self._household_rows(puprn)
-            vals = {c: self._fill(puprn, stamp, c, hh_rows) for c in VALUE_COLUMNS}
-            row = raw_row_for(puprn, stamp, vals)
-            later = np.flatnonzero(text > row["Read_date_time"])
-            row["_pos"] = (later[0] if len(later) else len(raw)) - 0.5 + r * 1e-6
+            row = self._new_row(puprn, stamp, stamp, r)
             rows.append(row)
             self.record("edition_removed", row)
+            self.removed_slots.add(int(i))
         return pd.DataFrame(rows)
+
+    def _off_grid_edition_skip(self) -> pd.DataFrame:
+        """Raw has an off-grid reading; the edition has nothing at its
+        half-hour (dropped it, wrote no row)."""
+        n = self.counts.off_grid_edition_skip
+        if n == 0:
+            return self.raw.iloc[:0]
+        rng = np.random.default_rng([self.seed, self.year, self.month, 4])
+        cand, slot_stamps = self._gap_slots()
+        free = np.array([i for i in range(len(cand)) if i not in self.removed_slots], dtype=np.int64)
+        k = min(n, len(free))
+        self.short("off_grid_edition_skip", n, k)
+        if not k:
+            return self.raw.iloc[:0]
+        rows = []
+        for r, i in enumerate(np.sort(rng.choice(free, k, replace=False))):
+            puprn, slot_stamp = cand.at[i, "PUPRN"], slot_stamps[i]
+            row = self._new_row(puprn, self._off_grid_stamp(rng, slot_stamp), slot_stamp, 1000 + r)
+            rows.append(row)
+            self.record("off_grid_edition_skip", row, edition_time=slot_stamp.strftime(STAMP_FMT))
+        return pd.DataFrame(rows)
+
+    def _off_grid_edition_empty(self, eligible_rows: np.ndarray) -> Tuple[np.ndarray, pd.DataFrame]:
+        """Raw has an off-grid reading; the edition has an empty row (every
+        value NULL) at its half-hour instead. Returns the edition rows raw
+        drops and the off-grid rows raw gets."""
+        n = self.counts.off_grid_edition_empty
+        raw = self.raw
+        none = (np.array([], dtype=np.int64), raw.iloc[:0])
+        if n == 0:
+            return none
+        rng = np.random.default_rng([self.seed, self.year, self.month, 3])
+        occ = self._slots()
+        # On-grid, every value empty, and no off-grid reading of the
+        # household within 30 min (whose floor slot is the slot or the one
+        # before), so the new off-grid stamp is the slot's only neighbour.
+        all_empty = (raw[VALUE_COLUMNS] == "").all(axis=1).to_numpy()
+        grid = occ[(occ["lo"] == occ["hi"]) & eligible_rows[occ["row"]] & all_empty[occ["row"]]]
+        off = occ[occ["lo"] != occ["hi"]]
+        near = set(zip(off["PUPRN"], off["lo"])) | set(zip(off["PUPRN"], off["lo"] + 1))
+        grid = grid[np.array([(p, s) not in near for p, s in zip(grid["PUPRN"], grid["lo"])], dtype=bool)]
+        # A fill must have something to come from.
+        has_any = set(raw.loc[(raw[VALUE_COLUMNS] != "").any(axis=1), "PUPRN"])
+        grid = grid[grid["PUPRN"].isin(has_any)].sort_values("row").reset_index(drop=True)
+        k = min(n, len(grid))
+        self.short("off_grid_edition_empty", n, k)
+        if not k:
+            return none
+        picked = np.sort(rng.choice(len(grid), k, replace=False))
+        rows, dropped = [], []
+        for r, i in enumerate(picked):
+            idx = int(grid.at[i, "row"])
+            puprn = raw.at[idx, "PUPRN"]
+            slot_stamp = pd.Timestamp(raw.at[idx, "Read_date_time"])
+            row = self._new_row(puprn, self._off_grid_stamp(rng, slot_stamp), slot_stamp, 2000 + r)
+            row["_pos"] = raw.at[idx, "_pos"]  # where the edition's empty row was
+            rows.append(row)
+            dropped.append(idx)
+            self.record("off_grid_edition_empty", row, edition_time=raw.at[idx, "Read_date_time"])
+        return np.array(dropped, dtype=np.int64), pd.DataFrame(rows)
+
+    def off_grid_in_both(self, out: pd.DataFrame) -> pd.DataFrame:
+        """Off-grid readings the edition kept as they are (in the source, so
+        on both sides at the same stamp): PUPRN, Read_date_time."""
+        key = ["PUPRN", "Read_date_time"]
+        ed = self.raw.loc[~self.raw["Read_date_time"].str[14:].isin(["00:00Z", "30:00Z"]), key]
+        rw = out.loc[~out["Read_date_time"].str[14:].isin(["00:00Z", "30:00Z"]), key].drop_duplicates()
+        return ed.drop_duplicates().merge(rw, on=key).assign(file=self.fname)
 
 
 def plant_month(raw: pd.DataFrame, year: int, month: int, seed: int, counts: PlantCounts,
@@ -607,6 +738,7 @@ def convert(cfg: RawConfig, source_dir: Optional[Path] = None, out_dir: Optional
     all_records: List[dict] = []
     per_month: Dict[str, dict] = {}
     shortfall: Dict[str, Dict[str, int]] = {}
+    off_grid_kept: List[pd.DataFrame] = []
     for year, month, path in files:
         edition = read(path)
         if households is None:
@@ -616,16 +748,21 @@ def convert(cfg: RawConfig, source_dir: Optional[Path] = None, out_dir: Optional
         planted, m = plant_month(raw, year, month, cfg.seed, cfg.plants, households)
         planted.to_csv(out_dir / raw_file_name(year, month), index=False)
         all_records += m.records
+        kept = m.off_grid_in_both(planted)
+        off_grid_kept.append(kept)
         key = f"{year}-{month:02d}"
         per_month[key] = {"edition_rows": len(raw), "raw_rows": len(planted), **m.planted,
                           "missing_household_rows": m.missing_rows,
-                          "extra_household_rows": len(m.extra_rows)}
+                          "extra_household_rows": len(m.extra_rows),
+                          "off_grid_in_both": len(kept)}
         if m.shortfall:
             shortfall[key] = m.shortfall
             print(f"[raw] WARNING {key}: fewer candidates than requested, not planted: {m.shortfall}")
         print(f"[raw] {raw_file_name(year, month)}: {len(raw):,} -> {len(planted):,} rows")
 
     pd.DataFrame(all_records, columns=READINGS_COLUMNS).to_csv(internal / READINGS_FILE, index=False)
+    pd.concat(off_grid_kept, ignore_index=True)[["file", "PUPRN", "Read_date_time"]] \
+        .to_csv(internal / OFF_GRID_FILE, index=False)
     kinds = next(iter(per_month.values())).keys()
     manifest = {
         "description": "Mock raw half-hourly readings made from a mock Edition08 run, with planted "
@@ -648,6 +785,12 @@ def convert(cfg: RawConfig, source_dir: Optional[Path] = None, out_dir: Optional
                                     "Elec_act_imp_flag", "Elec_act_exp_flag",
                                     "Elect_react_imp_flag", "Elect_react_exp_flag", "Gas_flag"],
         "planted_readings_file": f"mock_internal/{READINGS_FILE}",
+        "off_grid_in_both_file": f"mock_internal/{OFF_GRID_FILE}",
+        "off_grid_scenarios": {
+            "edition keeps it at its stamp": "off_grid_in_both (copied from the source, not planted)",
+            "edition drops it, empty row at the half-hour": CATEGORY["off_grid_edition_empty"],
+            "edition drops it, no row at the half-hour": CATEGORY["off_grid_edition_skip"],
+        },
         "shortfall": shortfall,
         "totals": {k: sum(m[k] for m in per_month.values()) for k in kinds},
         "expected_counts": _expected_counts(all_records),

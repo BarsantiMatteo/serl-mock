@@ -21,14 +21,17 @@ import pytest
 
 from src.serl_mock.paths import mock_hh_dirname
 from src.serl_mock.raw_from_edition import (
-    GAS_COLUMN, MANIFEST_FILE, RAW_COLUMNS, RAW_TO_EDITION, READINGS_FILE,
+    GAS_COLUMN, MANIFEST_FILE, OFF_GRID_FILE, RAW_COLUMNS, RAW_TO_EDITION, READINGS_FILE,
     VALUE_COLUMNS, PlantCounts, RawConfig, convert, parse_config,
 )
 
 KEY = ["PUPRN", "Read_date_time"]
 COUNTS = PlantCounts(changed_values=5, edition_blanked=5, edition_removed=5, raw_missing_readings=4,
-                     raw_emptied_values=5, raw_duplicates=3, raw_missing_household_days=1)
-COMPLETE_COUNTS = replace(COUNTS, edition_blanked=0, edition_removed=0)
+                     raw_emptied_values=5, raw_duplicates=3, raw_missing_household_days=1,
+                     off_grid_edition_empty=4, off_grid_edition_skip=4)
+COMPLETE_COUNTS = replace(COUNTS, edition_blanked=0, edition_removed=0,
+                          off_grid_edition_empty=0, off_grid_edition_skip=0)
+OFF_GRID = ("off_grid_in_raw_empty_in_edition", "off_grid_in_raw_not_in_edition")
 HH_DIR = mock_hh_dirname("08")
 
 
@@ -38,8 +41,10 @@ def _cfg(counts: PlantCounts, **kw) -> RawConfig:
 
 @pytest.fixture(scope="module")
 def gappy_source(generated_output_dir: Path, tmp_path_factory) -> Path:
-    """The tiny fixture with ~3 % of rows dropped and ~2 % of each value
-    column emptied, as an edition with gaps."""
+    """The tiny fixture with ~3 % of rows dropped, ~2 % of each value
+    column emptied, ~1 % of rows emptied whole (missing reads) and ~0.5 %
+    of stamps moved 7 min off the grid (kept so by the edition), as an
+    edition with gaps."""
     out = tmp_path_factory.mktemp("gappy_source")
     (out / HH_DIR).mkdir()
     rng = np.random.default_rng(99)
@@ -49,6 +54,11 @@ def gappy_source(generated_output_dir: Path, tmp_path_factory) -> Path:
         df = df[rng.random(len(df)) > 0.03].copy()
         for col in ed_values:
             df.loc[rng.random(len(df)) < 0.02, col] = ""
+        df.loc[rng.random(len(df)) < 0.01, ed_values] = ""
+        shift = (rng.random(len(df)) < 0.005) & df["Read_date_time_UTC"].str[14:].isin(["00:00Z", "30:00Z"])
+        t = pd.to_datetime(df.loc[shift, "Read_date_time_UTC"], format="%Y-%m-%dT%H:%M:%SZ")
+        df.loc[shift, "Read_date_time_UTC"] = (t + pd.Timedelta(minutes=7)).dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        df.loc[shift, "HH"] = ""
         df.to_csv(out / HH_DIR / path.name, index=False)
     return out
 
@@ -79,6 +89,9 @@ def _load(source: Path, raw_dir: Path):
     raw = _read(raw_dir.glob("SERL_half_hourly_*.csv"))
     truth = pd.read_csv(raw_dir / "mock_internal" / READINGS_FILE, dtype=str, keep_default_na=False)
     manifest = json.loads((raw_dir / "mock_internal" / MANIFEST_FILE).read_text())
+    # The kept off-grid list, alongside (not part of the manifest file).
+    manifest["off_grid_in_both_rows"] = pd.read_csv(raw_dir / "mock_internal" / OFF_GRID_FILE, dtype=str,
+                                                    keep_default_na=False)
     return edition, raw, truth, manifest
 
 
@@ -119,14 +132,47 @@ def _check_against_edition(edition, raw, truth, manifest):
     ed = edition[~edition["PUPRN"].isin(missing)]
     rw = raw[~raw["PUPRN"].isin(extra)]
 
-    # Readings on one side only.
-    assert _keys(ed) - _keys(rw) == _keys(cat("only_in_edition"))
-    assert _keys(rw) - _keys(ed) == _keys(cat("removed_in_edition"))
+    # Readings on one side only. An off-grid plant is a raw reading at its
+    # off-grid stamp; the empty kind also leaves an edition-only empty row.
+    empty_rows = cat(OFF_GRID[0])
+    ed_side = {(p, t) for p, t in empty_rows[["PUPRN", "edition_read_date_time"]].to_numpy()}
+    assert _keys(ed) - _keys(rw) == _keys(cat("only_in_edition")) | ed_side
+    assert _keys(rw) - _keys(ed) == _keys(cat("removed_in_edition", *OFF_GRID))
     # Duplicates raw adds.
     already = _keys(ed[ed.duplicated(KEY, keep=False)])
     assert _keys(rw[rw.duplicated(KEY, keep=False)]) - already == _keys(cat("duplicate_in_raw"))
     n_dup = len(cat("duplicate_in_raw"))
-    assert len(rw) == len(ed) - len(cat("only_in_edition")) + len(cat("removed_in_edition")) + n_dup
+    assert len(rw) == (len(ed) - len(cat("only_in_edition")) + len(cat("removed_in_edition")) + n_dup
+                       + len(cat(OFF_GRID[1])))
+
+    # Off-grid plants: raw stamp 1-14 min from the edition's half-hour, a
+    # full reading in raw; at the half-hour the edition has an all-empty
+    # row (empty kind) or nothing within 30 min (skip kind).
+    rw_idx = rw.drop_duplicates(KEY).set_index(KEY)
+    for r in cat(*OFF_GRID).itertuples():
+        t = pd.Timestamp(r.Read_date_time)
+        slot = pd.Timestamp(r.edition_read_date_time)
+        assert slot.minute in (0, 30) and slot.second == 0
+        assert pd.Timedelta(minutes=1) <= abs(t - slot) <= pd.Timedelta(minutes=14)
+        row = rw_idx.loc[(r.PUPRN, r.Read_date_time)]
+        assert row["HH_segment"] == "" and (row[VALUE_COLUMNS[:4]] != "").all()
+        hh = pd.to_datetime(ed.loc[ed["PUPRN"] == r.PUPRN, "Read_date_time"], format="%Y-%m-%dT%H:%M:%SZ",
+                            utc=True)
+        near = hh[(hh - slot).abs() < pd.Timedelta(minutes=30)]
+        if r.category == OFF_GRID[0]:
+            assert list(near) == [slot]
+            slot_row = ed[(ed["PUPRN"] == r.PUPRN) & (ed["Read_date_time"] == r.edition_read_date_time)]
+            assert (slot_row[VALUE_COLUMNS] == "").all(axis=None)
+        else:
+            assert near.empty
+    others = truth[~truth["category"].isin(OFF_GRID)]
+    assert (others["edition_read_date_time"] == "").all()
+
+    # Off-grid readings the edition kept at their stamp: on both sides.
+    off_ed = ed[~ed["Read_date_time"].str[14:].isin(["00:00Z", "30:00Z"])]
+    assert _keys(manifest["off_grid_in_both_rows"]) == _keys(off_ed) & _keys(rw)
+    assert sum(m["off_grid_in_both"] for m in manifest["per_month"].values()) == len(
+        manifest["off_grid_in_both_rows"])
 
     # Values of readings on both sides.
     m = ed.drop_duplicates(KEY).merge(rw.drop_duplicates(KEY), on=KEY, suffixes=("_ed", "_raw"))
@@ -203,6 +249,19 @@ def test_gappy_source_differences_are_the_planted_ones(gappy):
     counts = truth["category"].value_counts()
     assert counts["emptied_in_edition"] == 12 * COUNTS.edition_blanked
     assert counts["removed_in_edition"] == 12 * COUNTS.edition_removed
+    assert counts[OFF_GRID[0]] == 12 * COUNTS.off_grid_edition_empty
+    assert counts[OFF_GRID[1]] == 12 * COUNTS.off_grid_edition_skip
+    assert len(manifest["off_grid_in_both_rows"]) > 0
+
+
+def test_off_grid_kinds_leave_earlier_plants_alone(gappy_source, gappy_dir, tmp_path):
+    """Turning the off-grid kinds off changes nothing else planted."""
+    convert(_cfg(replace(COUNTS, off_grid_edition_empty=0, off_grid_edition_skip=0)), gappy_source, tmp_path)
+    cols = ["kind", "PUPRN", "Read_date_time", "raw_column", "raw_value"]
+    with_og = pd.read_csv(gappy_dir / "mock_internal" / READINGS_FILE, dtype=str, keep_default_na=False)
+    without = pd.read_csv(tmp_path / "mock_internal" / READINGS_FILE, dtype=str, keep_default_na=False)
+    with_og = with_og[~with_og["category"].isin(OFF_GRID)]
+    pd.testing.assert_frame_equal(with_og[cols].reset_index(drop=True), without[cols])
 
 
 def test_removed_in_edition_rows_are_whole_readings(gappy, complete):
@@ -224,10 +283,12 @@ def test_removed_in_edition_rows_are_whole_readings(gappy, complete):
 
 def test_shortfall_is_recorded(generated_output_dir, tmp_path, capsys):
     """A complete source has no NULLs or gaps for the realistic kinds."""
-    manifest = convert(_cfg(replace(COMPLETE_COUNTS, edition_blanked=3, edition_removed=2),
+    manifest = convert(_cfg(replace(COMPLETE_COUNTS, edition_blanked=3, edition_removed=2,
+                                    off_grid_edition_empty=1, off_grid_edition_skip=2),
                             month_start="2021-02", month_end="2021-03"),
                        generated_output_dir, tmp_path)
-    assert manifest["shortfall"] == {m: {"edition_blanked": 3, "edition_removed": 2}
+    assert manifest["shortfall"] == {m: {"edition_blanked": 3, "edition_removed": 2,
+                                         "off_grid_edition_empty": 1, "off_grid_edition_skip": 2}
                                      for m in ("2021-02", "2021-03")}
     assert "WARNING 2021-02" in capsys.readouterr().out
 

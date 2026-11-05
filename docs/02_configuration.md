@@ -413,6 +413,8 @@ plants_per_month:                       # per month; 0 = off
   raw_emptied_values: 25     # raw NULL, edition has a value       (reverse, anomaly)
   raw_duplicates: 5          # reading written twice in raw (exact copy)
   raw_missing_household_days: 1
+  off_grid_edition_empty: 25 # raw reading off its half-hour; edition dropped it, empty row there (realistic)
+  off_grid_edition_skip: 25  # ditto, edition has no row there                                   (realistic)
 extra_households: 1          # only in raw (copy of another household under a new PUPRN)
 missing_households: 1        # only in the edition
 ```
@@ -434,13 +436,28 @@ differences are a reading or value the edition dropped:
   that the edition doesn't have (and no off-grid reading within 30 min of),
   and raw gets a full row there, its `HH_segment` and dates derived as the
   edition derives them.
-- Both fill in a value from the same household's same half-hour a week
+- They fill in a value from the same household's same half-hour a week
   earlier, if the edition has it, else from the household's median for the
   column that month.
 
-Both kinds need gaps in the source. If there are fewer candidates than
-requested (e.g. a complete source), what exists is planted. The rest is
-printed as a warning and recorded under `shortfall` in the manifest.
+**Off-grid raw timestamps.** Raw readings are sometimes stamped off the
+half-hour grid (e.g. 13:07 instead of 13:00). It isn't known how the edition
+treats them, so the mock has all three ways:
+
+| The edition... | Raw | Edition | How |
+|---|---|---|---|
+| keeps it at its stamp | 13:07 | 13:07 | in the source (mock editions have off-grid stamps); copied, listed in `raw_off_grid_in_both.csv` |
+| drops it, writes an empty row at the half-hour | 13:07, with values | 13:00, every value NULL | `off_grid_edition_empty`: picks an all-NULL edition row, raw gets the reading off-grid instead |
+| drops it, writes no row | 13:07, with values | nothing near 13:00 | `off_grid_edition_skip`: picks a half-hour the edition lacks (as `edition_removed`), raw gets the reading off-grid |
+
+The planted stamp is 1-14 min either side of the half-hour (so that is
+still its nearest half-hour), within the month's file. `HH_segment` is
+empty, as the edition leaves HH for off-grid stamps. Values are filled as
+above. There is no off-grid edition reading within 30 min of the half-hour.
+
+The realistic kinds need gaps in the source. If there are fewer candidates
+than requested (e.g. a complete source), what exists is planted. The rest
+is printed as a warning and recorded under `shortfall` in the manifest.
 
 The `raw_*` kinds go the other way (raw lacks something the edition has)
 and stand for anomalies.
@@ -455,6 +472,10 @@ and stand for anomalies.
   are never differences.
 - Each month has its own rngs (seed, year, month), so one month's output
   doesn't depend on which months are converted.
+- The realistic kinds run after the others, in the order `edition_blanked`,
+  `edition_removed`, `off_grid_edition_empty`, `off_grid_edition_skip`,
+  each with its own rng and never on what an earlier kind took. So turning
+  a kind on or off doesn't move the plants of the kinds before it.
 
 **Ground truth** in `<output>/mock_internal/`:
 
@@ -462,7 +483,14 @@ and stand for anomalies.
   value kinds, a row is one reading and one column. Columns: `category`,
   `kind`, `file`, `PUPRN`, `Read_date_time`, `raw_column`,
   `edition_column`, `edition_value`, `raw_value`,
-  `raw_value_in_edition_units` (gas in m3).
+  `raw_value_in_edition_units` (gas in m3), `edition_read_date_time`.
+  `Read_date_time` is raw's timestamp. `edition_read_date_time` is set
+  only for the off-grid kinds: the half-hour the edition has empty or
+  lacks.
+- `raw_off_grid_in_both.csv` (`file`, `PUPRN`, `Read_date_time`) lists
+  the off-grid readings at the same stamp in raw and edition (the "keeps
+  it" case; from the source, not planted). The manifest has their count
+  per month (`per_month.*.off_grid_in_both`).
 - `raw_planted_manifest.json` has the households on one side only, any
   `shortfall`, and the settings. It also has `expected_counts`: per
   category × month × edition column, where a whole-reading kind counts
@@ -478,6 +506,8 @@ and stand for anomalies.
 | `raw_missing_readings`, `raw_missing_household_days` | `only_in_edition` |
 | `raw_emptied_values` | `emptied_in_raw` |
 | `raw_duplicates` | `duplicate_in_raw` |
+| `off_grid_edition_empty` | `off_grid_in_raw_empty_in_edition` |
+| `off_grid_edition_skip` | `off_grid_in_raw_not_in_edition` |
 | `extra_households` (manifest) | `household_not_in_edition` |
 | `missing_households` (manifest) | `household_not_in_raw` |
 

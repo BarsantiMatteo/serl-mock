@@ -21,5 +21,7 @@ plants_per_month:                       # 0 = off
   raw_emptied_values: 25     # raw NULL, edition has a value       (reverse, anomaly)
   raw_duplicates: 5          # reading written twice in raw (exact copy)
   raw_missing_household_days: 1
+  off_grid_edition_empty: 25 # raw reading off its half-hour; edition dropped it, empty row there (realistic)
+  off_grid_edition_skip: 25  # ditto, edition has no row there                                   (realistic)
 extra_households: 1          # only in raw (copy of another household under a new PUPRN; e.g. withdrawn)
 missing_households: 1        # only in the edition
