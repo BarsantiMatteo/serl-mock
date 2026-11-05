@@ -14,16 +14,14 @@ output_edition: "09"               # "09": Parquet, harmonised columns; "08": CS
 seed: 42
 months: {start: null, end: null}   # YYYY-MM; null = the source's range
 changes_per_month:                 # 0 = off; status before -> after
+  # A flag only changes together with its value (no flag-only changes).
   # resolved: a problem in the source, fixed
   gap_filled: 20         # no_reading -> ok      a reading where the source has none
-  value_filled: 20       # empty -> ok           value filled, flag 1
-  flag_cleared: 20       # flagged -> ok         flag set to 1, value kept
-  value_corrected: 10    # out_of_range -> ok    meter-max value replaced, flag 1
+  value_filled: 20       # empty -> ok           value filled, flag 0 -> 1
+  value_corrected: 10    # out_of_range -> ok    meter-max value replaced, flag -1 -> 1
   # introduced: fine in the source, a problem now
   reading_dropped: 20    # ok -> no_reading
-  value_lost: 20         # ok -> empty           flag 0
-  flag_raised: 20        # ok -> flagged         flag set to flag_raised_code
-  value_spoiled: 10      # ok -> out_of_range    meter maximum, flag -1
+  value_lost: 20         # ok -> empty           value emptied, flag 1 -> 0
+  value_spoiled: 10      # ok -> out_of_range    meter maximum, flag 1 -> -1
   # status unchanged
-  value_changed: 20      # ok -> ok              a different plausible value
-flag_raised_code: -2     # any code but 1; -2 = SERL's "very high"
+  value_changed: 20      # ok -> ok              a different plausible value, flag stays 1

@@ -3,8 +3,9 @@ Generate a mock later edition derived from a mock Edition08 run.
 
 Same readings as the source except for planted, seeded changes, each
 defined by the status it moves a reading from and to (resolved:
-gap_filled, value_filled, flag_cleared, value_corrected; introduced:
-reading_dropped, value_lost, flag_raised, value_spoiled; value_changed).
+gap_filled, value_filled, value_corrected; introduced: reading_dropped,
+value_lost, value_spoiled; value_changed). A flag only changes with its
+value.
 For testing comparisons across editions. See src/serl_mock/next_edition.py
 and docs/02_configuration.md.
 

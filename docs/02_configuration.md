@@ -593,14 +593,11 @@ months: {start: null, end: null}   # YYYY-MM, inclusive; null = the source's ran
 changes_per_month:                 # per month; 0 = off
   gap_filled: 20         # no_reading -> ok
   value_filled: 20       # empty -> ok
-  flag_cleared: 20       # flagged -> ok
   value_corrected: 10    # out_of_range -> ok
   reading_dropped: 20    # ok -> no_reading
   value_lost: 20         # ok -> empty
-  flag_raised: 20        # ok -> flagged
   value_spoiled: 10      # ok -> out_of_range
   value_changed: 20      # ok -> ok, different value
-flag_raised_code: -2     # any code but 1
 ```
 
 Unknown keys, negative counts, bad months and an `output_edition` other
@@ -621,17 +618,21 @@ applies:
 | Kind | Before → after | What changes in "after" |
 |---|---|---|
 | `gap_filled` | no_reading → ok | a full reading where "before" has none, inside the household's covered range (no off-grid reading within 30 min) |
-| `value_filled` | empty → ok | a stream's value filled, flag 1 |
-| `flag_cleared` | flagged → ok | a stream's flag set to 1, value kept |
-| `value_corrected` | out_of_range → ok | a meter-max value replaced, flag 1 |
+| `value_filled` | empty → ok | a stream's value filled, flag 0 → 1 |
+| `value_corrected` | out_of_range → ok | a meter-max value replaced, flag -1 → 1 |
 | `reading_dropped` | ok → no_reading | a reading whose streams are all ok removed |
-| `value_lost` | ok → empty | a stream's value emptied, flag 0 |
-| `flag_raised` | ok → flagged | a stream's flag set to `flag_raised_code` |
-| `value_spoiled` | ok → out_of_range | a stream's value set to the meter maximum, flag -1 |
-| `value_changed` | ok → ok | a stream's value changed, still plausible |
+| `value_lost` | ok → empty | a stream's value emptied, flag 1 → 0 |
+| `value_spoiled` | ok → out_of_range | a stream's value set to the meter maximum, flag 1 → -1 |
+| `value_changed` | ok → ok | a stream's value changed, still plausible, flag stays 1 |
 
 **How changes are applied.**
 
+- **A flag only changes together with its value.** A later edition isn't
+  assumed to recode the flag of a reading whose value stays the same, so
+  there is no flag-only change. Nothing moves a reading to or from
+  `flagged` on its own. (In Edition08 format, a gas meter-max read is
+  `flagged` in `Gas_hh_m3`, which has no limit, so correcting or spoiling
+  gas moves that column to or from `flagged`, with its value.)
 - A stream is one meter channel: its flag and its value column(s). For gas,
   the m3 and Wh columns change together.
 - Filled values come from the same household's same half-hour a week
@@ -647,10 +648,9 @@ applies:
   planted. The rest is printed and recorded under `shortfall` in the
   manifest.
 
-The resolved kinds need problems in the source, so use a gappy one. The
-current `edition08_gappy` has no reading flagged with an otherwise valid
-value, so `flag_cleared` falls short there. Its meter-max reads are
-`out_of_range`, which is what `value_corrected` uses.
+The resolved kinds need problems in the source, so use a gappy one:
+`edition08_gappy` has gaps (`gap_filled`), missing reads (`value_filled`)
+and meter-max reads (`value_corrected`).
 
 **Output.**
 

@@ -27,15 +27,15 @@ from src.serl_mock.next_edition import (
 from src.serl_mock.paths import mock_hh_dirname
 
 KEY = ["PUPRN", "Read_date_time_UTC"]
-COUNTS = ChangeCounts(gap_filled=4, value_filled=4, flag_cleared=3, value_corrected=2, reading_dropped=4,
-                      value_lost=4, flag_raised=3, value_spoiled=2, value_changed=4)
+COUNTS = ChangeCounts(gap_filled=4, value_filled=4, value_corrected=2, reading_dropped=4,
+                      value_lost=4, value_spoiled=2, value_changed=4)
 ZERO = ChangeCounts(**{k: 0 for k in ChangeCounts.__dataclass_fields__})
 LIMITS = {"Elec_act_imp_hh_Wh": 24000, "Elec_act_exp_hh_Wh": 5000, "Gas_hh_Wh": 89765}
 FROM_TO = {
     "gap_filled": ("no_reading", "ok"), "value_filled": ("empty", "ok"),
-    "flag_cleared": ("flagged", "ok"), "value_corrected": ("out_of_range", "ok"),
+    "value_corrected": ("out_of_range", "ok"),
     "reading_dropped": ("ok", "no_reading"), "value_lost": ("ok", "empty"),
-    "flag_raised": ("ok", "flagged"), "value_spoiled": ("ok", "out_of_range"),
+    "value_spoiled": ("ok", "out_of_range"),
     "value_changed": ("ok", "ok"),
 }
 FLAG_OF = {c: f for f, cs in STREAM_COLUMNS.values() for c in cs}
@@ -163,6 +163,22 @@ def test_each_kind_moves_between_its_statuses(derived):
     assert change["value_changed"] == "unchanged"
 
 
+def test_flags_only_change_with_their_value(derived):
+    """No flag-only change: wherever a flag differs, the value differs too.
+    (A move to or from `flagged` only happens with a value change, e.g. a
+    gas meter-max read is `flagged` in Gas_hh_m3, which has no limit.)"""
+    _, _, before, after, truth, manifest = derived
+    both = truth[(truth["status_before"] != "no_reading") & (truth["status_after"] != "no_reading")]
+    flag_changed = both["flag_before"] != both["flag_after"]
+    assert (both.loc[flag_changed, "value_before"] != both.loc[flag_changed, "value_after"]).all()
+    assert (both["value_before"] != both["value_after"]).all()
+    # and from the files: no reading in both whose value is the same but its flag differs
+    m = before.merge(after, on=KEY, suffixes=("_b", "_a"))
+    for col in manifest["compared_columns"]:
+        f = FLAG_OF[col]
+        assert not ((m[f"{col}_b"] == m[f"{col}_a"]) & (m[f"{f}_b"] != m[f"{f}_a"])).any(), col
+
+
 def test_one_change_per_reading(derived):
     _, _, _, _, truth, _ = derived
     per_reading = truth.groupby(["PUPRN", "Read_date_time_UTC"])["kind"].nunique()
@@ -206,11 +222,10 @@ def test_identity_configs(problem_source, tmp_path):
 
 
 def test_shortfall_on_a_complete_source(generated_output_dir, tmp_path, capsys):
-    manifest = convert(_cfg(replace(ZERO, value_filled=2, flag_cleared=1, value_corrected=1, gap_filled=1),
+    manifest = convert(_cfg(replace(ZERO, value_filled=2, value_corrected=1, gap_filled=1),
                             month_start="2021-02", month_end="2021-02"),
                        generated_output_dir, tmp_path)
-    assert manifest["shortfall"] == {"2021-02": {"value_filled": 2, "flag_cleared": 1, "value_corrected": 1,
-                                                 "gap_filled": 1}}
+    assert manifest["shortfall"] == {"2021-02": {"value_filled": 2, "value_corrected": 1, "gap_filled": 1}}
     assert "WARNING 2021-02" in capsys.readouterr().out
 
 
@@ -227,7 +242,8 @@ def test_deterministic_and_months_independent(problem_source, tmp_path):
     ({"source": "x", "changes_per_month": {"gap_fill": 1}}, "unknown changes_per_month"),
     ({"source": "x", "changes_per_month": {"gap_filled": -1}}, ">= 0"),
     ({"source": "x", "output_edition": "07"}, "output_edition"),
-    ({"source": "x", "flag_raised_code": 1}, "flag_raised_code"),
+    ({"source": "x", "flag_raised_code": -2}, "unknown key"),
+    ({"source": "x", "changes_per_month": {"flag_cleared": 1}}, "unknown changes_per_month"),
     ({"source": "x", "months": {"start": "2024-13"}}, "YYYY-MM"),
     ({"output_label": "y"}, "source"),
 ])

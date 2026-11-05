@@ -16,21 +16,21 @@ move a reading from and to:
 
   resolved (a problem before, ok after)
     gap_filled        no_reading -> ok     a full reading where "before" has none
-    value_filled      empty -> ok          a stream's value filled, flag 1
-    flag_cleared      flagged -> ok        a stream's flag set to 1, value kept
-    value_corrected   out_of_range -> ok   a meter-max value replaced, flag 1
+    value_filled      empty -> ok          a stream's value filled, flag 0 -> 1
+    value_corrected   out_of_range -> ok   a meter-max value replaced, flag -1 -> 1
   introduced (ok before, a problem after)
     reading_dropped   ok -> no_reading     a reading removed
-    value_lost        ok -> empty          a stream's value emptied, flag 0
-    flag_raised       ok -> flagged        a stream's flag set to `flag_raised_code`
-    value_spoiled     ok -> out_of_range   a stream's value set to the meter maximum, flag -1
+    value_lost        ok -> empty          a stream's value emptied, flag 1 -> 0
+    value_spoiled     ok -> out_of_range   a stream's value set to the meter maximum, flag 1 -> -1
   unchanged status
-    value_changed     ok -> ok             a stream's value changed, still plausible
+    value_changed     ok -> ok             a stream's value changed, still plausible, flag stays 1
 
-A stream is one meter channel: its flag and its value column(s) (gas: m3
-and Wh together; `missingness.STREAM_COLUMNS`). Every changed row stays
-consistent (flags match values), so "after"'s own checks only see what was
-planted. Fill values: the same household's same half-hour a week earlier
+A flag never changes unless its value does: no flag-only change is planted
+(a later edition isn't assumed to recode flags on unchanged readings), so
+nothing moves a reading to or from `flagged`. A stream is one meter
+channel: its flag and its value column(s) (gas: m3 and Wh together;
+`missingness.STREAM_COLUMNS`). Every changed row stays consistent (flags
+match values), so "after"'s own checks only see what was planted. Fill values: the same household's same half-hour a week earlier
 if ok there, else the household's median of its ok values that month.
 
 Changes only touch on-grid readings with a unique (PUPRN, timestamp), one
@@ -83,9 +83,12 @@ STREAMS = list(STREAM_COLUMNS)
 LIMITED_STREAMS = [s for s in STREAMS if PRIMARY[s] in STATUS_LIMITS]
 OK_FLAG = "1"
 
-RESOLVED = ["gap_filled", "value_filled", "flag_cleared", "value_corrected"]
-INTRODUCED = ["reading_dropped", "value_lost", "flag_raised", "value_spoiled"]
+RESOLVED = ["gap_filled", "value_filled", "value_corrected"]
+INTRODUCED = ["reading_dropped", "value_lost", "value_spoiled"]
 KINDS = RESOLVED + INTRODUCED + ["value_changed"]
+# Fixed rng salt per kind, so adding or removing a kind never moves another's draws.
+_RNG_SALT = {"gap_filled": 100, "value_filled": 101, "value_corrected": 103, "reading_dropped": 104,
+             "value_lost": 105, "value_spoiled": 107, "value_changed": 108}
 
 ED09_RENAME = {"Elect_react_imp_flag": "Elec_react_imp_flag", "Elect_react_exp_flag": "Elec_react_exp_flag"}
 ED09_COLUMNS = [
@@ -111,11 +114,9 @@ class ChangeCounts:
     """How many of each change per month (0 = off)."""
     gap_filled: int = 20
     value_filled: int = 20
-    flag_cleared: int = 20
     value_corrected: int = 10
     reading_dropped: int = 20
     value_lost: int = 20
-    flag_raised: int = 20
     value_spoiled: int = 10
     value_changed: int = 20
 
@@ -129,11 +130,9 @@ class NextEditionConfig:
     month_start: Optional[str] = None
     month_end: Optional[str] = None
     changes: ChangeCounts = field(default_factory=ChangeCounts)
-    flag_raised_code: int = -2           # any code but 1; -2 = SERL's "very high"
 
 
-_TOP_KEYS = {"source", "output_label", "output_edition", "seed", "months", "changes_per_month",
-             "flag_raised_code"}
+_TOP_KEYS = {"source", "output_label", "output_edition", "seed", "months", "changes_per_month"}
 _MONTH_RE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 
 
@@ -178,9 +177,6 @@ def parse_config(cfg: dict) -> NextEditionConfig:
         raise ValueError(f"next-edition config: unknown changes_per_month key(s) {sorted(unknown)}; "
                          f"expected {KINDS}")
     counts = ChangeCounts(**{k: _int(v, f"changes_per_month.{k}") for k, v in changes.items()})
-    code = _int(cfg.get("flag_raised_code", -2), "flag_raised_code", minimum=None)
-    if code == 1:
-        raise ValueError("next-edition config: flag_raised_code must not be 1 (the valid flag)")
 
     return NextEditionConfig(
         source=source,
@@ -190,7 +186,6 @@ def parse_config(cfg: dict) -> NextEditionConfig:
         month_start=str(start) if start else None,
         month_end=str(end) if end else None,
         changes=counts,
-        flag_raised_code=code,
     )
 
 
@@ -271,7 +266,7 @@ class _Month:
         self._hh_cache: Dict[str, pd.DataFrame] = {}
 
     def rng(self, kind: str) -> np.random.Generator:
-        return np.random.default_rng([self.cfg.seed, self.year, self.month, 100 + KINDS.index(kind)])
+        return np.random.default_rng([self.cfg.seed, self.year, self.month, _RNG_SALT[kind]])
 
     def short(self, kind: str, requested: int, planted: int) -> None:
         if planted < requested:
@@ -354,10 +349,6 @@ class _Month:
             self.set_stream(i, s, self.fill(puprn(i), stamp(i), s), OK_FLAG)
             self.note("value_filled", i)
 
-        for i, s in self.pick_cells("flag_cleared", {s: st[s] == "flagged" for s in STREAMS}):
-            self.set_stream(i, s, None, OK_FLAG)
-            self.note("flag_cleared", i)
-
         for i, s in self.pick_cells("value_corrected", {s: st[s] == "out_of_range" for s in STREAMS}):
             self.set_stream(i, s, self.fill(puprn(i), stamp(i), s), OK_FLAG)
             self.note("value_corrected", i)
@@ -370,10 +361,6 @@ class _Month:
         for i, s in self.pick_cells("value_lost", ok):
             self.set_stream(i, s, {c: "" for c in STREAM_COLUMNS[s][1]}, "0")
             self.note("value_lost", i)
-
-        for i, s in self.pick_cells("flag_raised", ok):
-            self.set_stream(i, s, None, str(self.cfg.flag_raised_code))
-            self.note("flag_raised", i)
 
         for i, s in self.pick_cells("value_spoiled", {s: ok[s] for s in LIMITED_STREAMS}):
             if s == "gas":
