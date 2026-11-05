@@ -35,18 +35,23 @@ short config: which edition run (`source`), where to write
 | `config/raw/raw_from_edition08.yaml` | `edition08_with_2025survey` (clean) | raw format and simple raw-vs-edition differences; the realistic kinds are off (they need gaps in the source) |
 | `config/raw/raw_from_edition08_gappy.yaml` | `edition08_gappy` | every kind of difference, including the realistic ones (values or readings the edition dropped, off-grid raw stamps) |
 
-### 3. A later edition: compare editions *(planned)*
+### 3. A later edition: compare editions
 
-`scripts/generate_next_edition.py --config config/next_edition/<file>`
-(not built yet). A short config, like the raw ones: an edition run as
-`source`, the extra months, and the changes to plant (problems fixed,
-introduced or left).
+`uv run python scripts/generate_next_edition.py --config config/next_edition/<file>`.
+A short config, like the raw ones: an edition run as `source`, the output
+edition's format, and how many of each change to plant. See
+[A later edition](#a-later-edition-confignext_edition).
+
+| Config | Source (generate it first) | Use it for |
+|---|---|---|
+| `config/next_edition/edition09_from_edition08_gappy.yaml` | `edition08_gappy` | an Edition09-format edition, the same as the gappy Edition08 except that some problems are resolved and some new ones introduced: tests whether a comparison across editions finds exactly those |
 
 ### Order of commands
 
 ```bash
 uv run python scripts/generate_mock_data.py --config config/serl_mock_edition08_gappy.yaml --skip-weather
 uv run python scripts/generate_raw_data.py --config config/raw/raw_from_edition08_gappy.yaml
+uv run python scripts/generate_next_edition.py --config config/next_edition/edition09_from_edition08_gappy.yaml
 ```
 
 ---
@@ -563,6 +568,110 @@ and stand for anomalies.
 | `off_grid_edition_skip` | `off_grid_in_raw_not_in_edition` |
 | `extra_households` (manifest) | `household_not_in_edition` |
 | `missing_households` (manifest) | `household_not_in_raw` |
+
+---
+
+## A later edition (`config/next_edition/`)
+
+`scripts/generate_next_edition.py` reads an **existing** mock Edition08 run
+("before") and writes a later edition ("after") with the same readings,
+except for planted, seeded changes. Some of "before"'s problems are
+resolved, some new ones introduced, and the rest are left as they were. A
+comparison across editions (serl-dq's reading comparison and its status
+changes) should find exactly the planted changes.
+
+```bash
+uv run python scripts/generate_next_edition.py --config config/next_edition/edition09_from_edition08_gappy.yaml
+```
+
+```yaml
+source: edition08_gappy            # data/mock/<source>/ = "before" (an Edition08 run)
+output_label: edition09_revised    # data/mock/<label>/ = "after" (default edition<NN>_from_<source>)
+output_edition: "09"               # "09": Parquet, harmonised columns; "08": CSV as the source
+seed: 42
+months: {start: null, end: null}   # YYYY-MM, inclusive; null = the source's range
+changes_per_month:                 # per month; 0 = off
+  gap_filled: 20         # no_reading -> ok
+  value_filled: 20       # empty -> ok
+  flag_cleared: 20       # flagged -> ok
+  value_corrected: 10    # out_of_range -> ok
+  reading_dropped: 20    # ok -> no_reading
+  value_lost: 20         # ok -> empty
+  flag_raised: 20        # ok -> flagged
+  value_spoiled: 10      # ok -> out_of_range
+  value_changed: 20      # ok -> ok, different value
+flag_raised_code: -2     # any code but 1
+```
+
+Unknown keys, negative counts, bad months and an `output_edition` other
+than "08" or "09" raise an error.
+
+**Statuses.** Each kind is defined by the status it moves a reading from
+and to, per value column. The statuses are the ones serl-dq's comparison
+assigns (its `config/smart_meter/compare.yaml` `status`), first that
+applies:
+
+1. `no_reading`;
+2. `empty`;
+3. `out_of_range`: negative, or above 24,000 Wh import, 5,000 Wh export or
+   89,765 Wh gas;
+4. `flagged`: flag not 1;
+5. `ok`.
+
+| Kind | Before → after | What changes in "after" |
+|---|---|---|
+| `gap_filled` | no_reading → ok | a full reading where "before" has none, inside the household's covered range (no off-grid reading within 30 min) |
+| `value_filled` | empty → ok | a stream's value filled, flag 1 |
+| `flag_cleared` | flagged → ok | a stream's flag set to 1, value kept |
+| `value_corrected` | out_of_range → ok | a meter-max value replaced, flag 1 |
+| `reading_dropped` | ok → no_reading | a reading whose streams are all ok removed |
+| `value_lost` | ok → empty | a stream's value emptied, flag 0 |
+| `flag_raised` | ok → flagged | a stream's flag set to `flag_raised_code` |
+| `value_spoiled` | ok → out_of_range | a stream's value set to the meter maximum, flag -1 |
+| `value_changed` | ok → ok | a stream's value changed, still plausible |
+
+**How changes are applied.**
+
+- A stream is one meter channel: its flag and its value column(s). For gas,
+  the m3 and Wh columns change together.
+- Filled values come from the same household's same half-hour a week
+  earlier, if that was ok, else from the household's median of its ok
+  values that month.
+- Every changed reading stays consistent: flags match values, and a filled
+  reading gets the generator's date and half-hour fields.
+- Changes only touch on-grid readings with a unique key, one change per
+  reading.
+- Kinds run in the order of the table, each with its own rng (seed, year,
+  month, kind), never on a reading an earlier kind took.
+- If the source has fewer candidates than requested, what exists is
+  planted. The rest is printed and recorded under `shortfall` in the
+  manifest.
+
+The resolved kinds need problems in the source, so use a gappy one. The
+current `edition08_gappy` has no reading flagged with an otherwise valid
+value, so `flag_cleared` falls short there. Its meter-max reads are
+`out_of_range`, which is what `value_corrected` uses.
+
+**Output.**
+
+- Only the half-hourly files and `bst_dates_to_2030.csv` are written.
+  serl-dq reads them with its `hh_only` overlay.
+- With `output_edition: "09"`, the files use Edition09's layout: Parquet,
+  gas in Wh only, reactive flags without the "Elect" typo, and a
+  `filename` column. `Gas_hh_m3` is then not compared.
+
+**Ground truth** in `<output>/mock_internal/`:
+
+- `edition_changes.csv` has one row per changed reading and compared value
+  column. Columns: `change` (resolved / introduced / changed_problem /
+  unchanged), `kind`, `file`, `PUPRN`, `Read_date_time_UTC`,
+  `edition_column`, `value_before`, `value_after`, `flag_before`,
+  `flag_after`, `status_before`, `status_after`. It is computed from the
+  cells on both sides, so a stream change lists every column of the
+  stream.
+- `edition_changes_manifest.json` has the settings, counts per kind and
+  month, any shortfall, and `expected_status_transitions` (month → column
+  → "before -> after" → readings).
 
 ---
 

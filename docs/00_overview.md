@@ -17,12 +17,14 @@ It produces three kinds of mock data, each with its own script and config family
 |---|---|---|---|
 | Edition data | analysis code and single-edition data quality checks | `generate_mock_data.py` | `config/serl_mock*.yaml` (the `_gappy` one adds calibrated missingness and errors) |
 | Raw data, from an edition run | data quality checks on raw SERL deliveries; raw vs edition comparison | `generate_raw_data.py` | `config/raw/*.yaml` |
-| A later edition, from an edition run *(planned)* | comparison across editions: problems fixed, persisting or new | `generate_next_edition.py` | `config/next_edition/*.yaml` |
+| A later edition, from an edition run | comparison across editions: problems resolved, persisting or new | `generate_next_edition.py` | `config/next_edition/*.yaml` |
 
 The two derived kinds read an existing edition run (`source:` in their
 config) and write a ground truth of what they changed to their
-`mock_internal/`. The rest of this page describes edition data. Raw data is in
-[02_configuration.md](02_configuration.md#raw-half-hourly-deliveries-configraw).
+`mock_internal/`. The rest of this page describes edition data. Raw data and
+the later edition are in
+[02_configuration.md](02_configuration.md#raw-half-hourly-deliveries-configraw)
+and [A later edition](02_configuration.md#a-later-edition-confignext_edition).
 
 ---
 

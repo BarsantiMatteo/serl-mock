@@ -9,9 +9,11 @@ serl-mock/
 │   ├── serl_mock_edition08.yaml     # Example: explicit edition08 config
 │   ├── serl_mock_edition09.yaml     # Example: edition09 config (format/layout differ
 │   │                                # automatically — see src/serl_mock/edition.py)
-│   └── raw/                         # Raw-delivery configs for scripts/generate_raw_data.py
-│       ├── raw_from_edition08.yaml
-│       └── raw_from_edition08_gappy.yaml
+│   ├── raw/                         # Raw-delivery configs for scripts/generate_raw_data.py
+│   │   ├── raw_from_edition08.yaml
+│   │   └── raw_from_edition08_gappy.yaml
+│   └── next_edition/                # Later-edition configs for scripts/generate_next_edition.py
+│       └── edition09_from_edition08_gappy.yaml
 │
 ├── data/
 │   ├── reference/                  # Tracked input files (data dictionaries, BST dates, bank holidays)
@@ -84,6 +86,7 @@ serl-mock/
 │   ├── generate_mock_data.py       # Entry point: runs the full pipeline
 │   ├── generate_bank_holidays_csv.py  # One-off: fetches UK bank holidays from gov.uk
 │   ├── generate_raw_data.py        # Mock raw HH deliveries from a mock Edition08 run (config/raw/*.yaml)
+│   ├── generate_next_edition.py    # Mock later edition from a mock Edition08 run (config/next_edition/*.yaml)
 │   └── update_golden_manifest.py   # Regenerates tests/golden/*.json baselines (manual only)
 │
 ├── src/
@@ -100,6 +103,7 @@ serl-mock/
 │       ├── generator_smartmeter.py
 │       ├── generator_contextual_data.py
 │       ├── raw_from_edition.py
+│       ├── next_edition.py
 │       └── weather_downloader.py
 │
 ├── tests/                          # Automated test suite — see docs/06_testing.md
@@ -121,7 +125,8 @@ serl-mock/
 │   ├── test_reference_dictionary_resolution.py
 │   ├── test_harmonised_survey.py
 │   ├── test_2025_survey.py
-│   └── test_raw_from_edition.py
+│   ├── test_raw_from_edition.py
+│   └── test_next_edition.py
 │
 ├── pyproject.toml
 └── README.md
@@ -151,6 +156,9 @@ Skipping steps 1–4 with `--survey-only` requires `mock_internal/puprn_master.c
 
 ### `scripts/generate_raw_data.py`
 Makes **mock raw half-hourly deliveries** (SERL's readings before they are wrapped into an edition) from a finished mock Edition08 run, separately from `generate_mock_data.py`: `uv run python scripts/generate_raw_data.py --config config/raw/<name>.yaml` (`--output-dir` overrides `data/mock/<output_label>/`). Output: `SERL_half_hourly_YYYY_MM.csv`, a copy of `bst_dates_to_2030.csv`, and the ground truth `mock_internal/raw_planted_manifest.json` / `raw_planted_readings.csv`. Used by serl-dq's raw-vs-edition comparison (data versions `mock_raw_from_edition08`, `mock_raw_from_edition08_gappy`). See [02_configuration.md](02_configuration.md#raw-half-hourly-deliveries-configraw) and `raw_from_edition.py` below.
+
+### `scripts/generate_next_edition.py`
+Makes a **mock later edition** from a finished mock Edition08 run: same readings, except for planted changes that resolve some problems and introduce others, each defined by the status it moves a reading from and to. `uv run python scripts/generate_next_edition.py --config config/next_edition/<name>.yaml` (`--output-dir` overrides `data/mock/<output_label>/`). Output: half-hourly files in the output edition's format (`"08"` CSV or `"09"` Parquet), `bst_dates_to_2030.csv`, and the ground truth `mock_internal/edition_changes.csv` / `edition_changes_manifest.json`. Used by serl-dq's comparison across editions (data version `mock_edition09_revised` vs `mock_edition08_gappy`). See [02_configuration.md](02_configuration.md#a-later-edition-confignext_edition).
 
 ### `scripts/generate_bank_holidays_csv.py`
 A one-off utility that fetches the official UK bank holidays JSON from gov.uk and writes `data/reference/uk_bank_holidays_england_wales_scotland.csv`.  Run this locally if the reference file needs updating; the output is committed to the repo.
@@ -261,6 +269,9 @@ Optional **synthetic missingness** (`missingness:` in the config, off by default
 | `Read_date_time_effective` | `Read_date_time_UTC` − 1 s |
 
 Dropped: `Read_date_time_local`, `Valid_read_time`, `Gas_hh_Wh` and the five flag columns. Planting is done month by month by `_Month.plant()`: first the anomaly kinds and changed values (one rng per (seed, year, month), drawn in a fixed order), then the realistic kinds `edition_blanked`, `edition_removed`, `off_grid_edition_empty`, `off_grid_edition_skip` in that order (own rngs, each skipping what an earlier one took, so turning one on or off never moves those before it). A reading the edition lacks gets a full raw row from `raw_row_for` (HH and effective date derived with `HHSmartMeterGenerator`'s own helpers; HH empty for an off-grid stamp). `off_grid_in_both()` lists the source's off-grid readings that reach raw unchanged. Row order follows the edition file.
+
+### `src/serl_mock/next_edition.py`
+`load_config` / `parse_config` read and validate a `config/next_edition/*.yaml` file into a `NextEditionConfig`; `convert(cfg, source_dir=None, out_dir=None)` writes the later edition. Per month, `_Month` computes each stream's status in the source (`column_status`, the same rules as serl-dq's comparison), then runs the change kinds in a fixed order (`run()`; `gap_filled` and `full_row` for new readings; `pick_cells` for one-stream changes, one per reading), and `records()` writes the ground truth from the cells on both sides. `to_edition09` converts to Edition09's columns and types. Streams and their columns come from `missingness.STREAM_COLUMNS`; flags thresholds, gas Wh/m3 and the date/half-hour helpers from `HHSmartMeterGenerator`.
 
 ### `src/serl_mock/generator_contextual_data.py`
 `SERLContextualVariablesGenerator` produces the contextual CSV files: EPC, SERL survey, COVID-19 survey, participant summary, follow-up survey, the MasterSERL harmonised survey, the raw 2025 survey, and the exporter PUPRN list.  It reads household traits from `mock_internal/household_traits.csv` to ensure device-ownership fields (PV, HP, EV, solar thermal) are consistent with the smart-meter outputs, and shares a single England & Wales / Scotland nation assignment between the EPC and participant-summary generators so `epcVersion` and `Region` never contradict each other.

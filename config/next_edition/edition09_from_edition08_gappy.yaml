@@ -1,0 +1,29 @@
+# A mock Edition09 derived from the gappy mock Edition08: same readings,
+# except for planted changes that resolve some of Edition08's problems and
+# introduce new ones, as a later edition might after SERL reassessed the data.
+#
+#   uv run python scripts/generate_mock_data.py --config config/serl_mock_edition08_gappy.yaml --skip-weather
+#   uv run python scripts/generate_next_edition.py --config config/next_edition/edition09_from_edition08_gappy.yaml
+#
+# Used by serl-dq's data version mock_edition09_revised, compared with
+# mock_edition08_gappy. Keys: docs/02_configuration.md#a-later-edition-confignext_edition.
+
+source: edition08_gappy            # data/mock/<source>/, an existing Edition08 mock = "before"
+output_label: edition09_revised    # data/mock/<label>/ = "after"
+output_edition: "09"               # "09": Parquet, harmonised columns; "08": CSV as the source
+seed: 42
+months: {start: null, end: null}   # YYYY-MM; null = the source's range
+changes_per_month:                 # 0 = off; status before -> after
+  # resolved: a problem in the source, fixed
+  gap_filled: 20         # no_reading -> ok      a reading where the source has none
+  value_filled: 20       # empty -> ok           value filled, flag 1
+  flag_cleared: 20       # flagged -> ok         flag set to 1, value kept
+  value_corrected: 10    # out_of_range -> ok    meter-max value replaced, flag 1
+  # introduced: fine in the source, a problem now
+  reading_dropped: 20    # ok -> no_reading
+  value_lost: 20         # ok -> empty           flag 0
+  flag_raised: 20        # ok -> flagged         flag set to flag_raised_code
+  value_spoiled: 10      # ok -> out_of_range    meter maximum, flag -1
+  # status unchanged
+  value_changed: 20      # ok -> ok              a different plausible value
+flag_raised_code: -2     # any code but 1; -2 = SERL's "very high"
