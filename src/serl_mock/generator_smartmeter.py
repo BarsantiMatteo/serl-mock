@@ -87,7 +87,7 @@ class HHSmartMeterGenerator:
     Profiles (per-household baselines) and patterns (seasonal/daily
     multipliers) are decoupled so either can be swapped independently.
     Most generation parameters are configurable via the config file
-    (config/serl_mock.yaml by default, or whichever file is passed to
+    (config/edition/serl_mock.yaml by default, or whichever file is passed to
     --config / config_path) — except format/layout, which are bound to
     `edition` and resolved via src/serl_mock/edition.py, not read from
     config directly.

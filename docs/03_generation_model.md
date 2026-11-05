@@ -166,7 +166,7 @@ implemented in `missingness.py`.
 ## How to extend the model
 
 ### Change population-level baselines
-Edit the `profiles:` section in `config/serl_mock.yaml`.  No code changes needed.
+Edit the `profiles:` section in `config/edition/serl_mock.yaml`.  No code changes needed.
 
 ### Change the seasonal or daily curve shape
 Edit the relevant function in `src/serl_mock/patterns.py`.  The function signature `(np.ndarray) → np.ndarray` is the only contract.  The generator calls these four functions by name, so renaming requires updating the import in `generator_smartmeter.py`.

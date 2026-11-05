@@ -15,7 +15,7 @@ Use it to build and test analysis pipelines locally, without needing access to t
 
 | You want to... | Generate | Command and config | Output |
 |---|---|---|---|
-| **develop SERL analysis code locally**, including data quality checks on one edition | **edition data**: a full mock edition (smart-meter, surveys, EPC, participant summary...), optionally with realistic gaps and errors | `scripts/generate_mock_data.py --config config/serl_mock*.yaml` | `data/mock/<output_label>/`, laid out as the real edition |
+| **develop SERL analysis code locally**, including data quality checks on one edition | **edition data**: a full mock edition (smart-meter, surveys, EPC, participant summary...), optionally with realistic gaps and errors | `scripts/generate_mock_data.py --config config/edition/serl_mock*.yaml` | `data/mock/<output_label>/`, laid out as the real edition |
 | **check raw SERL data**, before it becomes an edition, and compare raw with edition | **raw data**: an edition's half-hourly readings in SERL's raw delivery format, with known raw-vs-edition differences | `scripts/generate_raw_data.py --config config/raw/*.yaml` | `data/mock/<output_label>/SERL_half_hourly_*.csv` and the list of planted differences |
 | **compare editions**: are problems resolved, persisting or new in a later edition? | **a later edition** derived from an earlier one: same readings, with known resolved and introduced problems (e.g. Edition09 format from the gappy Edition08) | `scripts/generate_next_edition.py --config config/next_edition/*.yaml` | a second edition folder and the list of changes |
 
@@ -25,7 +25,7 @@ so household numbers, seeds and gap patterns are set once, in the edition
 config.
 
 ```text
-config/serl_mock*.yaml ──generate_mock_data.py──▶ data/mock/edition08_gappy/   (edition)
+config/edition/serl_mock*.yaml ──generate_mock_data.py──▶ data/mock/edition08_gappy/   (edition)
                                                      │
 config/raw/*.yaml ─────────generate_raw_data.py──────┼──▶ data/mock/raw_from_edition08_gappy/
 config/next_edition/*.yaml ─generate_next_edition.py─┘──▶ data/mock/edition09_revised/
@@ -33,9 +33,9 @@ config/next_edition/*.yaml ─generate_next_edition.py─┘──▶ data/mock/
 
 Which edition config to use:
 
-- **`config/serl_mock.yaml`** (Edition08) and **`config/serl_mock_edition09.yaml`**
+- **`config/edition/serl_mock.yaml`** (Edition08) and **`config/edition/serl_mock_edition09.yaml`**
   (Edition09 format): clean data, for developing analysis code.
-- **`config/serl_mock_edition08_gappy.yaml`**: adds missingness and
+- **`config/edition/serl_mock_edition08_gappy.yaml`**: adds missingness and
   errors calibrated to SERL's data quality report (outages, missing reads,
   max reads, off-grid timestamps, duplicates), with a ground truth in
   `mock_internal/`. Use it for developing data quality checks. See
@@ -57,7 +57,9 @@ is:
 ```text
 serl-mock/
 ├── config/
-│   └── serl_mock.yaml                         # Central configuration (households, seed, edition, profiles…)
+│   ├── edition/serl_mock*.yaml                # Edition-data configs (households, seed, edition, profiles…)
+│   ├── raw/*.yaml                             # Raw-data configs (derived from an edition run)
+│   └── next_edition/*.yaml                    # Later-edition configs (derived from an edition run)
 ├── docs/
 │   ├── 00_overview.md                         # Project overview and key concepts
 │   ├── 01_structure.md                        # Module descriptions
@@ -130,7 +132,7 @@ Notes:
 - `mock_internal/` contains helper/mock-only files, including the master PUPRN list used to align all datasets; these are always CSV and unaffected by the `format` setting.
 - `serl_climate_data_edition08/` is populated only when weather download is enabled and CDS access is configured.
 - The `serl_smart_meter_daily_edition08/` subfolder reflects edition08's `daily_smart_meter_layout: yearly`. Edition09 uses `single_file` instead — one combined `smart_meter_daily_edition09.parquet` directly under `data/mock/edition09/`, no subfolder, and no `serl_` prefix for the moment — see [docs/02_configuration.md](docs/02_configuration.md).
-- Filename suffixes (`edition08`, year values) come from `config/serl_mock.yaml` and generator defaults.
+- Filename suffixes (`edition08`, year values) come from `config/edition/serl_mock.yaml` and generator defaults.
 - `output_label` (also from config, defaulting to `edition<N>`) controls which folder under `data/mock/` a run's output lands in.
 
 ### Consistency caveat for dummy data
@@ -189,9 +191,9 @@ uv run python scripts/generate_mock_data.py --skip-weather
 This command generates all mock datasets except ERA5 weather files.
 
 All settings (number of households, time period, random seed, consumption parameters)
-are controlled by a configuration file — **[config/serl_mock.yaml](config/serl_mock.yaml)**
-by default. [`config/serl_mock_edition08.yaml`](config/serl_mock_edition08.yaml) and
-[`config/serl_mock_edition09.yaml`](config/serl_mock_edition09.yaml) are ready-made examples —
+are controlled by a configuration file — **[config/edition/serl_mock.yaml](config/edition/serl_mock.yaml)**
+by default. [`config/edition/serl_mock_edition08.yaml`](config/edition/serl_mock_edition08.yaml) and
+[`config/edition/serl_mock_edition09.yaml`](config/edition/serl_mock_edition09.yaml) are ready-made examples —
 select one with `--config path/to/file.yaml`.
 
 Want to skip individual outputs (e.g. just EPC, or just the survey datasets) instead of
@@ -226,7 +228,7 @@ See [docs/02_configuration.md](docs/02_configuration.md) for a full description 
 
 ### Mock raw half-hourly deliveries
 
-First generate the source edition (`--config config/serl_mock_edition08_gappy.yaml`), then
+First generate the source edition (`--config config/edition/serl_mock_edition08_gappy.yaml`), then
 `uv run python scripts/generate_raw_data.py --config config/raw/raw_from_edition08_gappy.yaml`
 turns that mock Edition08 run into SERL's raw half-hourly format
 (`SERL_half_hourly_YYYY_MM.csv`) in `data/mock/<output_label>/`, with known

@@ -6,6 +6,9 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 CONFIG_DIR = PROJECT_ROOT / "config"
+# Edition-data configs (scripts/generate_mock_data.py). The derived kinds have
+# their own folders: config/raw/, config/next_edition/.
+EDITION_CONFIG_DIR = CONFIG_DIR / "edition"
 DATA_DIR = PROJECT_ROOT / "data"
 MOCK_DIR = DATA_DIR / "mock"
 

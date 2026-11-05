@@ -1,5 +1,5 @@
 # Mock raw half-hourly deliveries from the gappy mock Edition08 run
-# (config/serl_mock_edition08_gappy.yaml: dropped rows, NULL values with
+# (config/edition/serl_mock_edition08_gappy.yaml: dropped rows, NULL values with
 # flag 0, off-grid stamps, duplicates), all kinds on.
 #
 #   uv run python scripts/generate_raw_data.py --config config/raw/raw_from_edition08_gappy.yaml

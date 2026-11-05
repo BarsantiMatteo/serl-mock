@@ -1,8 +1,8 @@
 """
 Generate mock SERL smart-meter and contextual data.
 
-Loads settings from config/serl_mock.yaml by default — pass --config to use a
-different saved config file (e.g. config/serl_mock_edition09.yaml). The
+Loads settings from config/edition/serl_mock.yaml by default — pass --config to use a
+different saved config file (e.g. config/edition/serl_mock_edition09.yaml). The
 config's `edition` setting determines output format, smart-meter file
 layout, and which reference dictionaries are used — see
 src/serl_mock/edition.py; these are not independent config keys, so a config
@@ -67,7 +67,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.serl_mock.paths import (
-    CONFIG_DIR, MOCK_INTERNAL_DIR, MOCK_AGGREGATED_DIR, REFERENCE_DIR,
+    EDITION_CONFIG_DIR, MOCK_INTERNAL_DIR, MOCK_AGGREGATED_DIR, REFERENCE_DIR,
     reference_dir_for, mock_dir_for, mock_hh_dirname, mock_daily_dirname, mock_climate_dirname,
 )
 from src.serl_mock.edition import get_edition
@@ -81,12 +81,12 @@ from src.serl_mock.utils import read_config
 
 # Set this to run the script directly (e.g. an IDE "Run" button) against a
 # specific config without typing --config every time. Leave as None to use
-# config/serl_mock.yaml. `--config` on the command line always overrides
+# config/edition/serl_mock.yaml. `--config` on the command line always overrides
 # this — this is only consulted when --config isn't passed. Does not affect
-# programmatic callers of run_all(), which defaults to config/serl_mock.yaml
+# programmatic callers of run_all(), which defaults to config/edition/serl_mock.yaml
 # on its own.
 # DEFAULT_CONFIG_PATH: Optional[Path] = None
-DEFAULT_CONFIG_PATH = CONFIG_DIR / "serl_mock_edition08.yaml"
+DEFAULT_CONFIG_PATH = EDITION_CONFIG_DIR / "serl_mock_edition08.yaml"
 
 # Which datasets a run produces. All True by default (today's behaviour) —
 # set any to False via the config file's `generate:` section to skip that
@@ -141,7 +141,7 @@ def run_all(
 
     config_path / output_dir let callers (tests, `--survey-only` re-runs
     against a scratch location, etc.) redirect the pipeline away from the
-    real config/serl_mock.yaml and data/mock/ tree. Both default to the
+    real config/edition/serl_mock.yaml and data/mock/ tree. Both default to the
     real locations so normal CLI usage is unaffected.
 
     survey_only defaults to None, meaning "use the config file's own
@@ -158,7 +158,7 @@ def run_all(
     follow_up_survey, harmonised_survey, survey_2025, participant_summary, exporters_list), each
     independently skippable and all True by default.
     """
-    cfg_path = Path(config_path) if config_path is not None else (CONFIG_DIR / "serl_mock.yaml")
+    cfg_path = Path(config_path) if config_path is not None else (EDITION_CONFIG_DIR / "serl_mock.yaml")
     cfg = read_config(cfg_path)
 
     survey_only = survey_only if survey_only is not None else bool(cfg.get("survey_only", False))
@@ -409,8 +409,8 @@ if __name__ == "__main__":
         type=Path,
         default=None,
         help=(
-            "Path to a config YAML to use instead of config/serl_mock.yaml — e.g. a "
-            "saved per-edition config such as config/serl_mock_edition09.yaml. "
+            "Path to a config YAML to use instead of config/edition/serl_mock.yaml — e.g. a "
+            "saved per-edition config such as config/edition/serl_mock_edition09.yaml. "
             "Overrides DEFAULT_CONFIG_PATH set at the top of this file, if any."
         ),
     )

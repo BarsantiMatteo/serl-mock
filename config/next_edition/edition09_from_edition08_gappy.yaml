@@ -2,7 +2,7 @@
 # except for planted changes that resolve some of Edition08's problems and
 # introduce new ones, as a later edition might after SERL reassessed the data.
 #
-#   uv run python scripts/generate_mock_data.py --config config/serl_mock_edition08_gappy.yaml --skip-weather
+#   uv run python scripts/generate_mock_data.py --config config/edition/serl_mock_edition08_gappy.yaml --skip-weather
 #   uv run python scripts/generate_next_edition.py --config config/next_edition/edition09_from_edition08_gappy.yaml
 #
 # Used by serl-dq's data version mock_edition09_revised, compared with

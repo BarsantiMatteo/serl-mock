@@ -132,7 +132,7 @@ unaffected.
 ## Fixture config
 
 All tests run against one small, deterministic config (`tests/_shared.py::TINY_CONFIG`), not the
-real `config/serl_mock.yaml`:
+real `config/edition/serl_mock.yaml`:
 
 | Setting | Value | Why |
 |---|---|---|

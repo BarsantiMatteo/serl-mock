@@ -14,10 +14,10 @@ settings are described in the rest of this page.
 
 | Config | Output folder (`data/mock/...`) | Use it for |
 |---|---|---|
-| `config/serl_mock.yaml` (default, no `--config`) | `edition08/` | analysis code on clean Edition08-style data |
-| `config/serl_mock_edition08.yaml` | `edition08_with_2025survey/` | same, plus the MasterSERL and 2025 surveys. Source of `config/raw/raw_from_edition08.yaml` |
-| `config/serl_mock_edition09.yaml` | `edition09_2024_N1000/` | code that must read Edition09's format (Parquet, harmonised columns, single daily file) |
-| `config/serl_mock_edition08_gappy.yaml` | `edition08_gappy/` | **data quality checks**: missingness and errors calibrated to SERL's data quality report, with a ground truth in `mock_internal/missingness_ground_truth.csv`. Source of the raw mock with every kind of difference |
+| `config/edition/serl_mock.yaml` (default, no `--config`) | `edition08/` | analysis code on clean Edition08-style data |
+| `config/edition/serl_mock_edition08.yaml` | `edition08_with_2025survey/` | same, plus the MasterSERL and 2025 surveys. Source of `config/raw/raw_from_edition08.yaml` |
+| `config/edition/serl_mock_edition09.yaml` | `edition09_2024_N1000/` | code that must read Edition09's format (Parquet, harmonised columns, single daily file) |
+| `config/edition/serl_mock_edition08_gappy.yaml` | `edition08_gappy/` | **data quality checks**: missingness and errors calibrated to SERL's data quality report, with a ground truth in `mock_internal/missingness_ground_truth.csv`. Source of the raw mock with every kind of difference |
 
 To make your own, copy the closest one, change what you need (e.g.
 `n_households`, `start_year`/`end_year`, the `missingness:` block) and give
@@ -49,7 +49,7 @@ edition's format, and how many of each change to plant. See
 ### Order of commands
 
 ```bash
-uv run python scripts/generate_mock_data.py --config config/serl_mock_edition08_gappy.yaml --skip-weather
+uv run python scripts/generate_mock_data.py --config config/edition/serl_mock_edition08_gappy.yaml --skip-weather
 uv run python scripts/generate_raw_data.py --config config/raw/raw_from_edition08_gappy.yaml
 uv run python scripts/generate_next_edition.py --config config/next_edition/edition09_from_edition08_gappy.yaml
 ```
@@ -58,9 +58,9 @@ uv run python scripts/generate_next_edition.py --config config/next_edition/edit
 
 ## The edition config
 
-The default config is `config/serl_mock.yaml`, loaded automatically by
+The default config is `config/edition/serl_mock.yaml`, loaded automatically by
 `scripts/generate_mock_data.py`. You can save additional config files (e.g.
-`config/serl_mock_edition09.yaml`) for different editions or scenarios and select one with
+`config/edition/serl_mock_edition09.yaml`) for different editions or scenarios and select one with
 `--config path/to/file.yaml`, or by passing `config_path=` to `run_all()` directly.
 
 If you run the script from an IDE "Run" button rather than a terminal (so passing `--config`
@@ -103,7 +103,7 @@ generate:
 `true` (today's behaviour) if the `generate:` section, or the key itself, is omitted, **except
 `harmonised_survey` and `survey_2025`, which default to `false`** (both need
 `data/reference/edition<N>/serl_master_mapping_edition<N>.csv`, which today only exists for
-edition09 — see `config/serl_mock_edition09.yaml`, which turns both on). An unknown key under
+edition09 — see `config/edition/serl_mock_edition09.yaml`, which turns both on). An unknown key under
 `generate:` raises an error at startup rather than being silently ignored, to catch typos.
 `--skip-weather` on the CLI always forces `generate.weather` off, regardless of what the config
 says. `survey_only: true` forces `hh_smart_meter`, `daily_smart_meter`, `rt_summary`, and
@@ -195,8 +195,8 @@ The actual definitions live in [`src/serl_mock/edition.py`](../src/serl_mock/edi
   [05_epc_reference.md](05_epc_reference.md)); edition09 reads its own `_edition09`-named ones.
 
 **To add a new edition**, add an entry to `_EDITIONS` in `edition.py` — a deliberate, reviewable
-code change, not a config-file setting. See `config/serl_mock_edition08.yaml` and
-`config/serl_mock_edition09.yaml` for example configs that pair with existing editions.
+code change, not a config-file setting. See `config/edition/serl_mock_edition08.yaml` and
+`config/edition/serl_mock_edition09.yaml` for example configs that pair with existing editions.
 
 (If you need a one-off combination `edition.py` doesn't define — e.g. for local testing — the
 generator classes accept `format`/`layout` as constructor keyword arguments that override the
@@ -337,7 +337,7 @@ Real SERL data has gaps; the base generator makes almost none. The
 for developing missing-data analysis against realistic gaps. It is **off
 unless `enabled: true`**: without it the output is byte-identical to a
 run with no block. A ready-made scenario is
-`config/serl_mock_edition08_gappy.yaml` (output `data/mock/edition08_gappy/`),
+`config/edition/serl_mock_edition08_gappy.yaml` (output `data/mock/edition08_gappy/`),
 whose header documents every key.
 
 ```yaml

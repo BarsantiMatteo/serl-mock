@@ -15,7 +15,7 @@ It produces three kinds of mock data, each with its own script and config family
 
 | Kind | Use | Script | Config |
 |---|---|---|---|
-| Edition data | analysis code and single-edition data quality checks | `generate_mock_data.py` | `config/serl_mock*.yaml` (the `_gappy` one adds calibrated missingness and errors) |
+| Edition data | analysis code and single-edition data quality checks | `generate_mock_data.py` | `config/edition/serl_mock*.yaml` (the `_gappy` one adds calibrated missingness and errors) |
 | Raw data, from an edition run | data quality checks on raw SERL deliveries; raw vs edition comparison | `generate_raw_data.py` | `config/raw/*.yaml` |
 | A later edition, from an edition run | comparison across editions: problems resolved, persisting or new | `generate_next_edition.py` | `config/next_edition/*.yaml` |
 

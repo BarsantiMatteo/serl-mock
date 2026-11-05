@@ -43,7 +43,7 @@ import cdsapi
 import pandas as pd
 
 from .utils import read_config, write_table
-from .paths import CONFIG_DIR, MOCK_DIR, mock_climate_dirname
+from .paths import EDITION_CONFIG_DIR, MOCK_DIR, mock_climate_dirname
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +112,7 @@ class WeatherDownloader:
         output_dir: Optional[Union[str, Path]] = None,
         edition: Optional[str] = None,
     ) -> None:
-        cfg = read_config(config_path or (CONFIG_DIR / "serl_mock.yaml"))
+        cfg = read_config(config_path or (EDITION_CONFIG_DIR / "serl_mock.yaml"))
         wcfg: Dict[str, Any] = cfg.get("weather", {})
 
         self.dataset = dataset or wcfg.get("dataset", "reanalysis-era5-single-levels")

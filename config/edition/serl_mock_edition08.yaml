@@ -1,10 +1,10 @@
 # ===================================================
 # SERL Mock Data - Edition08 example config
 # ===================================================
-# Identical to config/serl_mock.yaml (edition08 is the default), saved under
+# Identical to config/edition/serl_mock.yaml (edition08 is the default), saved under
 # its own name to demonstrate the --config pattern:
 #
-#   uv run python scripts/generate_mock_data.py --config config/serl_mock_edition08.yaml
+#   uv run python scripts/generate_mock_data.py --config config/edition/serl_mock_edition08.yaml
 #
 # See src/serl_mock/edition.py for what "edition08" fixes (format: csv,
 # hh_smart_meter layout: monthly, dictionary_source_edition: 07) versus what
@@ -29,7 +29,7 @@ lsoa_vintage: "2011"
 # survey_only: true
 
 # Skip any of the pipeline's outputs individually — all true by default.
-# See config/serl_mock.yaml for the full list of generate.<name> keys.
+# See config/edition/serl_mock.yaml for the full list of generate.<name> keys.
 generate:
    hh_smart_meter: true       # half-hourly smart-meter data (step 2)
    daily_smart_meter: true    # daily smart-meter data (step 3)

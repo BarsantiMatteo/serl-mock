@@ -4,11 +4,13 @@
 serl-mock/
 │
 ├── config/
-│   ├── serl_mock.yaml               # Default config (edition08) — select a different one
-│   │                                # with --config (see 02_configuration.md)
-│   ├── serl_mock_edition08.yaml     # Example: explicit edition08 config
-│   ├── serl_mock_edition09.yaml     # Example: edition09 config (format/layout differ
-│   │                                # automatically — see src/serl_mock/edition.py)
+│   ├── edition/                     # Edition-data configs for scripts/generate_mock_data.py
+│   │   ├── serl_mock.yaml               # Default config (edition08) — select a different one
+│   │   │                                # with --config (see 02_configuration.md)
+│   │   ├── serl_mock_edition08.yaml     # Example: explicit edition08 config
+│   │   ├── serl_mock_edition08_gappy.yaml  # Edition08 with calibrated missingness and errors
+│   │   └── serl_mock_edition09.yaml     # Example: edition09 config (format/layout differ
+│   │                                    # automatically — see src/serl_mock/edition.py)
 │   ├── raw/                         # Raw-delivery configs for scripts/generate_raw_data.py
 │   │   ├── raw_from_edition08.yaml
 │   │   └── raw_from_edition08_gappy.yaml
@@ -164,7 +166,7 @@ Makes a **mock later edition** from a finished mock Edition08 run: same readings
 A one-off utility that fetches the official UK bank holidays JSON from gov.uk and writes `data/reference/uk_bank_holidays_england_wales_scotland.csv`.  Run this locally if the reference file needs updating; the output is committed to the repo.
 
 ### `src/serl_mock/paths.py`
-Defines `Path` constants for `CONFIG_DIR`, `DATA_DIR`, `MOCK_DIR`, `MOCK_INTERNAL_DIR`,
+Defines `Path` constants for `CONFIG_DIR`, `EDITION_CONFIG_DIR` (`config/edition/`), `DATA_DIR`, `MOCK_DIR`, `MOCK_INTERNAL_DIR`,
 `MOCK_AGGREGATED_DIR`, and `REFERENCE_DIR` relative to the project root, plus helpers for
 paths that vary by edition (so a run's subfolders actually match its own edition):
 - `mock_dir_for(output_label)` — `MOCK_DIR / output_label`, e.g. `data/mock/edition08/`
