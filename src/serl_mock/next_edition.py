@@ -53,7 +53,6 @@ shortfall and expected status transitions per column and month.
 from __future__ import annotations
 
 import json
-import re
 import shutil
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -65,12 +64,15 @@ import yaml
 
 from .generator_smartmeter import HHSmartMeterGenerator
 from .missingness import STREAM_COLUMNS
-from .paths import REFERENCE_DIR, mock_dir_for, mock_hh_dirname
-from .raw_from_edition import STAMP_FMT, find_edition_files
+from .paths import mock_dir_for, mock_hh_dirname
+from .derived import (
+    STAMP_FMT, check_folders, check_keys, copy_bst, find_edition_files, gap_slots, insert_position,
+    int_value, median_of, month_rng, note_shortfall, parse_counts, parse_months, require_source,
+    slot_stamps, stamp_slots, week_earlier,
+)
 from .utils import write_table
 
 GEN = HHSmartMeterGenerator
-BST_FILE = "bst_dates_to_2030.csv"
 CHANGES_FILE = "edition_changes.csv"
 MANIFEST_FILE = "edition_changes_manifest.json"
 
@@ -133,59 +135,26 @@ class NextEditionConfig:
 
 
 _TOP_KEYS = {"source", "output_label", "output_edition", "seed", "months", "changes_per_month"}
-_MONTH_RE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
-
-
-def _int(value, where: str, minimum: Optional[int] = 0) -> int:
-    if isinstance(value, bool) or not isinstance(value, int) or (minimum is not None and value < minimum):
-        raise ValueError(f"{where} must be an integer" + (f" >= {minimum}" if minimum is not None else "")
-                         + f", got {value!r}")
-    return value
+_WHERE = "next-edition config"
 
 
 def parse_config(cfg: dict) -> NextEditionConfig:
     """Validate a next-edition config dict (unknown keys, bad counts, bad
     months and editions raise)."""
-    if not isinstance(cfg, dict):
-        raise ValueError("next-edition config must be a mapping")
-    unknown = set(cfg) - _TOP_KEYS
-    if unknown:
-        raise ValueError(f"next-edition config: unknown key(s) {sorted(unknown)}; expected {sorted(_TOP_KEYS)}")
-    if not cfg.get("source"):
-        raise ValueError("next-edition config: `source` (a folder under data/mock/) is required")
-    source = str(cfg["source"])
+    check_keys(cfg, _TOP_KEYS, _WHERE)
+    source = require_source(cfg, _WHERE)
     edition = str(cfg.get("output_edition", "09")).zfill(2)
     if edition not in ("08", "09"):
-        raise ValueError(f"next-edition config: output_edition must be \"08\" or \"09\", got {edition!r}")
-
-    months = cfg.get("months") or {}
-    if not isinstance(months, dict) or set(months) - {"start", "end"}:
-        raise ValueError(f"next-edition config: months must be {{start, end}}, got {months!r}")
-    for k in ("start", "end"):
-        m = months.get(k)
-        if m is not None and not _MONTH_RE.match(str(m)):
-            raise ValueError(f"next-edition config: months.{k} must be YYYY-MM or null, got {m!r}")
-    start, end = months.get("start"), months.get("end")
-    if start and end and str(start) > str(end):
-        raise ValueError(f"next-edition config: months.start {start} is after months.end {end}")
-
-    changes = cfg.get("changes_per_month") or {}
-    if not isinstance(changes, dict):
-        raise ValueError("next-edition config: changes_per_month must be a mapping")
-    unknown = set(changes) - set(KINDS)
-    if unknown:
-        raise ValueError(f"next-edition config: unknown changes_per_month key(s) {sorted(unknown)}; "
-                         f"expected {KINDS}")
-    counts = ChangeCounts(**{k: _int(v, f"changes_per_month.{k}") for k, v in changes.items()})
-
+        raise ValueError(f"{_WHERE}: output_edition must be \"08\" or \"09\", got {edition!r}")
+    start, end = parse_months(cfg.get("months"), _WHERE)
     return NextEditionConfig(
         source=source,
         output_label=str(cfg.get("output_label") or f"edition{edition}_from_{source}"),
         output_edition=edition,
-        seed=_int(cfg.get("seed", 42), "seed", minimum=None),
-        month_start=str(start) if start else None,
-        month_end=str(end) if end else None,
-        changes=counts,
+        seed=int_value(cfg.get("seed", 42), f"{_WHERE}: seed", minimum=None),
+        month_start=start,
+        month_end=end,
+        changes=parse_counts(cfg.get("changes_per_month"), ChangeCounts, "changes_per_month", _WHERE),
     )
 
 
@@ -266,11 +235,10 @@ class _Month:
         self._hh_cache: Dict[str, pd.DataFrame] = {}
 
     def rng(self, kind: str) -> np.random.Generator:
-        return np.random.default_rng([self.cfg.seed, self.year, self.month, _RNG_SALT[kind]])
+        return month_rng(self.cfg.seed, self.year, self.month, _RNG_SALT[kind])
 
     def short(self, kind: str, requested: int, planted: int) -> None:
-        if planted < requested:
-            self.shortfall[kind] = requested - planted
+        note_shortfall(self.shortfall, kind, requested, planted)
 
     # -- fills ------------------------------------------------------------
     def _household(self, puprn: str) -> pd.DataFrame:
@@ -285,17 +253,13 @@ class _Month:
         source's ok values."""
         rows = self._household(puprn)
         ok = rows[rows[f"_st_{stream}"] == "ok"]
-        week = (stamp - pd.Timedelta(days=7)).strftime(STAMP_FMT)
-        prev = ok[ok["Read_date_time_UTC"] == week]
         _, cols = STREAM_COLUMNS[stream]
+        col = "Gas_hh_m3" if stream == "gas" else cols[0]
+        prev = week_earlier(ok, "Read_date_time_UTC", col, stamp)
+        x = float(prev) if prev is not None else (median_of(ok, col) or 0.0)
         if stream == "gas":
-            m3 = float(prev["Gas_hh_m3"].iloc[0]) if len(prev) else \
-                float(pd.to_numeric(ok["Gas_hh_m3"]).median()) if len(ok) else 0.0
-            m3 = round(m3, 4)
+            m3 = round(x, 4)
             return {"Gas_hh_m3": repr(float(m3)), "Gas_hh_Wh": _gas_wh(m3)}
-        col = cols[0]
-        x = float(prev[col].iloc[0]) if len(prev) else \
-            float(pd.to_numeric(ok[col]).median()) if len(ok) else 0.0
         return {col: str(int(round(x)))}
 
     # -- picking ------------------------------------------------------------
@@ -401,34 +365,16 @@ class _Month:
         if n == 0:
             return
         src = self.src
-        stamps = pd.to_datetime(src["Read_date_time_UTC"], format=STAMP_FMT, errors="coerce", utc=True)
-        ok = stamps.notna()
-        epoch = pd.Timestamp("1970-01-01", tz="UTC")
-        minutes = ((stamps[ok] - epoch) // pd.Timedelta(minutes=1)).to_numpy(dtype=np.int64)
-        occ = pd.DataFrame({"PUPRN": src.loc[ok, "PUPRN"].to_numpy(), "lo": minutes // 30,
-                            "hi": -(-minutes // 30)})
-        occupied = pd.concat([occ[["PUPRN", "lo"]].rename(columns={"lo": "slot"}),
-                              occ[["PUPRN", "hi"]].rename(columns={"hi": "slot"})]).drop_duplicates()
-        span = occ[occ["lo"] == occ["hi"]].groupby("PUPRN")["lo"].agg(["min", "max"])
-        full = pd.DataFrame({
-            "PUPRN": np.repeat(span.index.to_numpy(), (span["max"] - span["min"] + 1).to_numpy()),
-            "slot": np.concatenate([np.arange(a, b + 1) for a, b in zip(span["min"], span["max"])])
-                    if len(span) else np.array([], dtype=np.int64),
-        })
-        cand = full.merge(occupied, on=["PUPRN", "slot"], how="left", indicator=True)
-        cand = cand[cand["_merge"] == "left_only"][["PUPRN", "slot"]].sort_values(["PUPRN", "slot"])
-        cand = cand.reset_index(drop=True)
+        cand = gap_slots(stamp_slots(src["PUPRN"], src["Read_date_time_UTC"]))
         k = min(n, len(cand))
         self.short("gap_filled", n, k)
         if not k:
             return
         text = src["Read_date_time_UTC"].to_numpy(dtype=object)
+        stamps = slot_stamps(cand["slot"])
         for r, i in enumerate(np.sort(self.rng("gap_filled").choice(len(cand), k, replace=False))):
-            p = cand.at[i, "PUPRN"]
-            t = pd.Timestamp(int(cand.at[i, "slot"]) * 30, unit="m", tz="UTC")
-            row = self.full_row(p, t)
-            later = np.flatnonzero(text > row["Read_date_time_UTC"])
-            row["_pos"] = (later[0] if len(later) else len(src)) - 0.5 + r * 1e-6
+            row = self.full_row(cand.at[i, "PUPRN"], stamps[i])
+            row["_pos"] = insert_position(text, row["Read_date_time_UTC"], len(src), r)
             self.added.append(row)
             self.note("gap_filled", added=row)
 
@@ -511,8 +457,7 @@ def convert(cfg: NextEditionConfig, source_dir: Optional[Path] = None, out_dir: 
     manifest."""
     source_dir = Path(source_dir) if source_dir else mock_dir_for(cfg.source)
     out_dir = Path(out_dir) if out_dir else mock_dir_for(cfg.output_label)
-    if source_dir.resolve() == out_dir.resolve():
-        raise ValueError("output folder must differ from the source folder")
+    check_folders(source_dir, out_dir)
     files = find_edition_files(source_dir, cfg.month_start, cfg.month_end)
     ed = cfg.output_edition
     hh_dir = out_dir / mock_hh_dirname(ed)
@@ -521,8 +466,7 @@ def convert(cfg: NextEditionConfig, source_dir: Optional[Path] = None, out_dir: 
     hh_dir.mkdir(parents=True)
     internal = out_dir / "mock_internal"
     internal.mkdir(exist_ok=True)
-    bst = source_dir / BST_FILE
-    shutil.copyfile(bst if bst.exists() else REFERENCE_DIR / BST_FILE, out_dir / BST_FILE)
+    copy_bst(source_dir, out_dir)
 
     compared = compared_columns(ed)
     records: List[dict] = []

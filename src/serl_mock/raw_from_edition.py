@@ -63,7 +63,6 @@ from __future__ import annotations
 
 import json
 import re
-import shutil
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -72,8 +71,13 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from .derived import (
+    STAMP_FMT, check_folders, check_keys, copy_bst, find_edition_files, gap_slots, insert_position,
+    int_value, median_of, month_rng, note_shortfall, parse_counts, parse_months, require_source,
+    slot_stamps, stamp_slots, week_earlier,
+)
 from .generator_smartmeter import HHSmartMeterGenerator
-from .paths import REFERENCE_DIR, mock_dir_for, mock_hh_dirname
+from .paths import mock_dir_for
 
 # Raw column -> Edition08 column, in raw file order. Read_date_time_effective
 # has no Edition column: derived from Read_date_time (minus 1 s).
@@ -94,11 +98,8 @@ VALUE_COLUMNS: List[str] = [c for c in RAW_COLUMNS if c.startswith(("elec_", "ga
 EDITION_VALUE_COLUMNS: List[str] = [RAW_TO_EDITION[c] for c in VALUE_COLUMNS]
 GAS_COLUMN = "gas_active_import_profile_hh_L"
 LITRES_PER_M3 = 1000.0
-STAMP_FMT = "%Y-%m-%dT%H:%M:%SZ"
 
 RAW_FILE_STEM = "SERL_half_hourly"
-EDITION_FILE_RE = re.compile(r"^serl_half_hourly_(\d{4})_(\d{2})_edition08\.csv$")
-BST_FILE = "bst_dates_to_2030.csv"
 READINGS_FILE = "raw_planted_readings.csv"
 MANIFEST_FILE = "raw_planted_manifest.json"
 OFF_GRID_FILE = "raw_off_grid_in_both.csv"
@@ -161,60 +162,24 @@ class RawConfig:
 
 _TOP_KEYS = {"source", "output_label", "seed", "months", "plants_per_month",
              "extra_households", "missing_households"}
-_MONTH_RE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
-
-
-def _count(value, where: str) -> int:
-    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-        raise ValueError(f"{where} must be an integer >= 0, got {value!r}")
-    return value
+_WHERE = "raw config"
 
 
 def parse_config(cfg: dict) -> RawConfig:
     """Validate a raw-delivery config dict (unknown keys, bad counts and
     bad months raise)."""
-    if not isinstance(cfg, dict):
-        raise ValueError("raw config must be a mapping")
-    unknown = set(cfg) - _TOP_KEYS
-    if unknown:
-        raise ValueError(f"raw config: unknown key(s) {sorted(unknown)}; expected {sorted(_TOP_KEYS)}")
-    if not cfg.get("source"):
-        raise ValueError("raw config: `source` (a folder under data/mock/) is required")
-    source = str(cfg["source"])
-    seed = cfg.get("seed", 42)
-    if isinstance(seed, bool) or not isinstance(seed, int):
-        raise ValueError(f"raw config: seed must be an integer, got {seed!r}")
-
-    months = cfg.get("months") or {}
-    if not isinstance(months, dict) or set(months) - {"start", "end"}:
-        raise ValueError(f"raw config: months must be {{start, end}}, got {months!r}")
-    for k in ("start", "end"):
-        m = months.get(k)
-        if m is not None and not _MONTH_RE.match(str(m)):
-            raise ValueError(f"raw config: months.{k} must be YYYY-MM or null, got {m!r}")
-    start, end = months.get("start"), months.get("end")
-    if start and end and str(start) > str(end):
-        raise ValueError(f"raw config: months.start {start} is after months.end {end}")
-
-    plants = cfg.get("plants_per_month") or {}
-    if not isinstance(plants, dict):
-        raise ValueError("raw config: plants_per_month must be a mapping")
-    known = set(PlantCounts.__dataclass_fields__)
-    unknown = set(plants) - known
-    if unknown:
-        raise ValueError(f"raw config: unknown plants_per_month key(s) {sorted(unknown)}; "
-                         f"expected {sorted(known)}")
-    counts = PlantCounts(**{k: _count(v, f"plants_per_month.{k}") for k, v in plants.items()})
-
+    check_keys(cfg, _TOP_KEYS, _WHERE)
+    source = require_source(cfg, _WHERE)
+    start, end = parse_months(cfg.get("months"), _WHERE)
     return RawConfig(
         source=source,
         output_label=str(cfg.get("output_label") or f"raw_from_{source}"),
-        seed=seed,
-        month_start=str(start) if start else None,
-        month_end=str(end) if end else None,
-        plants=counts,
-        extra_households=_count(cfg.get("extra_households", 1), "extra_households"),
-        missing_households=_count(cfg.get("missing_households", 1), "missing_households"),
+        seed=int_value(cfg.get("seed", 42), f"{_WHERE}: seed", minimum=None),
+        month_start=start,
+        month_end=end,
+        plants=parse_counts(cfg.get("plants_per_month"), PlantCounts, "plants_per_month", _WHERE),
+        extra_households=int_value(cfg.get("extra_households", 1), "extra_households"),
+        missing_households=int_value(cfg.get("missing_households", 1), "missing_households"),
     )
 
 
@@ -226,26 +191,6 @@ def load_config(path: Path) -> RawConfig:
 # ---------------------------------------------------------------------------
 # Format conversion
 # ---------------------------------------------------------------------------
-
-def find_edition_files(source_dir: Path, start: Optional[str] = None,
-                       end: Optional[str] = None) -> List[Tuple[int, int, Path]]:
-    """(year, month, path) of each Edition08 half-hourly file in a mock run's
-    output folder within [start, end] (YYYY-MM, None = open), in date order."""
-    hh_dir = Path(source_dir) / mock_hh_dirname("08")
-    found = []
-    for path in sorted(hh_dir.glob("serl_half_hourly_*_edition08.csv")):
-        m = EDITION_FILE_RE.match(path.name)
-        if not m:
-            continue
-        ym = f"{m.group(1)}-{m.group(2)}"
-        if (start and ym < start) or (end and ym > end):
-            continue
-        found.append((int(m.group(1)), int(m.group(2)), path))
-    if not found:
-        raise FileNotFoundError(f"No Edition08 half-hourly CSVs in {hh_dir}"
-                                + (f" for months {start or '...'} to {end or '...'}" if start or end else ""))
-    return found
-
 
 def raw_file_name(year: int, month: int) -> str:
     return f"{RAW_FILE_STEM}_{year}_{month:02d}.csv"
@@ -392,12 +337,11 @@ class _Month:
         self.planted[kind] += 1
 
     def short(self, kind: str, requested: int, planted: int) -> None:
-        if planted < requested:
-            self.shortfall[kind] = requested - planted
+        note_shortfall(self.shortfall, kind, requested, planted)
 
     def plant(self) -> pd.DataFrame:
         raw, counts = self.raw, self.counts
-        rng = np.random.default_rng([self.seed, self.year, self.month])
+        rng = month_rng(self.seed, self.year, self.month)
 
         # Targets: not a donor (its copy should stay identical), only
         # readings whose (PUPRN, Read_date_time) is unique so every planted
@@ -478,13 +422,11 @@ class _Month:
     # same half-hour a week earlier if the edition has it, else the
     # household's median for the column this month.
     def _fill(self, puprn: str, stamp: pd.Timestamp, col: str, hh_rows: pd.DataFrame) -> str:
-        week = (stamp - pd.Timedelta(days=7)).strftime(STAMP_FMT)
-        prev = hh_rows.loc[hh_rows["Read_date_time"] == week, col]
-        prev = prev[prev != ""]
-        if len(prev):
-            return str(prev.iloc[0])
-        vals = pd.to_numeric(hh_rows[col][hh_rows[col] != ""])
-        return _fmt_value(col, float(vals.median())) if len(vals) else ""
+        prev = week_earlier(hh_rows, "Read_date_time", col, stamp)
+        if prev is not None:
+            return prev
+        median = median_of(hh_rows, col)
+        return _fmt_value(col, median) if median is not None else ""
 
     def _household_rows(self, puprn: str) -> pd.DataFrame:
         cache = self.__dict__.setdefault("_hh_cache", {})
@@ -500,7 +442,7 @@ class _Month:
             **{c: edition_values[:, j] for j, c in enumerate(VALUE_COLUMNS)})
         if n == 0:
             return
-        rng = np.random.default_rng([self.seed, self.year, self.month, 1])
+        rng = month_rng(self.seed, self.year, self.month, 1)
         ok = eligible_rows.to_numpy()
         cells = []
         for j, col in enumerate(VALUE_COLUMNS):
@@ -530,13 +472,7 @@ class _Month:
         with its row index; not the missing households or donors."""
         if hasattr(self, "_slots_cache"):
             return self._slots_cache
-        raw = self.raw
-        stamps = pd.to_datetime(raw["Read_date_time"], format=STAMP_FMT, errors="coerce", utc=True)
-        ok = stamps.notna()
-        epoch = pd.Timestamp("1970-01-01", tz="UTC")
-        minutes = ((stamps[ok] - epoch) // pd.Timedelta(minutes=1)).to_numpy(dtype=np.int64)
-        occ = pd.DataFrame({"PUPRN": raw.loc[ok, "PUPRN"].to_numpy(), "lo": minutes // 30,
-                            "hi": -(-minutes // 30), "row": np.flatnonzero(ok.to_numpy())})
+        occ = stamp_slots(self.raw["PUPRN"], self.raw["Read_date_time"])
         excluded = set(self.households.missing) | self.donors
         self._slots_cache = occ[~occ["PUPRN"].isin(excluded)].reset_index(drop=True)
         return self._slots_cache
@@ -549,20 +485,8 @@ class _Month:
         stamps, in a fixed order."""
         if hasattr(self, "_gap_cache"):
             return self._gap_cache
-        occ = self._slots()
-        occupied = pd.concat([occ[["PUPRN", "lo"]].rename(columns={"lo": "slot"}),
-                              occ[["PUPRN", "hi"]].rename(columns={"hi": "slot"})]).drop_duplicates()
-        on_grid = occ[occ["lo"] == occ["hi"]]
-        span = on_grid.groupby("PUPRN")["lo"].agg(["min", "max"])
-        full = pd.DataFrame({
-            "PUPRN": np.repeat(span.index.to_numpy(), (span["max"] - span["min"] + 1).to_numpy()),
-            "slot": np.concatenate([np.arange(a, b + 1) for a, b in zip(span["min"], span["max"])])
-                    if len(span) else np.array([], dtype=np.int64),
-        })
-        cand = full.merge(occupied, on=["PUPRN", "slot"], how="left", indicator=True)
-        cand = cand[cand["_merge"] == "left_only"][["PUPRN", "slot"]].sort_values(["PUPRN", "slot"])
-        cand = cand.reset_index(drop=True)
-        new_stamps = pd.to_datetime(cand["slot"] * 30, unit="m", utc=True)
+        cand = gap_slots(self._slots())
+        new_stamps = slot_stamps(cand["slot"])
         if len(self.removed_days) and len(cand):
             eff = [HHSmartMeterGenerator._effective_date_local(t.tz_convert("Europe/London"))
                    for t in new_stamps]
@@ -578,8 +502,7 @@ class _Month:
         hh_rows = self._household_rows(puprn)
         vals = {c: self._fill(puprn, slot_stamp, c, hh_rows) for c in VALUE_COLUMNS}
         row = raw_row_for(puprn, stamp, vals)
-        later = np.flatnonzero(self._stamp_text > row["Read_date_time"])
-        row["_pos"] = (later[0] if len(later) else len(self.raw)) - 0.5 + r * 1e-6
+        row["_pos"] = insert_position(self._stamp_text, row["Read_date_time"], len(self.raw), r)
         return row
 
     def _off_grid_stamp(self, rng: np.random.Generator, slot_stamp: pd.Timestamp) -> pd.Timestamp:
@@ -601,7 +524,7 @@ class _Month:
         self.removed_slots: set = set()
         if n == 0:
             return empty
-        rng = np.random.default_rng([self.seed, self.year, self.month, 2])
+        rng = month_rng(self.seed, self.year, self.month, 2)
         cand, new_stamps = self._gap_slots()
         k = min(n, len(cand))
         self.short("edition_removed", n, k)
@@ -623,7 +546,7 @@ class _Month:
         n = self.counts.off_grid_edition_skip
         if n == 0:
             return self.raw.iloc[:0]
-        rng = np.random.default_rng([self.seed, self.year, self.month, 4])
+        rng = month_rng(self.seed, self.year, self.month, 4)
         cand, slot_stamps = self._gap_slots()
         free = np.array([i for i in range(len(cand)) if i not in self.removed_slots], dtype=np.int64)
         k = min(n, len(free))
@@ -647,7 +570,7 @@ class _Month:
         none = (np.array([], dtype=np.int64), raw.iloc[:0])
         if n == 0:
             return none
-        rng = np.random.default_rng([self.seed, self.year, self.month, 3])
+        rng = month_rng(self.seed, self.year, self.month, 3)
         occ = self._slots()
         # On-grid, every value empty, and no off-grid reading of the
         # household within 30 min (whose floor slot is the slot or the one
@@ -719,17 +642,14 @@ def convert(cfg: RawConfig, source_dir: Optional[Path] = None, out_dir: Optional
     manifest."""
     source_dir = Path(source_dir) if source_dir else mock_dir_for(cfg.source)
     out_dir = Path(out_dir) if out_dir else mock_dir_for(cfg.output_label)
-    if source_dir.resolve() == out_dir.resolve():
-        raise ValueError("raw output folder must differ from the source folder")
+    check_folders(source_dir, out_dir)
     files = find_edition_files(source_dir, cfg.month_start, cfg.month_end)
     out_dir.mkdir(parents=True, exist_ok=True)
     internal = out_dir / "mock_internal"
     internal.mkdir(exist_ok=True)
     for old in out_dir.glob(f"{RAW_FILE_STEM}_*.csv"):
         old.unlink()  # a rerun with fewer months shouldn't leave stale files
-
-    bst = source_dir / BST_FILE
-    shutil.copyfile(bst if bst.exists() else REFERENCE_DIR / BST_FILE, out_dir / BST_FILE)
+    copy_bst(source_dir, out_dir)
 
     usecols = [c for c in RAW_TO_EDITION.values() if c is not None]
     read = lambda p: pd.read_csv(p, usecols=usecols, dtype=str, keep_default_na=False, na_filter=False)

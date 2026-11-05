@@ -104,6 +104,7 @@ serl-mock/
 │       ├── generator_household_traits.py
 │       ├── generator_smartmeter.py
 │       ├── generator_contextual_data.py
+│       ├── derived.py
 │       ├── raw_from_edition.py
 │       ├── next_edition.py
 │       └── weather_downloader.py
@@ -253,6 +254,9 @@ Contains three generators:
 
 ### `src/serl_mock/missingness.py`
 Optional **synthetic missingness** (`missingness:` in the config, off by default). `parse_patterns` validates the block; `MissingnessPlanner` draws each pattern's households and runs from its own seeded rngs and `apply()` changes one month's HH frame (dropped rows, flag `0` / other codes, emptied values, invalid times, duplicates, off-grid stamps). `ground_truth()` lists every planted run for `mock_internal/missingness_ground_truth.csv`. See [02_configuration.md](02_configuration.md#synthetic-missingness-missingness).
+
+### `src/serl_mock/derived.py`
+What the two derived generators (`raw_from_edition.py`, `next_edition.py`) share: `find_edition_files` and `copy_bst` (the source run's half-hourly files and BST dates file), config validation (`check_keys`, `require_source`, `int_value`, `parse_counts`, `parse_months`), `month_rng` (one rng per seed, year, month and optional salt), `note_shortfall`, half-hour slots (`stamp_slots`, `gap_slots`, `slot_stamps`: the half-hours a household lacks inside its covered range, with no off-grid reading within 30 min), fill values (`week_earlier`, `median_of`) and `insert_position` (where a new row goes so a file keeps the edition's order).
 
 ### `src/serl_mock/raw_from_edition.py`
 `load_config` / `parse_config` read and validate a `config/raw/*.yaml` file into a `RawConfig`; `convert(cfg, source_dir=None, out_dir=None)` rewrites the source run's half-hourly files into the raw format and plants deterministic differences (kinds, categories and the ground truth: [02_configuration.md](02_configuration.md#raw-half-hourly-deliveries-configraw)). Format changes:
