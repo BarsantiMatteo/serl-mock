@@ -132,7 +132,7 @@ future edition ever changes them.
 | `Valid_read_time` | `True` if HH is not NA |
 | Error flags | `-5` invalid time, `-2` very high, `-1` meter max, `1` valid, `0` missing (only from synthetic missingness) |
 
-A small fraction (~0.05 %) of timestamps is deliberately skewed by 60 seconds to exercise `Valid_read_time = False` and `HH = NA` paths.
+Every timestamp is on the half-hour grid. Off-grid stamps (`HH = NA`, `Valid_read_time = False`, flags `-5`) are an error like any other: only the config's `missingness:` block plants them (an `off_grid` pattern, as in `config/edition/serl_mock_edition08_gappy.yaml`), so a config without it gives clean data.
 
 ---
 

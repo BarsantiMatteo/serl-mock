@@ -53,13 +53,12 @@ then changes the affected rows (`effect`):
                             records a 'max read'
               invalid_time  Valid_read_time FALSE
               duplicate     the row written twice
-              off_grid      the stamp moved `minutes` off :00/:30, handled
-                            like the base generator's skewed stamps
-                            (HH NA, Valid_read_time FALSE, flags -5)
+              off_grid      the stamp moved `minutes` off :00/:30
+                            (HH NA, Valid_read_time FALSE, flags -5); the
+                            only source of off-grid stamps
 
 Patterns run in order. A later pattern only targets rows still on their
-half-hour (not dropped or moved off-grid by an earlier one), and never the
-base generator's own skewed stamps.
+half-hour (not dropped or moved off-grid by an earlier one).
 
 Ground truth
 ------------
@@ -329,7 +328,7 @@ class MissingnessPlanner:
 
         `df` is generate_month()'s legacy-schema frame, time-major (row =
         t * H + h), still holding `timestamp_utc`. `stamps_utc` holds the T
-        end-of-half-hour stamps (tz-aware UTC), skewed ones included. `fmt`
+        end-of-half-hour stamps (tz-aware UTC), all on the grid. `fmt`
         is the generator, for its timestamp formatting helpers (off_grid).
         Returns the changed frame and records what was planted.
         """

@@ -7,6 +7,12 @@
 # The edition's own gaps and NULLs are copied to raw unchanged; the realistic
 # kinds fill some of them in raw only. Used by serl-dq's data version
 # mock_raw_from_edition08_gappy.
+#
+# Off-grid raw stamps: an edition typically removes them, but not always.
+# The source's own off-grid stamps (~350 a year, its off_grid_stamps pattern)
+# reach raw unchanged = the "edition kept it" case; the two off_grid_edition_*
+# kinds below (50 + 50 a month = 1,200 a year) are the "edition removed it"
+# cases, so removal dominates, as in real data.
 # Keys: docs/02_configuration.md#raw-half-hourly-deliveries-configraw.
 
 source: edition08_gappy                 # data/mock/<source>/, an existing Edition08 mock
@@ -21,7 +27,7 @@ plants_per_month:                       # 0 = off
   raw_emptied_values: 25     # raw NULL, edition has a value       (reverse, anomaly)
   raw_duplicates: 5          # reading written twice in raw (exact copy)
   raw_missing_household_days: 1
-  off_grid_edition_empty: 25 # raw reading off its half-hour; edition dropped it, empty row there (realistic)
-  off_grid_edition_skip: 25  # ditto, edition has no row there                                   (realistic)
+  off_grid_edition_empty: 50 # raw reading off its half-hour; edition dropped it, empty row there (realistic)
+  off_grid_edition_skip: 50  # ditto, edition has no row there                                   (realistic)
 extra_households: 1          # only in raw (copy of another household under a new PUPRN; e.g. withdrawn)
 missing_households: 1        # only in the edition

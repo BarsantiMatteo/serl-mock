@@ -252,13 +252,11 @@ class HHSmartMeterGenerator:
         end_utc   = month_start_utc + pd.offsets.MonthBegin(1)
         idx_utc   = pd.date_range(start=start_utc, end=end_utc, freq=self.freq, tz="UTC")
 
-        # Minimal skew (~0.05 %) to exercise Valid_read_time and HH index logic
-        if len(idx_utc) > 0:
-            skew_count = max(1, len(idx_utc) // 2000)
-            skew_pos   = self.rng.choice(len(idx_utc), size=skew_count, replace=False)
-            idx_series = idx_utc.to_series()
-            idx_series.iloc[skew_pos] += pd.to_timedelta(60, unit="s")
-            idx_utc = idx_series.sort_values().to_numpy()
+        # Every stamp is on the half-hour grid: off-grid stamps (HH NA,
+        # Valid_read_time FALSE, flags -5) are an error, planted only by the
+        # config's `missingness:` block (an `off_grid` pattern), like every
+        # other error, so a config without it gives clean data.
+        idx_utc = idx_utc.to_numpy()
 
         T = len(idx_utc)
         H = self.n_households
@@ -521,7 +519,7 @@ class DailySmartMeterGenerator:
         df["_e_ok"] = df["_valid"] & (df["Elec_act_imp_flag"] == 1) & e_val.notna()
         df["_g_ok"] = df["_valid"] & (df["Gas_flag"] == 1) & g_val.notna()
 
-        # Energy from valid reads only (invalid skewed timestamps contribute 0).
+        # Energy from valid reads only (invalid timestamps contribute 0).
         # Gas is summed from whichever HH column this schema actually writes —
         # m3 for legacy, Wh for harmonised (edition09 has no Gas_hh_m3 column).
         # Export is only consumed by the harmonised schema's "net" field below;

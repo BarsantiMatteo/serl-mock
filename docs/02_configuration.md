@@ -332,19 +332,30 @@ The contextual generator uses this top-level `year` (default `2023`, independent
 
 ## Synthetic missingness (`missingness`)
 
-Real SERL data has gaps; the base generator makes almost none. The
-`missingness:` block plants configurable ones in the half-hourly data,
-for developing missing-data analysis against realistic gaps. It is **off
-unless `enabled: true`**: without it the output is byte-identical to a
-run with no block. A ready-made scenario is
+Real SERL data has gaps and errors; the base generator makes none (every
+stamp on the half-hour grid, every read valid). The `missingness:` block
+plants them in the half-hourly data: despite its name it holds **every
+error type**, not only missing data (missing reads, absent rows, max reads,
+invalid read times, duplicates, off-grid timestamps). The daily data and
+rt_summary follow. A ready-made scenario is
 `config/edition/serl_mock_edition08_gappy.yaml` (output `data/mock/edition08_gappy/`),
 whose header documents every key.
 
+Two switches:
+
+- **All errors**: `missingness.enabled`. It is off unless `enabled: true`;
+  without it the output is byte-identical to a run with no block, i.e.
+  clean data.
+- **One error type**: each pattern's own `enabled` (default true). In the
+  gappy config each error type is a named pattern with an `enabled:` line,
+  so e.g. `duplicates` or `off_grid_stamps` can be switched off alone.
+
 ```yaml
 missingness:
-  enabled: true
+  enabled: true                          # all errors on / off
   patterns:
     - name: export_failures              # unique; used in the ground truth
+      enabled: true                      # this pattern on / off (default true)
       type: scattered                    # outage | scattered | event | late_start | early_end
       households: {share: 0.3, traits: {has_export_meter: true}}
       time_window: {start: "08:00", end: "18:00"}   # optional, local, half-open
@@ -377,7 +388,7 @@ is drawn by weight, then a length uniformly within it.
 | `max_read` | flag `-1` and value the meter maximum (`16777215` Wh/varh, `16777.215` m³), as SERL records a 'max read' | yes |
 | `invalid_time` | `Valid_read_time` FALSE | no |
 | `duplicate` | row written twice | no |
-| `{type: off_grid, minutes: N}` | stamp moved off :00/:30, like the base skew (`HH` NA, `Valid_read_time` FALSE, flags `-5`) | no |
+| `{type: off_grid, minutes: N}` | stamp moved off :00/:30 (`HH` NA, `Valid_read_time` FALSE, flags `-5`) | no |
 
 Streams: `elec_imp`, `elec_exp`, `elec_react_imp`, `elec_react_exp`, `gas`.
 
@@ -402,7 +413,8 @@ It keeps the report's **shape** (most households nearly complete, a long
 tail missing months) at about **half its level**, so a small local sample
 still has enough valid data. The SERL column is the recommended value for
 a fully realistic run; "used" was measured on a 400-household run of the
-config (rt_summary).
+config (rt_summary), except the first table below, re-measured on the
+1,000-household run once the base generator stopped shifting stamps.
 
 Households with at least X% of HH electricity active import reads valid
 (report Table 2):
@@ -410,10 +422,11 @@ Households with at least X% of HH electricity active import reads valid
 | X | 100 | 99 | 98 | 95 | 90 | 75 | 50 | 25 |
 |---|---|---|---|---|---|---|---|---|
 | SERL (%) | 20.9 | 42.8 | 52.7 | 60.5 | 64.6 | 68.8 | 86.0 | 95.0 |
-| used (%) | 0 | 46 | 63 | 70 | 77 | 87 | 96 | 100 |
+| used (%) | 18 | 52 | 67 | 74 | 81 | 90 | 97 | 100 |
 
-100% is never reached because the base generator skews ~0.05% of stamps
-for every household (see [03_generation_model.md](03_generation_model.md)).
+"Used" is measured on the config's own 1,000-household run (2024). The base
+generator puts every stamp on the grid, so a household untouched by the
+patterns is 100% valid.
 
 Reads missing (flag `0` or absent) and max reads, by stream (Tables 3-5):
 
