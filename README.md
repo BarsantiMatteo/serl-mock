@@ -188,6 +188,15 @@ Key options you can adjust before running the generator:
 
 See [docs/02_configuration.md](docs/02_configuration.md) for a full description of every option.
 
+### Mock raw half-hourly deliveries
+
+`uv run python scripts/make_raw_from_edition08.py` turns a mock Edition08 run
+(`data/mock/edition08_with_2025survey/` by default) into SERL's raw half-hourly
+format (`SERL_half_hourly_YYYY_MM.csv`) in `data/mock/raw_from_edition08/`,
+with known differences planted (removed, changed, emptied and duplicated
+readings; one household missing, one extra) and listed in its
+`mock_internal/`. See [docs/01_structure.md](docs/01_structure.md#srcserl_mockraw_from_editionpy).
+
 ### Weather data (ERA5 via CDS API)
 
 If you also want weather data, the same generator can download ERA5 hourly reanalysis data from the
