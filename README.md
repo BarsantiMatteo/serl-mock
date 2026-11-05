@@ -11,6 +11,42 @@ Use it to build and test analysis pipelines locally, without needing access to t
 
 ---
 
+## Three kinds of mock data
+
+| You want to... | Generate | Command and config | Output |
+|---|---|---|---|
+| **develop SERL analysis code locally**, including data quality checks on one edition | **edition data**: a full mock edition (smart-meter, surveys, EPC, participant summary...), optionally with realistic gaps and errors | `scripts/generate_mock_data.py --config config/serl_mock*.yaml` | `data/mock/<output_label>/`, laid out as the real edition |
+| **check raw SERL data**, before it becomes an edition, and compare raw with edition | **raw data**: an edition's half-hourly readings in SERL's raw delivery format, with known raw-vs-edition differences | `scripts/generate_raw_data.py --config config/raw/*.yaml` | `data/mock/<output_label>/SERL_half_hourly_*.csv` and the list of planted differences |
+| **compare editions**: are problems fixed, persisting or new in a later edition? | **a later edition** consistent with an earlier one: same series, extra months, known changes *(planned)* | `scripts/generate_next_edition.py --config config/next_edition/*.yaml` | a second edition folder and the list of changes |
+
+Start with edition data. The other two are made **from** an edition run. Their
+configs are short: they name that run as `source:` and say what to change,
+so household numbers, seeds and gap patterns are set once, in the edition
+config.
+
+```text
+config/serl_mock*.yaml ──generate_mock_data.py──▶ data/mock/edition08_gappy/   (edition)
+                                                     │
+config/raw/*.yaml ─────────generate_raw_data.py──────┼──▶ data/mock/raw_from_edition08_gappy/
+config/next_edition/*.yaml ─generate_next_edition.py─┘──▶ data/mock/next_from_edition08_gappy/  (planned)
+```
+
+Which edition config to use:
+
+- **`config/serl_mock.yaml`** (Edition08) and **`config/serl_mock_edition09.yaml`**
+  (Edition09 format): clean data, for developing analysis code.
+- **`config/serl_mock_edition08_gappy.yaml`**: adds missingness and
+  errors calibrated to SERL's data quality report (outages, missing reads,
+  max reads, off-grid timestamps, duplicates), with a ground truth in
+  `mock_internal/`. Use it for developing data quality checks. See
+  [docs/02_configuration.md](docs/02_configuration.md#synthetic-missingness-missingness).
+
+Both derived kinds write a ground truth to their `mock_internal/` (every
+planted difference, with expected counts). A test can therefore assert that
+a check or comparison finds exactly what was planted, not just that it runs.
+
+---
+
 ## What is generated
 
 Running the pipeline writes outputs under `data/mock/<output_label>/`, where `output_label`
@@ -190,8 +226,9 @@ See [docs/02_configuration.md](docs/02_configuration.md) for a full description 
 
 ### Mock raw half-hourly deliveries
 
+First generate the source edition (`--config config/serl_mock_edition08_gappy.yaml`), then
 `uv run python scripts/generate_raw_data.py --config config/raw/raw_from_edition08_gappy.yaml`
-turns an existing mock Edition08 run into SERL's raw half-hourly format
+turns that mock Edition08 run into SERL's raw half-hourly format
 (`SERL_half_hourly_YYYY_MM.csv`) in `data/mock/<output_label>/`, with known
 differences between raw and edition planted (readings or values the edition
 dropped, changed values, duplicates, households on one side only) and listed

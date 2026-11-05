@@ -1,5 +1,58 @@
 # Configuration Reference
 
+## Which config for what
+
+serl-mock has three kinds of output, each with its own script and config
+family. The two derived kinds start from an **edition run** (their
+`source:`), so generate that first.
+
+### 1. Edition data: develop analysis code and single-edition checks
+
+`uv run python scripts/generate_mock_data.py --config <file>`. This is the
+full generator: households, period, edition, profiles, missingness. These
+settings are described in the rest of this page.
+
+| Config | Output folder (`data/mock/...`) | Use it for |
+|---|---|---|
+| `config/serl_mock.yaml` (default, no `--config`) | `edition08/` | analysis code on clean Edition08-style data |
+| `config/serl_mock_edition08.yaml` | `edition08_with_2025survey/` | same, plus the MasterSERL and 2025 surveys. Source of `config/raw/raw_from_edition08.yaml` |
+| `config/serl_mock_edition09.yaml` | `edition09_2024_N1000/` | code that must read Edition09's format (Parquet, harmonised columns, single daily file) |
+| `config/serl_mock_edition08_gappy.yaml` | `edition08_gappy/` | **data quality checks**: missingness and errors calibrated to SERL's data quality report, with a ground truth in `mock_internal/missingness_ground_truth.csv`. Source of the raw mock with every kind of difference |
+
+To make your own, copy the closest one, change what you need (e.g.
+`n_households`, `start_year`/`end_year`, the `missingness:` block) and give
+it its own `output_label` so it doesn't overwrite another run.
+
+### 2. Raw data: check raw deliveries, compare raw with edition
+
+`uv run python scripts/generate_raw_data.py --config config/raw/<file>`. A
+short config: which edition run (`source`), where to write
+(`output_label`), and how many of each difference to plant. See
+[Raw half-hourly deliveries](#raw-half-hourly-deliveries-configraw).
+
+| Config | Source (generate it first) | Use it for |
+|---|---|---|
+| `config/raw/raw_from_edition08.yaml` | `edition08_with_2025survey` (clean) | raw format and simple raw-vs-edition differences; the realistic kinds are off (they need gaps in the source) |
+| `config/raw/raw_from_edition08_gappy.yaml` | `edition08_gappy` | every kind of difference, including the realistic ones (values or readings the edition dropped, off-grid raw stamps) |
+
+### 3. A later edition: compare editions *(planned)*
+
+`scripts/generate_next_edition.py --config config/next_edition/<file>`
+(not built yet). A short config, like the raw ones: an edition run as
+`source`, the extra months, and the changes to plant (problems fixed,
+introduced or left).
+
+### Order of commands
+
+```bash
+uv run python scripts/generate_mock_data.py --config config/serl_mock_edition08_gappy.yaml --skip-weather
+uv run python scripts/generate_raw_data.py --config config/raw/raw_from_edition08_gappy.yaml
+```
+
+---
+
+## The edition config
+
 The default config is `config/serl_mock.yaml`, loaded automatically by
 `scripts/generate_mock_data.py`. You can save additional config files (e.g.
 `config/serl_mock_edition09.yaml`) for different editions or scenarios and select one with
