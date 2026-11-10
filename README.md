@@ -40,6 +40,10 @@ Which edition config to use:
   max reads, off-grid timestamps, duplicates), with a ground truth in
   `mock_internal/`. Use it for developing data quality checks. See
   [docs/02_configuration.md](docs/02_configuration.md#synthetic-missingness-missingness).
+- **`config/edition/serl_mock_edition08_2023_2025.yaml`**: three years
+  (2023-2025) of the same kind of gappy data for 500 households, plus blank
+  values with a valid flag and EPC floor areas of 0. Use it for pipelines
+  that must work on any period.
 
 Both derived kinds write a ground truth to their `mock_internal/` (every
 planted difference, with expected counts). A test can therefore assert that

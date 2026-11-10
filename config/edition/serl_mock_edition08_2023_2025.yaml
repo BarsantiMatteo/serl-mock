@@ -1,0 +1,261 @@
+# ===================================================
+# SERL Mock Data - Edition08, 2023-2025, with synthetic missingness
+# ===================================================
+# Three years of half-hourly data (2023-01 to 2025-12), so a pipeline can be
+# run on any period inside them: several clock changes, two year boundaries
+# (a year's last half-hour is stamped 00:00 on 1 January, in the next year's
+# first file) and a period that doesn't start in January.
+#
+#   uv run python scripts/generate_mock_data.py --config config/edition/serl_mock_edition08_2023_2025.yaml
+#
+# Output goes to data/mock/edition08_2023_2025_N500/. 500 households keep the
+# three years at about the size of the one-year 1,000-household sample.
+#
+# The `missingness:` block is serl_mock_edition08_gappy.yaml's (calibrated to
+# about half of real SERL missingness, see that file) with the event dates
+# moved into this period, plus cases seen in real data that the downstream
+# pipelines must handle:
+#   - blank_values: a valid flag with no value (import, gas)
+#   - export_outage_2023: export missing for most export meters in
+#     February 2023 (as in SERL's own data quality report)
+#   - epc_quirks.zero_floor_area_share: EPC floor areas of 0
+# What was planted is in mock_internal/missingness_ground_truth.csv.
+#
+# Weather: ERA5 is downloaded per month into
+# data/mock/edition08_2023_2025_N500/serl_climate_data_edition08/ (CDS
+# credentials needed); a month whose file is already there isn't downloaded
+# again, so the 2024 files of another mock with the same `area` can be copied
+# in first.
+
+# -------------------------
+# Global
+# -------------------------
+n_households: 500
+seed: 42
+edition: "08"
+output_label: "edition08_2023_2025_N500"
+lsoa_vintage: "2011"
+
+generate:
+   hh_smart_meter: true
+   daily_smart_meter: true
+   rt_summary: true
+   weather: true
+   epc: true
+   survey: true
+   covid19_survey: true
+   follow_up_survey: true
+   harmonised_survey: true
+   survey_2025: true
+   participant_summary: true
+   exporters_list: true
+
+# -------------------------
+# Time period for smart-meter data
+# -------------------------
+start_year: 2023
+end_year: 2025
+
+# -------------------------
+# Household traits
+# -------------------------
+household_traits:
+  pv_fraction: 0.15
+  hp_fraction: 0.07
+  ev_fraction: 0.10
+  gas_meter_fraction: 0.85
+  export_meter_fraction: 0.15
+  solar_thermal_fraction: 0.02
+
+# -------------------------
+# Household profiles
+# -------------------------
+profiles:
+  base_elec_mean_wh: 175
+  base_elec_std_wh:   50
+  base_gas_mean_wh: 1500
+  base_gas_std_wh:   300
+  gas_fraction:     0.85
+
+# -------------------------
+# Generation patterns
+# -------------------------
+patterns:
+  elec_seasonal_amplitude:     0.3
+  gas_seasonal_amplitude:      2.0
+  elec_spike_probability:     0.02
+  elec_spike_max_wh:        2000.0
+  summer_hot_water_probability: 0.15
+  gas_heating_threshold:       0.1
+
+# -------------------------
+# Weather data (CDS / ERA5)
+# -------------------------
+weather:
+  dataset: "reanalysis-era5-single-levels"
+  product_type: "reanalysis"
+  variables:
+    - "2m_temperature"
+    - "surface_solar_radiation_downwards"
+    - "total_precipitation"
+    - "10m_u_component_of_wind"
+    - "10m_v_component_of_wind"
+  area: [52.0, -4.0, 49.0, 2.0]   # [north, west, south, east], as the other mocks
+  grid: [0.25, 0.25]
+  time_step_hours: 1
+  output_format: "netcdf"
+
+# --------------------------
+# Naming of output files
+# --------------------------
+filenames:
+  epc: "serl_epc_data"
+  covid19_survey: "serl_covid19_survey_data"
+  survey: "serl_survey_data"
+  followup_survey: "serl_2023_follow_up_survey_data"
+  summary: "serl_participant_summary"
+  tariff_data: "serl_tariff_data"
+
+# --------------------------
+# EPC quirks seen in real records (generator_contextual_data.py)
+# --------------------------
+epc_quirks:
+  zero_floor_area_share: 0.03   # share of EPCs with a floor area recorded as 0
+
+# --------------------------
+# Synthetic missingness and errors (src/serl_mock/missingness.py)
+# --------------------------
+# See serl_mock_edition08_gappy.yaml for what each pattern stands for and
+# how the values were calibrated against SERL's data quality report.
+missingness:
+  enabled: true
+  patterns:
+    # --- whole-meter gaps: rows absent ---
+    - name: late_start
+      type: late_start
+      households: {share: 0.10}
+      length_days: [[7, 60, 0.6], [60, 180, 0.4]]
+      effect: drop_row
+
+    - name: early_end
+      type: early_end
+      households: {share: 0.06}
+      length_days: [[30, 270, 1.0]]
+      effect: drop_row
+
+    - name: long_outages
+      type: outage
+      households: {share: 0.20}
+      per_household: [1, 3]
+      length_days: [[1, 7, 0.5], [7, 30, 0.3], [30, 120, 0.2]]
+      effect: drop_row
+
+    - name: extended_outages
+      type: outage
+      households: {share: 0.04}
+      per_household: [1, 1]
+      length_days: [[120, 240, 1.0]]
+      effect: drop_row
+
+    - name: short_gaps
+      type: scattered
+      households: {share: 0.5}
+      prob_per_slot: {low: 0.0005, high: 0.02}
+      effect: drop_row
+
+    - name: february_event
+      type: event
+      households: {share: 0.3}
+      start: "2024-02-01 00:00"
+      end: "2024-02-04 00:00"
+      effect: drop_row
+
+    # --- per-stream gaps: row kept, failed streams flag 0 and no value ---
+    - name: missing_reads
+      type: outage
+      households: {share: 0.15}
+      per_household: [1, 4]
+      length_days: [[0.1, 1, 0.8], [1, 5, 0.2]]
+      streams: [elec_imp, elec_exp, elec_react_imp, elec_react_exp, gas]
+      effect: missing
+
+    - name: short_history_streams
+      type: late_start
+      households: {share: 0.25}
+      length_days: [[14, 60, 1.0]]
+      streams: [elec_exp, elec_react_imp, elec_react_exp]
+      effect: missing
+
+    - name: export_failures
+      type: outage
+      households: {share: 0.25, traits: {has_export_meter: true}}
+      per_household: [1, 3]
+      length_days: [[1, 7, 0.7], [7, 30, 0.3]]
+      streams: [elec_exp, elec_react_exp]
+      effect: missing
+
+    - name: export_outage_2023       # SERL: very little export collected in
+      type: event                    # February 2023 (system migration)
+      households: {share: 0.8, traits: {has_export_meter: true}}
+      start: "2023-02-01 00:00"
+      end: "2023-03-01 00:00"
+      streams: [elec_exp, elec_react_exp]
+      effect: missing
+
+    - name: reactive_import_gaps
+      type: outage
+      households: {share: 0.20}
+      per_household: [1, 2]
+      length_days: [[3, 30, 1.0]]
+      streams: [elec_react_imp]
+      effect: missing
+
+    - name: gas_outages
+      type: outage
+      households: {share: 0.25, traits: {has_gas_meter: true}}
+      per_household: [1, 4]
+      length_days: [[0.25, 2, 0.5], [2, 14, 0.35], [14, 60, 0.15]]
+      streams: [gas]
+      effect: missing
+
+    # --- a valid flag with no value: a missing reading, not 0 ---
+    - name: blank_values
+      type: scattered
+      households: {share: 0.05}
+      prob_per_slot: {low: 0.0005, high: 0.005}
+      streams: [elec_imp, gas]
+      effect: null_value
+
+    # --- error flags ---
+    - name: gas_max_reads
+      type: scattered
+      households: {share: 0.05, traits: {has_gas_meter: true}}
+      prob_per_slot: {low: 0.01, high: 0.1}
+      streams: [gas]
+      effect: max_read
+
+    - name: elec_max_reads
+      type: scattered
+      households: {share: 0.01}
+      prob_per_slot: {low: 0.0005, high: 0.002}
+      streams: [elec_imp]
+      effect: max_read
+
+    - name: invalid_time
+      type: scattered
+      households: {share: 0.02}
+      prob_per_slot: {low: 0.0005, high: 0.002}
+      effect: invalid_time
+
+    # --- robustness of pipelines ---
+    - name: duplicates
+      type: scattered
+      households: {share: 0.02}
+      prob_per_slot: {low: 0.0001, high: 0.0005}
+      effect: duplicate
+
+    - name: off_grid_stamps
+      type: scattered
+      households: {share: 0.05}
+      prob_per_slot: {low: 0.0002, high: 0.001}
+      effect: {type: off_grid, minutes: 7}

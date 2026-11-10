@@ -1317,6 +1317,11 @@ class SERLContextualVariablesGenerator:
         # are unaffected — see read_lsoa_codes() in utils.py.
         self.lsoa_vintage = str(cfg.get("lsoa_vintage", "2021"))
 
+        # Optional EPC quirks found in real records (all off by default):
+        #   zero_floor_area_share: share of EPCs with a floor area whose
+        #   totalFloorArea is 0 instead (a real EPC's "not recorded").
+        self.epc_quirks = cfg.get("epc_quirks") or {}
+
         # PUPRN: load from master list or generate deterministically
         self.puprn_list_path = puprn_list_path or cfg.get("puprn_list_path")
 
@@ -1610,7 +1615,17 @@ class SERLContextualVariablesGenerator:
                     row[field] = f"Sample_{field}"
             data.append(row)
 
-        return pd.DataFrame(data)
+        df = pd.DataFrame(data)
+        # Optional quirk seen in real EPC records: a floor area of 0, which
+        # means "not recorded". Off unless configured; drawn from its own RNG
+        # so turning it on doesn't change any other generated value.
+        share = float(self.epc_quirks.get("zero_floor_area_share", 0) or 0)
+        if share > 0 and "totalFloorArea" in df.columns:
+            qrng = np.random.default_rng(self.seed + 1801)
+            has_area = df["totalFloorArea"].notna().to_numpy()
+            pick = has_area & (qrng.random(len(df)) < share)
+            df.loc[pick, "totalFloorArea"] = 0.0
+        return df
 
     # ---------- SERL survey ----------
     def generate_serl_survey(self) -> pd.DataFrame:

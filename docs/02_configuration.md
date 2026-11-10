@@ -18,6 +18,7 @@ settings are described in the rest of this page.
 | `config/edition/serl_mock_edition08.yaml` | `edition08_with_2025survey/` | same, plus the MasterSERL and 2025 surveys. Source of `config/raw/raw_from_edition08.yaml` |
 | `config/edition/serl_mock_edition09.yaml` | `edition09_2024_N1000/` | code that must read Edition09's format (Parquet, harmonised columns, single daily file) |
 | `config/edition/serl_mock_edition08_gappy.yaml` | `edition08_gappy/` | **data quality checks**: missingness and errors calibrated to SERL's data quality report, with a ground truth in `mock_internal/missingness_ground_truth.csv`. Source of the raw mock with every kind of difference |
+| `config/edition/serl_mock_edition08_2023_2025.yaml` | `edition08_2023_2025_N500/` | **pipelines over several years**: 2023-2025, 500 households, the gappy config's missingness plus a February 2023 export outage, blank values with a valid flag and EPC floor areas of 0 (`epc_quirks`). Lets a warehouse build or an analysis run on any period inside the three years |
 
 To make your own, copy the closest one, change what you need (e.g.
 `n_households`, `start_year`/`end_year`, the `missingness:` block) and give
@@ -319,6 +320,15 @@ lsoa_vintage: "2021"   # Not set by default — "2021" (2011 also supported)
 ```
 
 The participant summary's `LSOA` field is sampled from real ONS LSOA codes for England/Wales and real NRS Data Zone codes for Scotland (`data/reference/lsoa_codes_england_wales_scotland.csv`; see `scripts/generate_lsoa_codes_csv.py`). Set `lsoa_vintage: "2011"` to sample from the 2011 LSOA boundary set instead of the 2021 one. Scotland's Data Zones only have a 2011 vintage in current use, so this setting doesn't affect Scottish households. As with the default vintage, sampled codes are real but not tied to a household's actual location.
+
+## EPC quirks (`epc_quirks`)
+
+```yaml
+epc_quirks:                    # Not set by default — no quirks
+  zero_floor_area_share: 0.03  # share of EPCs with a floor area recorded as 0
+```
+
+Values seen in real EPC records that a pipeline has to handle. `zero_floor_area_share` sets `totalFloorArea` to 0 (a real EPC's "not recorded") for that share of the EPCs that have a floor area; a missing floor area stays missing. The quirk is drawn from its own random generator, so turning it on changes no other value in the data.
 
 ## Year for the exporter list
 

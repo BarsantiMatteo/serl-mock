@@ -9,6 +9,8 @@ serl-mock/
 │   │   │                                # with --config (see 02_configuration.md)
 │   │   ├── serl_mock_edition08.yaml     # Example: explicit edition08 config
 │   │   ├── serl_mock_edition08_gappy.yaml  # Edition08 with calibrated missingness and errors
+│   │   ├── serl_mock_edition08_2023_2025.yaml  # the same over 2023-2025, 500 households,
+│   │   │                                # plus blank values and EPC floor areas of 0
 │   │   └── serl_mock_edition09.yaml     # Example: edition09 config (format/layout differ
 │   │                                    # automatically — see src/serl_mock/edition.py)
 │   ├── raw/                         # Raw-delivery configs for scripts/generate_raw_data.py
