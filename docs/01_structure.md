@@ -91,6 +91,7 @@ serl-mock/
 │   ├── generate_bank_holidays_csv.py  # One-off: fetches UK bank holidays from gov.uk
 │   ├── generate_raw_data.py        # Mock raw HH deliveries from a mock Edition08 run (config/raw/*.yaml)
 │   ├── generate_next_edition.py    # Mock later edition from a mock Edition08 run (config/next_edition/*.yaml)
+│   ├── publish_release.py          # Optional: copy a dataset to a shared sources folder, with a release record
 │   └── update_golden_manifest.py   # Regenerates tests/golden/*.json baselines (manual only)
 │
 ├── src/
@@ -164,6 +165,9 @@ Makes **mock raw half-hourly deliveries** (SERL's readings before they are wrapp
 
 ### `scripts/generate_next_edition.py`
 Makes a **mock later edition** from a finished mock Edition08 run: same readings, except for planted changes that resolve some problems and introduce others, each defined by the status it moves a reading from and to. `uv run python scripts/generate_next_edition.py --config config/next_edition/<name>.yaml` (`--output-dir` overrides `data/mock/<output_label>/`). Output: half-hourly files in the output edition's format (`"08"` CSV or `"09"` Parquet), `bst_dates_to_2030.csv`, and the ground truth `mock_internal/edition_changes.csv` / `edition_changes_manifest.json`. Used by serl-dq's comparison across editions (data version `mock_edition09_revised` vs `mock_edition08_gappy`). See [02_configuration.md](02_configuration.md#a-later-edition-confignext_edition).
+
+### `scripts/publish_release.py` (optional)
+Copies a finished dataset `data/mock/<dataset>/` to a shared sources folder laid out like the TRE's `~/shared/sources/`: `<sources root>/editions/<name>/` for an edition run, `<sources root>/raw/<name>/` for a raw run (`--kind`, default `raw` when the dataset name starts with `raw_`). An edition also gets the bank and school holiday CSVs from `data/reference/`. Writes `RELEASE.md` and `release.json` (source dataset, serl-mock commit, generator config, date, every file's size and SHA-256), and stops if the release already exists. Sources root: `--sources-root`, `$SERL_SOURCES_ROOT`, or `../_serl_shared/sources`; name: `--name`, default `mock_<dataset>`. Not needed to use the data: it is for several tools on one machine reading one copy. `uv run python scripts/publish_release.py --dataset edition08_2024_N1000`. Standard library only.
 
 ### `scripts/generate_bank_holidays_csv.py`
 A one-off utility that fetches the official UK bank holidays JSON from gov.uk and writes `data/reference/uk_bank_holidays_england_wales_scotland.csv`.  Run this locally if the reference file needs updating; the output is committed to the repo.

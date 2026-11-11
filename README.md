@@ -78,6 +78,7 @@ serl-mock/
 ├── scripts/
 │   ├── generate_mock_data.py                  # Main entry point — runs the full pipeline
 │   ├── generate_bank_holidays_csv.py
+│   ├── publish_release.py                     # Optional: copy a dataset to a shared sources folder
 │   └── update_golden_manifest.py              # Regenerates tests/golden/*.json baselines
 ├── tests/                                     # Automated test suite — see docs/06_testing.md
 │   └── golden/                                #   one manifest per edition (edition08, edition09…)
@@ -269,6 +270,25 @@ If CDS setup is not available yet, continue using:
 ```bash
 uv run python scripts/generate_mock_data.py --skip-weather
 ```
+
+### Optional: publish a dataset to a shared sources folder
+
+Not needed to use the data: `data/mock/<output_label>/` is the output.
+When several tools on one machine read the same mock data, they can all
+read one copy laid out like the TRE's `~/shared/sources/`:
+
+```bash
+uv run python scripts/publish_release.py --dataset edition08_2024_N1000   # -> editions/mock_edition08_2024_N1000/
+uv run python scripts/publish_release.py --dataset raw_from_edition08     # -> raw/mock_raw_from_edition08/
+```
+
+The script copies the dataset (plus the holiday CSVs from
+`data/reference/`, which sit next to an edition's files in the TRE) to
+`<sources root>/editions/<name>/` or `<sources root>/raw/<name>/`, and
+writes `RELEASE.md` and `release.json` (source dataset, serl-mock commit,
+date, every file's SHA-256). The sources root is `--sources-root`,
+`$SERL_SOURCES_ROOT`, or `../_serl_shared/sources` next to this repo. A
+release is never changed: publishing to an existing name stops.
 
 
 ---
