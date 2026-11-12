@@ -4,6 +4,8 @@
 
 # serl-mock
 
+[![tests](https://github.com/BarsantiMatteo/serl-mock/actions/workflows/tests.yml/badge.svg)](https://github.com/BarsantiMatteo/serl-mock/actions/workflows/tests.yml)
+
 A lightweight Python package that generates mock datasets matching the structure
 and naming conventions of the **SERL (Smart Energy Research Lab) Observatory** data Edition08 release.
 

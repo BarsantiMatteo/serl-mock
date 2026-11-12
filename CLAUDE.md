@@ -37,8 +37,12 @@ Generates dummy SERL Observatory datasets for pipeline development and testing. 
 
 ## Working on the code
 
-- Environment: `uv sync`; run with `uv run ...`; tests with `uv run pytest`
-  ([docs/06_testing.md](docs/06_testing.md)).
+- Environment: `uv sync`; run with `uv run ...`; tests with `uv run python -m pytest` (on this
+  machine `pytest.exe` is blocked by Windows Application Control) — ~3 minutes, see
+  [docs/06_testing.md](docs/06_testing.md).
+- GitHub Actions runs the same tests on every push and pull request
+  (`.github/workflows/tests.yml`). Run them locally before pushing; after pushing, check the run
+  (`gh run list -L 3`, `gh run watch`).
 - When behaviour or config options change, update the matching page in `docs/` in the same commit
   (configuration options: [docs/02_configuration.md](docs/02_configuration.md); layout and modules:
   [docs/01_structure.md](docs/01_structure.md)).

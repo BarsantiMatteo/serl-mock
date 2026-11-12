@@ -16,6 +16,19 @@ uv run pytest -k golden                # anything matching "golden"
 No CDS API credentials or network access are required — weather download is always skipped in
 tests (see [Fixture config](#fixture-config) below).
 
+If `pytest` itself won't start (e.g. Windows Application Control blocks `pytest.exe`), run it as
+a module: `uv run python -m pytest`.
+
+## Automatic runs on GitHub
+
+[`.github/workflows/tests.yml`](../.github/workflows/tests.yml) runs the whole suite on every
+push (any branch) and every pull request, on Ubuntu with the Python version from `.python-version`
+and the exact dependencies in `uv.lock` (`uv sync --locked`, so a `pyproject.toml` change without
+an updated `uv.lock` fails too). It takes about 3–4 minutes. Results are in the repository's
+**Actions** tab, as a tick or cross next to each commit, and in the badge at the top of the README.
+A newer push to the same branch cancels the run still going for the older one. It can also be
+started by hand from the Actions tab ("Run workflow").
+
 ## Reading the output
 
 Standard pytest output: a `.` (or a test name with `PASSED`, in `-v` mode) per passing test, `F`
