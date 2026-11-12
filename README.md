@@ -338,6 +338,7 @@ Bug reports, suggestions, and pull requests are welcome.
 
 - **Questions or feedback** — open a [GitHub issue](https://github.com/BarsantiMatteo/serl-mock/issues) or email [m.barsanti@ucl.ac.uk](mailto:m.barsanti@ucl.ac.uk).
 - **Bug fixes or improvements** — fork the repository, make your changes on a branch, and open a pull request against `master`.
+- **Planned work** — open tasks are [issues](https://github.com/BarsantiMatteo/serl-mock/issues), grouped by [milestone](https://github.com/BarsantiMatteo/serl-mock/milestones). Reference the issue in commits or pull requests (`Closes #N`, or `Refs #N` for partial progress).
 
 ---
 
