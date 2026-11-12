@@ -9,8 +9,12 @@ Generates dummy SERL Observatory datasets for pipeline development and testing. 
   `gh` is at `C:\Program Files\GitHub CLI\gh.exe` if not on PATH.
 - Milestones group them: *Realistic data quality*, *Edition09*, *Edition comparison mock*, *Cleanup*,
   *pip package (PyPI)*. An issue with no milestone is backlog.
+- Board: <https://github.com/users/BarsantiMatteo/projects/2> (project "serl-mock", Status
+  Todo → In Progress → Done; closed issues move to Done automatically).
 - At the start of a session, list the open issues of the milestone being worked on
-  (`gh issue list --milestone "<title>"`), or read the issue named in the request.
+  (`gh issue list --milestone "<title>"`), or read the issue named in the request. Set the issue
+  being worked on to In Progress on the board, so parallel sessions don't pick the same one.
+- New issues: add `--project "serl-mock"` to `gh issue create` so they appear on the board.
 - Close issues from commits: `Closes #N` (closes when the commit reaches `master`); `Refs #N` for
   partial progress.
 - Open an issue for any follow-up found during work, rather than a TODO in code or notes.
