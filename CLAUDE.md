@@ -14,7 +14,9 @@ Generates dummy SERL Observatory datasets for pipeline development and testing. 
   unblocked issue of the lowest milestone unless asked otherwise, skipping M2 (optional: only when
   asked).
 - Data-quality checks, including comparisons across editions, belong in serl-dq, not here.
-  serl-mock only generates the data they run on.
+  serl-mock only generates the data they run on. The later-edition generator
+  (`scripts/generate_next_edition.py`) stays as it is, maintained but not extended (#10–#15 closed
+  as not planned).
 - Board: <https://github.com/users/BarsantiMatteo/projects/2> (project "serl-mock", Status
   Todo → In Progress → Done; closed issues move to Done automatically).
 - At the start of a session, list the open issues of the milestone being worked on
