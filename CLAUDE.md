@@ -7,8 +7,11 @@ Generates dummy SERL Observatory datasets for pipeline development and testing. 
 
 - Open tasks are public GitHub issues: <https://github.com/BarsantiMatteo/serl-mock/issues>.
   `gh` is at `C:\Program Files\GitHub CLI\gh.exe` if not on PATH.
-- Milestones group them: *Realistic data quality*, *Edition09*, *Edition comparison mock*, *Cleanup*,
-  *pip package (PyPI)*. An issue with no milestone is backlog.
+- Milestones group them, numbered in working order: *M1: Cleanup*, *M2: Realistic data quality*,
+  *M3: pip package (PyPI)*, *M4: Edition09*, *M5: Edition comparison mock*. An issue with no
+  milestone is backlog. Each milestone's description gives the order of its issues; the board's
+  Priority field (High / Medium / Low) and "blocked by" links on issues say what comes first.
+  Take the first open, unblocked issue of the lowest milestone unless asked otherwise.
 - Board: <https://github.com/users/BarsantiMatteo/projects/2> (project "serl-mock", Status
   Todo → In Progress → Done; closed issues move to Done automatically).
 - At the start of a session, list the open issues of the milestone being worked on
